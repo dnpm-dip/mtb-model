@@ -20,7 +20,10 @@ import de.dnpm.dip.coding.icd.{
   ICD10GM,
   ICDO3
 }
-import play.api.libs.json.Json
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 
 
@@ -32,7 +35,6 @@ final case class MTBDiagnosis
   code: Coding[ICD10GM],
   topography: Option[Coding[ICDO3.Topography]],
   whoGrading: Option[Coding[WHOGrading]],
-//  whoGrading: Option[Coding[WHOGrading.Value]],
   stageHistory: Seq[MTBDiagnosis.StageOnDate],
   guidelineTreatmentStatus: Option[Coding[GuidelineTreatmentStatus.Value]]
 )
@@ -88,10 +90,18 @@ object MTBDiagnosis
   }
 */
 
-  final case class StageOnDate(
+  final case class StageOnDate
+  (
     stage: Coding[TumorStage.Value],
     date: LocalDate
   )
+
+
+  implicit val formatStage: OFormat[StageOnDate] =
+    Json.format[StageOnDate]
+
+  implicit val format: OFormat[MTBDiagnosis] =
+    Json.format[MTBDiagnosis]
 
 }
 

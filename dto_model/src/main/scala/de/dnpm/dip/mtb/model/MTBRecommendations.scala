@@ -17,6 +17,11 @@ import de.dnpm.dip.model.{
   MedicationRecommendation
 }
 import de.dnpm.dip.coding.atc.ATC
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
+
 
 
 final case class MTBMedicationRecommendation
@@ -32,3 +37,9 @@ final case class MTBMedicationRecommendation
 )
 extends MedicationRecommendation[ATC]
 
+
+object MTBMedicationRecommendation
+{
+  implicit val format: OFormat[MTBMedicationRecommendation] =
+    Json.format[MTBMedicationRecommendation]
+}

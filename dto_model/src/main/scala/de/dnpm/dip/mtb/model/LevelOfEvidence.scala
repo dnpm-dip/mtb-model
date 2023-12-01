@@ -7,7 +7,10 @@ import de.dnpm.dip.coding.{
   CodeSystem,
   DefaultCodeSystem,
 }
-
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 final case class LevelOfEvidence
 (
@@ -22,10 +25,12 @@ object LevelOfEvidence
   extends CodedEnum("mtb/level-of-evidence/grading")
   with DefaultCodeSystem
   {
+    val Undefined = Value("undefined")
     val m1A,m1B,m1C,m2A,m2B,m2C,m3,m4 = Value
 
     override val display = {
-      case grading => grading.toString
+      case Undefined => "N/A"
+      case g         => g.toString
     }
 
   }
@@ -39,5 +44,8 @@ object LevelOfEvidence
     val Z  = Value("Z")
     val R  = Value("R")
   }
+
+  implicit val format: OFormat[LevelOfEvidence] =
+    Json.format[LevelOfEvidence]
 
 }

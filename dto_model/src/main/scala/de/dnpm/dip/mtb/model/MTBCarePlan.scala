@@ -15,7 +15,10 @@ import de.dnpm.dip.model.{
   Patient,
   CarePlan
 }
-
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 
 final case class MTBCarePlan
@@ -41,8 +44,11 @@ object MTBCarePlan
     val NoTarget = Value("no-target")
 
     override val display = {
-      case NoTarget => "Kein Target"
+      case NoTarget => "Keine Therapeutische Konsequenz"
     }
   }
+
+  implicit val format: OFormat[MTBCarePlan] =
+    Json.format[MTBCarePlan]
 
 }

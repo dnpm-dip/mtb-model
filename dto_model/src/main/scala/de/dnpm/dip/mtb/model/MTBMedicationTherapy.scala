@@ -17,6 +17,11 @@ import de.dnpm.dip.model.{
   Therapy,
   MedicationTherapy
 }
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
+
 
 
 final case class MTBMedicationTherapy
@@ -24,7 +29,6 @@ final case class MTBMedicationTherapy
   id: Id[MTBMedicationTherapy],
   patient: Reference[Patient],
   indication: Reference[MTBDiagnosis],
-  category: Option[Coding[Any]],
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
   recordedOn: Option[LocalDate],
@@ -35,9 +39,12 @@ final case class MTBMedicationTherapy
   note: Option[String],
 )
 extends MedicationTherapy[ATC]
+{
+  val category = None
+}
 
 
-object MTBTherapy
+object MTBMedicationTherapy
 {
 
   val PaymentRefused      = "payment-refused"
@@ -83,12 +90,21 @@ object MTBTherapy
       Unknown             -> "Unbekannt"
     )
 
-
+  implicit val format: OFormat[MTBMedicationTherapy] =
+    Json.format[MTBMedicationTherapy]
 
 }
 
 
-final case class TherapyDocumentation
+final case class MTBTherapyDocumentation
 (
   history: List[MTBMedicationTherapy]
 )
+
+object MTBTherapyDocumentation
+{
+
+  implicit val format: OFormat[MTBTherapyDocumentation] =
+    Json.format[MTBTherapyDocumentation]
+
+}

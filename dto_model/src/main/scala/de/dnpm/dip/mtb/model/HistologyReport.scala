@@ -15,6 +15,10 @@ import de.dnpm.dip.model.{
   Reference,
   Observation
 }
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 
 final case class TumorMorphology
@@ -26,6 +30,12 @@ final case class TumorMorphology
   notes: Option[String]
 )
 extends Observation[Coding[ICDO3.Morphology]]
+
+object TumorMorphology
+{
+  implicit val format: OFormat[TumorMorphology] =
+    Json.format[TumorMorphology]
+}
 
 
 final case class HistologyReport
@@ -46,4 +56,9 @@ object HistologyReport
     tumorCellContent: Option[TumorCellContent]
   )
 
+  implicit val formatResults: OFormat[Results] =
+    Json.format[Results]
+
+  implicit val format: OFormat[HistologyReport] =
+    Json.format[HistologyReport]
 }

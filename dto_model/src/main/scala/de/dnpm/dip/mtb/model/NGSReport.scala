@@ -20,6 +20,14 @@ import de.dnpm.dip.coding.{
   DefaultCodeSystem,
 }
 import de.dnpm.dip.coding.hgnc.HGNC
+import de.dnpm.dip.coding.hgvs.HGVS
+import play.api.libs.json.{
+  Json,
+  Format,
+  OFormat,
+  Reads
+}
+
 
 
 final case class TMB
@@ -46,6 +54,11 @@ object TMB
   val referenceRange =
     ClosedInterval(Result(0.0) -> Result(1e6))
 
+  implicit val readsResult: Reads[Result] =
+    Json.reads[Result]
+
+  implicit val format: OFormat[TMB] =
+    Json.format[TMB]
 }
 
 
@@ -64,11 +77,17 @@ object MSI
 
   final case class Result(value: Double) extends AnyVal
 
-  implicit val resultOrder: Ordering[Result] = Ordering[Double].on(_.value) 
+  implicit val resultOrder: Ordering[Result] =
+    Ordering[Double].on(_.value) 
 
   val referenceRange =
     LeftClosedInterval(Result(0.0))
 
+  implicit val formatResult: Format[Result] =
+    Json.valueFormat[Result]
+
+  implicit val format: OFormat[MSI] =
+    Json.format[MSI]
 }
 
 
@@ -80,7 +99,7 @@ final case class HRDScore
   effectiveDate: LocalDate,
   value: Double,
   components: HRDScore.Components,
-  interpretation: Option[HRDScore.Interpretation.Value]
+  interpretation: Option[Coding[HRDScore.Interpretation.Value]]
 )
 extends Observation[Double]
 
@@ -125,6 +144,21 @@ object HRDScore
     tai: TAI
   )
 
+  implicit val formatLST: Format[LST] =
+    Json.valueFormat[LST]
+
+  implicit val formatLoH: Format[LoH] =
+    Json.valueFormat[LoH]
+
+  implicit val formatTAI: Format[TAI] =
+    Json.valueFormat[TAI]
+
+  implicit val formatComponents: OFormat[Components] =
+    Json.format[Components]
+
+  implicit val format: OFormat[HRDScore] =
+    Json.format[HRDScore]
+
 }
 
 
@@ -141,6 +175,13 @@ object Variant
     start: Long,
     end: Option[Long]
   )
+
+  object PositionRange
+  {
+    implicit val format: OFormat[PositionRange] =
+      Json.format[PositionRange]
+  }
+
 }
 
 object Chromosome
@@ -170,9 +211,12 @@ with DefaultCodeSystem
       chr22,
       chrX,
       chrY = Value
+
+  implicit val format: Format[Chromosome.Value] =
+    Json.formatEnum(this)
 }
 
-
+/*
 object HGVS
 {
   sealed trait c
@@ -184,6 +228,8 @@ object HGVS
   implicit val codingSystemProtein =
     Coding.System[HGVS.p]("https://varnomen.hgvs.org/recommendations/protein/")
 }
+*/
+
 
 sealed trait dbSNP
 object dbSNP
@@ -216,8 +262,8 @@ final case class SNV
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
-  dnaChange: Option[Coding[HGVS.c]],
-  aminoAcidChange: Option[Coding[HGVS.p]],
+  dnaChange: Option[Coding[HGVS]],
+  aminoAcidChange: Option[Coding[HGVS]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
   interpretation: Option[Coding[ClinVar]]
@@ -231,6 +277,17 @@ object SNV
   final case class AllelicFrequency(value: Double) extends AnyVal
   final case class ReadDepth(value: Int) extends AnyVal
 
+  implicit val formatAllele: Format[Allele] =
+    Json.valueFormat[Allele]
+
+  implicit val formatAllelicFreq: Format[AllelicFrequency] =
+    Json.valueFormat[AllelicFrequency]
+
+  implicit val formatReadDepth: Format[ReadDepth] =
+    Json.valueFormat[ReadDepth]
+
+  implicit val format: OFormat[SNV] =
+    Json.format[SNV]
 }
 
 
@@ -263,6 +320,8 @@ object CNV
 
   }
 
+  implicit val format: OFormat[CNV] =
+    Json.format[CNV]
 }
 
 
@@ -293,6 +352,11 @@ object DNAFusion
     gene: Coding[HGNC]
   )
 
+  implicit val formatPartner: OFormat[Partner] =
+    Json.format[Partner]
+
+  implicit val format: OFormat[DNAFusion] =
+    Json.format[DNAFusion]
 }
 
 
@@ -308,22 +372,31 @@ extends Fusion[RNAFusion.Partner]
 object RNAFusion
 {
 
-  object Strand
-  extends CodedEnum("mtb/ngs-report/rna-fusion/strand")
-  with DefaultCodeSystem
+  object Strand extends Enumeration
+//  extends CodedEnum("mtb/ngs-report/rna-fusion/strand")
+//  with DefaultCodeSystem
   {
     val Plus  = Value("+")
     val Minus = Value("-")
+
+    implicit val format =
+      Json.formatEnum(this)
   }
 
   final case class Partner
   (
-    codings: Set[Coding[_]],  // Transcript ID and Exon Id listed here
+    codings: Set[Reference[_]],  // Transcript ID and Exon Id listed here
+//    codings: Set[Coding[_]],  // Transcript ID and Exon Id listed here
     position: Long,
     gene: Coding[HGNC],
     strand: Strand.Value
   )
 
+  implicit val formatPartner: OFormat[Partner] =
+    Json.format[Partner]
+
+  implicit val format: OFormat[RNAFusion] =
+    Json.format[RNAFusion]
 }
 
 
@@ -353,6 +426,11 @@ object RNASeq
     override val unit = fragmentsPerKbMillion
   }
 
+  implicit val readsFragments: Reads[Fragments] =
+    Json.reads[Fragments]
+
+  implicit val format: OFormat[RNASeq] =
+    Json.format[RNASeq]
 }
 
 final case class NGSReport
@@ -390,4 +468,12 @@ object NGSReport
     rnaSeqs: List[RNASeq],
   )
 
+  implicit val formatMetaData: OFormat[Metadata] =
+    Json.format[Metadata]
+
+  implicit val formatResults: OFormat[Results] =
+    Json.format[Results]
+
+  implicit val format: OFormat[NGSReport] =
+    Json.format[NGSReport]
 }

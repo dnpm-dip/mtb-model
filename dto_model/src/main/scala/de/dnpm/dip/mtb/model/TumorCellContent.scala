@@ -14,6 +14,10 @@ import de.dnpm.dip.coding.{
   CodedEnum,
   DefaultCodeSystem
 }
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 
 
@@ -28,6 +32,7 @@ final case class TumorCellContent
 )
 extends Observation[Double]
 
+
 object TumorCellContent
 {
 
@@ -37,8 +42,8 @@ object TumorCellContent
   {
     val Histologic    = Value("histologic")
     val Bioinformatic = Value("bioinformatic")
-
-
   }
 
+  implicit val format: OFormat[TumorCellContent] =
+    Json.format[TumorCellContent]
 }

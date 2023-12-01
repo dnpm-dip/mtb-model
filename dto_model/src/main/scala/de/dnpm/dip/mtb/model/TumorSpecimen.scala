@@ -13,13 +13,18 @@ import de.dnpm.dip.coding.{
   CodedEnum,
   DefaultCodeSystem,
 }
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
+
 
 
 final case class TumorSpecimen
 (
   id: Id[TumorSpecimen],
   patient: Reference[Patient],
-  `type`: TumorSpecimen.Type.Value,
+  `type`: Coding[TumorSpecimen.Type.Value],
   collection: Option[TumorSpecimen.Collection]
 )
 
@@ -42,8 +47,8 @@ object TumorSpecimen
   final case class Collection
   (
     date: LocalDate,
-    method: Collection.Method.Value,
-    localization: Collection.Localization.Value
+    method: Coding[Collection.Method.Value],
+    localization: Coding[Collection.Localization.Value]
   )
 
   object Collection
@@ -57,8 +62,7 @@ object TumorSpecimen
       val Resection    = Value("resection")
       val LiquidBiopsy = Value("liquid-biopsy")
       val Cytology     = Value("cytology")
-      val Unknown      = Value("unknown")
- 
+      val Unknown      = Value("unknown") 
     }
 
     object Localization
@@ -71,6 +75,13 @@ object TumorSpecimen
  
     }
 
+    implicit val format: OFormat[Collection] =
+      Json.format[Collection]
+
   }
+
+
+  implicit val format: OFormat[TumorSpecimen] =
+    Json.format[TumorSpecimen]
 
 }

@@ -41,7 +41,13 @@ lazy val generators = project
     name := "mtb-dto-generators",
     settings,
     libraryDependencies ++= Seq(
-      dependencies.generators
+      dependencies.generators,
+      dependencies.scalatest,
+      dependencies.icd10gm,
+      dependencies.icdo3,
+      dependencies.icd_catalogs,
+      dependencies.atc_impl,
+      dependencies.atc_catalogs
     )
   )
   .dependsOn(
@@ -56,9 +62,14 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest   = "org.scalatest"  %% "scalatest"   % "3.1.1" % Test
-    val core        = "de.dnpm.dip"    %% "core"        % "1.0-SNAPSHOT"
-    val generators  = "de.ekut.tbi"    %% "generators"  % "0.1-SNAPSHOT"
+    val scalatest    = "org.scalatest"  %% "scalatest"              % "3.1.1"        % Test
+    val generators   = "de.ekut.tbi"    %% "generators"             % "1.0-SNAPSHOT"
+    val core         = "de.dnpm.dip"    %% "core"                   % "1.0-SNAPSHOT"
+    val icd10gm      = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
+    val icdo3        = "de.dnpm.dip"    %% "icdo3-impl"             % "1.0-SNAPSHOT" % Test
+    val icd_catalogs = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
+    val atc_impl     = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
+    val atc_catalogs = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
   }
 
 

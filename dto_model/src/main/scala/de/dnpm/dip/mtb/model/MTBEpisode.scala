@@ -13,6 +13,10 @@ import de.dnpm.dip.model.{
   Patient,
   Episode
 }
+import play.api.libs.json.{
+  Json, 
+  OFormat
+}
 
 
 final case class MTBEpisode
@@ -25,3 +29,9 @@ final case class MTBEpisode
 )
 extends Episode
 
+
+object MTBEpisode
+{
+  implicit val format: OFormat[MTBEpisode] =
+    Json.format[MTBEpisode]
+}

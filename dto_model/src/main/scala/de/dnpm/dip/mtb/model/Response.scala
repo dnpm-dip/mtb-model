@@ -13,12 +13,17 @@ import de.dnpm.dip.coding.{
   CodeSystem,
   DefaultCodeSystem
 }
+import play.api.libs.json.{
+  Json,
+  OFormat
+}
 
 
 object RECIST
 extends CodedEnum("RECIST")
 with DefaultCodeSystem
 {
+
   val CR  = Value("CR")
   val PR  = Value("PR")
   val MR  = Value("MR")
@@ -68,4 +73,8 @@ final case class Response
   value: Coding[RECIST.Value]
 )
 
-
+object Response
+{
+  implicit val format: OFormat[Response] =
+    Json.format[Response]
+}
