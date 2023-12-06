@@ -18,8 +18,11 @@ import de.dnpm.dip.coding.atc.Kinds.Substance
 import de.dnpm.dip.coding.icd.{
   ICD10GM,
   ICD10GMCatalogs,
-  ICDO3
+  ICDO3,
+  ClassKinds
 }
+import ClassKinds.Category
+import de.dnpm.dip.coding.icd.ICDO3.extensions._
 import de.dnpm.dip.model.{
   Id,
   Episode,
@@ -41,6 +44,43 @@ trait Generators
 {
 
   import MTBMedicationTherapy.statusReasonCodeSystem
+
+
+  private implicit lazy val icd10gm: CodeSystem[ICD10GM] =
+    ICD10GMCatalogs
+      .getInstance[cats.Id]
+      .get
+      .latest
+      .filter(_.code.value startsWith "C")
+
+
+  private lazy val icdo3Topography: CodeSystem[ICDO3.Topography] =
+    ICDO3.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .topography
+
+
+  private implicit lazy val icdo3Morphology: CodeSystem[ICDO3.Morphology] =
+    ICDO3.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .morphology
+      .filter(_.classKind == Category)
+
+
+  private implicit val whoGradingSystem: CodeSystem[WHOGrading] =
+    WHOGrading.codeSystem5th
+
+
+  private implicit lazy val atc: CodeSystem[ATC] =
+    ATC.Catalogs
+      .getInstance[cats.Id]
+      .get
+      .latest
+      .filter(_.code.value startsWith "L01XX")
+      .filter(ATC.filterByKind(Substance))
+
 
 
   implicit def genId[T]: Gen[Id[T]] =
@@ -101,22 +141,6 @@ trait Generators
         Some(healthInsurance)
       )
 
-
-  implicit lazy val icd10gm: CodeSystem[ICD10GM] =
-    ICD10GMCatalogs
-      .getInstance[cats.Id]
-      .get
-      .latest
-      .filter(_.code.value startsWith "C")
-
-  lazy val icdo3Topography: CodeSystem[ICDO3.Topography] =
-    ICDO3.Catalogs
-      .getInstance[cats.Id]
-      .get
-      .topography
-
-  implicit val whoGradingSystem: CodeSystem[WHOGrading] =
-    WHOGrading.codeSystem5th
 
 
   implicit val genDiagnosis: Gen[MTBDiagnosis] =
@@ -190,18 +214,9 @@ trait Generators
     )
 
 
-  implicit lazy val atc: CodeSystem[ATC] =
-    ATC.Catalogs
-      .getInstance[cats.Id]
-      .get
-      .latest
-      .filter(_.code.value startsWith "L01XX")
-      .filter(ATC.filterByKind(Substance))
+  import Therapy.Status._
 
-  val genGuidelineTherapy: Gen[MTBMedicationTherapy] = {
-
-    import Therapy.Status._
-
+  val genGuidelineTherapy: Gen[MTBMedicationTherapy] =
     for {
       id <- Gen.of[Id[MTBMedicationTherapy]]
 
@@ -211,17 +226,9 @@ trait Generators
 
       therapyLine <- Gen.intsBetween(1,9)
 
-//      recommendation <- Gen.of[Reference[MTBMedicationRecommendation]]
-
       status <- Gen.of[Coding[Therapy.Status.Value]]
 
-      statusReason <- Gen.of[Codinig[Therapy.StatusReason]]
-/*      
-      statusReason <- 
-        status match {
-          case NotDone => Gen.oneOf()
-        } 
-*/
+      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
 
       period = Period(LocalDate.now.minusMonths(6))
 
@@ -245,25 +252,129 @@ trait Generators
       Some(note)
     )
 
-  }
+
+  implicit val genOncoProcedure: Gen[OncoProcedure] =
+    for { 
+      id <- Gen.of[Id[OncoProcedure]]
+
+      patient <- Gen.of[Reference[Patient]]
+
+      indication <- Gen.of[Reference[MTBDiagnosis]]
+
+      code <- Gen.of[Coding[OncoProcedure.Type.Value]]
+
+      status <- Gen.of[Coding[Therapy.Status.Value]]
+
+      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
+
+      therapyLine <- Gen.intsBetween(1,9)
+
+      period = Period(LocalDate.now.minusMonths(6))
+
+      note = "Notes on the therapy..."
+    } yield OncoProcedure(
+      id,
+      patient,
+      indication,
+      code,
+      status,
+      Some(statusReason),
+      Some(therapyLine),
+      None,
+      Some(LocalDate.now),
+      Some(period),
+      Some(note)
+    )
 
 
-/*
-final case class OncoProcedure
-(
-  id: Id[OncoProcedure],
-  patient: Reference[Patient],
-  indication: Reference[MTBDiagnosis],
-  code: Coding[OncoProcedure.Type.Value],
-  status: Coding[Therapy.Status.Value],
-  statusReason: Option[Coding[Therapy.StatusReason]],
-  therapyLine: Option[Int],
-  basedOn: Option[Reference[TherapyRecommendation]],
-  recordedOn: Option[LocalDate],
-  period: Option[Period[LocalDate]],
-  note: Option[String]
-)
-*/
+  implicit val genTumorSpecimen: Gen[TumorSpecimen] =
+    for {
+      id <- Gen.of[Id[TumorSpecimen]]
+
+      patient <- Gen.of[Reference[Patient]]
+
+      typ <- Gen.of[Coding[TumorSpecimen.Type.Value]]
+
+      method <- Gen.of[Coding[TumorSpecimen.Collection.Method.Value]]
+
+      localization <- Gen.of[Coding[TumorSpecimen.Collection.Localization.Value]]
+
+    } yield TumorSpecimen(
+      id,
+      patient,
+      typ,
+      Some(
+        TumorSpecimen.Collection(
+          LocalDate.now,
+          method,
+          localization
+        )
+      )
+    )
+
+
+  def genHistologyReport(
+    patient: Reference[Patient],
+    specimen: Reference[TumorSpecimen]
+  ): Gen[HistologyReport] =
+    for {
+      id <- Gen.of[Id[HistologyReport]]
+
+      morphology <- 
+        for {
+          obsId <- Gen.of[Id[TumorMorphology]]
+          value <- Gen.of[Coding[ICDO3.Morphology]]
+        } yield TumorMorphology(
+          obsId,
+          patient,
+          specimen,
+          value,
+          Some("Notes...")
+        )
+                  
+      tumorCellContent <- 
+        for {
+          obsId  <- Gen.of[Id[TumorCellContent]]
+          method <- Gen.of[Coding[TumorCellContent.Method.Value]]
+          value  <- Gen.doubles
+        } yield TumorCellContent(
+          obsId,
+          patient,
+          specimen,
+          method,
+          value
+        )
+
+    } yield HistologyReport(
+      id,
+      patient,
+      specimen,
+      LocalDate.now,
+      HistologyReport.Results(
+        Some(morphology),
+        Some(tumorCellContent)
+      )
+    )
+
+
+  implicit val genResponse: Gen[Response] =
+    for {
+      id <- Gen.of[Id[Response]]
+
+      patient <- Gen.of[Reference[Patient]]
+
+      therapy <- Gen.of[Reference[MTBMedicationTherapy]]
+
+      value <- Gen.of[Coding[RECIST.Value]]
+
+    } yield Response(
+      id,
+      patient,
+      therapy,
+      LocalDate.now,
+      value
+    )
+
 
   implicit val genPatientRecord: Gen[MTBPatientRecord] =
     for {
@@ -294,16 +405,76 @@ final case class OncoProcedure
           Gen.intsBetween(1,3),
           genGuidelineTherapy
         )
+        .map(
+          _.map(
+            _.copy(
+              patient = patRef,
+              indication = Reference(diagnosis)
+            )
+          )
+        )
+
+      guidelineProcedures <-
+        Gen.list(
+          Gen.intsBetween(1,3),
+          Gen.of[OncoProcedure]
+        )
+        .map(
+          _.map(
+            _.copy(
+              patient = patRef,
+              indication = Reference(diagnosis)
+            )
+          )
+        )
+
+      specimen <-
+        Gen.of[TumorSpecimen]
+          .map(
+            _.copy(patient = patRef)
+          )
+
+      histologyReport <-
+        genHistologyReport(
+          Reference(patient),
+          Reference(specimen)
+        )
+/*      
+        Gen.of[HistologyReport]
+          .map(
+            report =>
+              report.copy(
+                patient = patRef,
+                specimen = Reference(specimen),
+                results = report.results.copy(
+                  tumorMorphology =
+                    report.results.tumorMorphology.map(
+                      _.copy(
+                        patient = patRef,
+                        specimen = Reference(specimen),
+                      )
+                    ),
+                  tumorCellContent =
+                    report.results.tumorCellContent.map(
+                      _.copy(
+                        patient = patRef,
+                        specimen = Reference(specimen),
+                      )
+                    )    
+                )
+              )
+          )
+*/
 
     } yield MTBPatientRecord(
       patient,
       List(episode),
       List(diagnosis),
       guidelineTherapies,
-      List.empty,
+      guidelineProcedures,
       List(performanceStatus),
-      List.empty,
-      List.empty,
+      List(specimen),
+      List(histologyReport),
       List.empty,
       List.empty,
       List.empty,

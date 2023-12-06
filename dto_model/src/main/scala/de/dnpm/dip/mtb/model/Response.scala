@@ -42,24 +42,6 @@ with DefaultCodeSystem
     case NYA => "Not Yet Assessable"
   }
 
-/*  
-  implicit val system =
-    Coding.System[RECIST.Value]("RECIST")
-
-  implicit val codingSystem: CodeSystem[RECIST.Value] =
-    CodeSystem(
-      Coding.System[RECIST.Value].uri,
-      "RECIST",
-      Some("RECIST"),
-      CR  -> "Complete Response",
-      PR  -> "Partial Response",
-      MR  -> "Mixed Response",
-      SD  -> "Stable Disease",
-      PD  -> "Progressive Disease",
-      NA  -> "Not Assessable",
-      NYA -> "Not Yet Assessable"
-    )
-*/
 }
 
 

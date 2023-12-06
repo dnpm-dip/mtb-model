@@ -26,7 +26,7 @@ final case class TumorCellContent
   id: Id[TumorCellContent],
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
-  effectiveDate: LocalDate,
+//  effectiveDate: LocalDate,
   method: Coding[TumorCellContent.Method.Value],
   value: Double,
 )
