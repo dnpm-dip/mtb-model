@@ -12,7 +12,11 @@ import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
 }
-import de.dnpm.dip.coding.hgnc.HGNC
+import de.dnpm.dip.coding.hgnc.{
+  HGNC,
+  Ensembl
+}
+import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
 import de.dnpm.dip.coding.icd.{
@@ -25,6 +29,7 @@ import ClassKinds.Category
 import de.dnpm.dip.coding.icd.ICDO3.extensions._
 import de.dnpm.dip.model.{
   Id,
+  ClosedInterval,
   Episode,
   ExternalId,
   Reference,
@@ -80,6 +85,13 @@ trait Generators
       .latest
       .filter(_.code.value startsWith "L01XX")
       .filter(ATC.filterByKind(Substance))
+
+
+  private implicit lazy val hgnc: CodeSystem[HGNC] =
+    HGNC.GeneSet
+      .getInstance[cats.Id]
+      .get
+      .latest
 
 
 
@@ -313,6 +325,23 @@ trait Generators
     )
 
 
+  def genTumorCellContent(
+    patient: Reference[Patient],
+    specimen: Reference[TumorSpecimen]
+  ): Gen[TumorCellContent] = 
+    for {
+      obsId  <- Gen.of[Id[TumorCellContent]]
+      method <- Gen.of[Coding[TumorCellContent.Method.Value]]
+      value  <- Gen.doubles
+    } yield TumorCellContent(
+      obsId,
+      patient,
+      specimen,
+      method,
+      value
+    )
+
+
   def genHistologyReport(
     patient: Reference[Patient],
     specimen: Reference[TumorSpecimen]
@@ -333,17 +362,7 @@ trait Generators
         )
                   
       tumorCellContent <- 
-        for {
-          obsId  <- Gen.of[Id[TumorCellContent]]
-          method <- Gen.of[Coding[TumorCellContent.Method.Value]]
-          value  <- Gen.doubles
-        } yield TumorCellContent(
-          obsId,
-          patient,
-          specimen,
-          method,
-          value
-        )
+        genTumorCellContent(patient,specimen)
 
     } yield HistologyReport(
       id,
@@ -352,9 +371,282 @@ trait Generators
       LocalDate.now,
       HistologyReport.Results(
         Some(morphology),
-        Some(tumorCellContent)
+        Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Histologic)))
       )
     )
+
+
+  def genProteinExpression(
+    patient: Reference[Patient],
+  ): Gen[ProteinExpression] =
+    for {
+      id      <- Gen.of[Id[ProteinExpression]]
+      protein <- Gen.of[Coding[HGNC]]
+      value   <- Gen.of[Coding[ProteinExpression.Result.Value]]
+      tpsScore <- Gen.intsBetween(0,100)
+      icScore <- Gen.of[Coding[ProteinExpression.ICScore.Value]]
+      tcScore <- Gen.of[Coding[ProteinExpression.TCScore.Value]]
+    } yield ProteinExpression(
+      id,
+      patient,
+      protein,
+      value,
+      Some(tpsScore),
+      Some(icScore),
+      Some(tcScore),
+    )
+
+  def genIHCReport(
+    patient: Reference[Patient],
+    specimen: Reference[TumorSpecimen]
+  ): Gen[IHCReport] =
+    for {
+      id <- Gen.of[Id[IHCReport]]
+
+      journalId <- Gen.of[ExternalId[Nothing]]
+
+      blockId <- Gen.of[ExternalId[Nothing]]
+
+      proteinExpression <-
+        Gen.list(
+          Gen.intsBetween(3,10),
+          genProteinExpression(patient)
+        )
+
+    } yield IHCReport(
+      id,
+      patient,
+      specimen,
+      LocalDate.now,
+      journalId,
+      blockId,
+      proteinExpression,
+      List.empty,
+    )
+
+
+
+  private val bases = 
+    Seq("A","C","G","T")
+
+  private val aminoAcids = 
+    Seq(
+      "Ala", "Asx", "Cys", "Asp",
+      "Glu", "Phe", "Gly", "His",
+      "Ile", "Lys", "Leu", "Met",
+      "Asn", "Pro", "Gln", "Arg",
+      "Ser", "Thr", "Sec", "Val",
+      "Trp", "Tyr", "Glx"
+     )
+
+
+  def genSNV(patient: Reference[Patient]): Gen[SNV] =
+    for { 
+      id <-
+        Gen.of[Id[Variant]]
+
+      dbSnpId <-
+        Gen.uuidStrings
+          .map(ExternalId[SNV](_,Some(Coding.System[dbSNP].uri)))
+
+      cosmicId <-
+        Gen.uuidStrings
+          .map(ExternalId[SNV](_,Some(Coding.System[COSMIC].uri)))
+      
+      chr <-
+        Gen.of[Coding[Chromosome.Value]]
+
+      gene <-
+        Gen.of[Coding[HGNC]]
+
+      transcriptId <-
+        Gen.uuidStrings
+          .map(ExternalId[Transcript](_,Some(Coding.System[Ensembl].uri)))
+
+      position <-
+        Gen.longsBetween(24,600)
+
+      ref <- Gen.oneOf(bases)    
+
+      alt <- Gen.oneOf(bases filter (_ != ref))
+
+      dnaChg = Coding[HGVS](s"c.$position$ref>$alt")
+
+      refAA <- Gen.oneOf(aminoAcids)
+
+      altAA <- Gen.oneOf(aminoAcids filter (_ != refAA))
+
+      proteinChg = Coding[HGVS](s"p.$refAA${(position/3).toInt}$altAA")
+
+      readDepth <- Gen.intsBetween(2,25).map(SNV.ReadDepth(_))
+
+      allelicFreq <- Gen.doubles.map(SNV.AllelicFrequency(_))
+
+      interpretation <- Gen.of[Coding[ClinVar]]
+
+    } yield SNV(
+      id,
+      patient,
+      Set(dbSnpId,cosmicId),
+      chr,
+      Some(gene),
+      transcriptId,
+      Variant.PositionRange(position,None),
+      SNV.Allele(alt),
+      SNV.Allele(ref),
+      Some(dnaChg),
+      Some(proteinChg),
+      readDepth,
+      allelicFreq,
+      Some(interpretation)
+    )
+
+
+  def genCNV(patient: Reference[Patient]): Gen[CNV] =
+    for { 
+      id <- Gen.of[Id[Variant]]
+      
+      chr <- Gen.of[Coding[Chromosome.Value]]
+
+      startRange <- Gen.longsBetween(42L,50000L).map(start => Variant.PositionRange(start,Some(start+42L)))
+
+      length <- Gen.longsBetween(42L,1000L)
+
+      endRange = Variant.PositionRange(startRange.start + length,Some(startRange.start + length + 50L))
+
+      copyNum <- Gen.intsBetween(1,8)
+
+      relCopyNum <- Gen.doubles
+
+      cnA <- Gen.doubles
+
+      cnB <- Gen.doubles
+
+      affectedGenes <- Gen.list(Gen.intsBetween(1,4),Gen.of[Coding[HGNC]])
+
+      focality = "partial q-arm"
+
+      copyNumberNeutralLoH <- Gen.list(Gen.intsBetween(1,4),Gen.of[Coding[HGNC]])
+
+      typ = copyNum match { 
+        case n if n < 2 => CNV.Type.Loss
+        case n if n < 4 => CNV.Type.LowLevelGain
+        case n          => CNV.Type.HighLevelGain
+
+      }
+
+    } yield CNV(
+      id,
+      patient,
+      chr,
+      Some(startRange),
+      Some(endRange),
+      Some(copyNum),
+      Some(relCopyNum),
+      Some(cnA),
+      Some(cnB),
+      affectedGenes,
+      Some(focality),
+      Coding(typ),
+      copyNumberNeutralLoH
+    )
+
+
+  def genNGSReport(
+    patient: Reference[Patient],
+    specimen: Reference[TumorSpecimen]
+  ): Gen[NGSReport] =
+    for {
+      id <- Gen.of[Id[NGSReport]]
+
+      metadata <-
+        for {
+          refGenome <- Gen.oneOf("HG19","HG38","GRCh37")
+        } yield NGSReport.Metadata(
+          "Kit Type",
+          "Manufacturer",
+          "Sequencer",
+          refGenome,
+          URI.create("https://github.com/pipeline-project")
+        )
+
+      tumorCellContent <- 
+        genTumorCellContent(patient,specimen)
+
+      tmb <-
+        for {
+          id <- Gen.of[Id[TMB]]
+          value <- Gen.intsBetween(0,500000)
+          interpretation <- Gen.of[Coding[TMB.Interpretation.Value]]
+        } yield TMB(
+          id,
+          patient,
+          specimen,
+          TMB.Result(value),
+          Some(interpretation)
+        )
+
+      brcaness <-
+        for {
+          id <- Gen.of[Id[BRCAness]]
+        } yield BRCAness(
+          id,
+          patient,
+          specimen,
+          0.5,
+          ClosedInterval(0.4,0.6)
+        )
+
+      hrdScore <-
+        for {
+          id <- Gen.of[Id[HRDScore]]
+          value <- Gen.doubles
+          lst <- Gen.doubles.map(HRDScore.LST(_))
+          loh <- Gen.doubles.map(HRDScore.LoH(_))
+          tai <- Gen.doubles.map(HRDScore.TAI(_))
+          interpretation <- Gen.of[Coding[HRDScore.Interpretation.Value]]
+        } yield HRDScore(
+          id,
+          patient,
+          specimen,
+          value,
+          HRDScore.Components(
+            lst,
+            loh,
+            tai
+          ),
+          Some(interpretation)
+        )
+
+      snvs <-
+        Gen.list(
+          Gen.intsBetween(4,10),
+          genSNV(patient)
+        )  
+
+      cnvs <-
+        Gen.list(
+          Gen.intsBetween(4,10),
+          genCNV(patient)
+        )  
+
+    } yield NGSReport(
+      id,
+      patient,
+      specimen,
+      List(metadata),
+      NGSReport.Results(
+        Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Bioinformatic))),
+        Some(brcaness),
+        Some(hrdScore),
+        snvs,
+        cnvs,
+        List.empty,
+        List.empty,
+        List.empty,
+      )
+    )
+
 
 
   implicit val genResponse: Gen[Response] =
@@ -374,6 +666,7 @@ trait Generators
       LocalDate.now,
       value
     )
+
 
 
   implicit val genPatientRecord: Gen[MTBPatientRecord] =
@@ -439,46 +732,26 @@ trait Generators
           Reference(patient),
           Reference(specimen)
         )
-/*      
-        Gen.of[HistologyReport]
-          .map(
-            report =>
-              report.copy(
-                patient = patRef,
-                specimen = Reference(specimen),
-                results = report.results.copy(
-                  tumorMorphology =
-                    report.results.tumorMorphology.map(
-                      _.copy(
-                        patient = patRef,
-                        specimen = Reference(specimen),
-                      )
-                    ),
-                  tumorCellContent =
-                    report.results.tumorCellContent.map(
-                      _.copy(
-                        patient = patRef,
-                        specimen = Reference(specimen),
-                      )
-                    )    
-                )
-              )
-          )
-*/
+
+      ngsReport <-
+        genNGSReport(
+          Reference(patient),
+          Reference(specimen)
+        )
 
     } yield MTBPatientRecord(
       patient,
-      List(episode),
-      List(diagnosis),
-      guidelineTherapies,
-      guidelineProcedures,
-      List(performanceStatus),
-      List(specimen),
-      List(histologyReport),
-      List.empty,
-      List.empty,
-      List.empty,
-      List.empty,
+      NonEmptyList.one(episode),
+      NonEmptyList.one(diagnosis),
+      Some(guidelineTherapies),
+      Some(guidelineProcedures),
+      Some(List(performanceStatus)),
+      Some(List(specimen)),
+      Some(List(histologyReport)),
+      Some(List(ngsReport)),
+      None,
+      None,
+      None,
     )
 
 }

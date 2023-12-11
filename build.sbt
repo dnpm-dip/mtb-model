@@ -47,7 +47,8 @@ lazy val generators = project
       dependencies.icdo3,
       dependencies.icd_catalogs,
       dependencies.atc_impl,
-      dependencies.atc_catalogs
+      dependencies.atc_catalogs,
+      dependencies.hgnc_geneset
     )
   )
   .dependsOn(
@@ -70,6 +71,7 @@ lazy val dependencies =
     val icd_catalogs = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
     val atc_impl     = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
     val atc_catalogs = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
+    val hgnc_geneset = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.0-SNAPSHOT" % Test
   }
 
 

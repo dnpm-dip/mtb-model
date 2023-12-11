@@ -3,8 +3,10 @@ package de.dnpm.dip.mtb.model
 
 import java.net.URI
 import java.time.LocalDate
+import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
+  ExternalId,
   Patient,
   Reference,
   ClosedInterval,
@@ -18,6 +20,8 @@ import de.dnpm.dip.coding.{
   CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
+  CodeSystemProvider,
+  CodeSystemProviderSPI
 }
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
@@ -34,14 +38,25 @@ final case class TMB
 (
   id: Id[TMB],
   patient: Reference[Patient],
-  effectiveDate: LocalDate,
   specimen: Reference[TumorSpecimen],
   value: TMB.Result,
+  interpretation: Option[Coding[TMB.Interpretation.Value]]
 )
 extends Observation[TMB.Result]
 
 object TMB
 {
+
+  object Interpretation
+  extends CodedEnum("mtb/ngs/tmb/interpretation")
+  with DefaultCodeSystem
+  {
+    val Low          = Value("low")
+    val Intermediate = Value("intermediate")
+    val High         = Value("high")
+
+  }
+
 
   val mutPerMBase =
     UnitOfMeasure("Mutations per megabase","mut/MBase")
@@ -61,12 +76,11 @@ object TMB
     Json.format[TMB]
 }
 
-
+/*
 final case class MSI
 (
   id: Id[MSI],
   patient: Reference[Patient],
-  effectiveDate: LocalDate,
   specimen: Reference[TumorSpecimen],
   value: MSI.Result
 )
@@ -89,6 +103,29 @@ object MSI
   implicit val format: OFormat[MSI] =
     Json.format[MSI]
 }
+*/
+
+
+final case class BRCAness
+(
+  id: Id[BRCAness],
+  patient: Reference[Patient],
+  specimen: Reference[TumorSpecimen],
+  value: Double,
+  confidenceRange: ClosedInterval[Double]
+)
+extends Observation[Double]
+
+object BRCAness
+{
+
+  val referenceRange =
+    ClosedInterval(0.0 -> 1.0)
+
+  implicit val format: OFormat[BRCAness] =
+    Json.format[BRCAness]
+}
+
 
 
 final case class HRDScore
@@ -96,7 +133,6 @@ final case class HRDScore
   id: Id[HRDScore],
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
-  effectiveDate: LocalDate,
   value: Double,
   components: HRDScore.Components,
   interpretation: Option[Coding[HRDScore.Interpretation.Value]]
@@ -166,6 +202,7 @@ object HRDScore
 sealed abstract class Variant
 {
   val id: Id[Variant]
+  val patient: Reference[Patient]
 }
 object Variant
 {
@@ -208,27 +245,14 @@ with DefaultCodeSystem
       chr18,
       chr19,
       chr21,
-      chr22,
-      chrX,
-      chrY = Value
+      chr22 = Value
+
+  val chrX = Value("X")
+  val chrY = Value("Y")
 
   implicit val format: Format[Chromosome.Value] =
     Json.formatEnum(this)
 }
-
-/*
-object HGVS
-{
-  sealed trait c
-  sealed trait p
-
-  implicit val codingSystemDNA =
-    Coding.System[HGVS.c]("https://varnomen.hgvs.org/recommendations/DNA/")
-
-  implicit val codingSystemProtein =
-    Coding.System[HGVS.p]("https://varnomen.hgvs.org/recommendations/protein/")
-}
-*/
 
 
 sealed trait dbSNP
@@ -250,15 +274,32 @@ object ClinVar
 {
   implicit val codingSystem =
     Coding.System[ClinVar]("https://www.ncbi.nlm.nih.gov/clinvar/")
+
+  implicit val codeSystem: CodeSystem[ClinVar] =
+    CodeSystem(
+      name = "ClinVar-Interpretation",
+      title = Some("ClinVar Interpretation"),
+      version = None,
+      "0" -> "Not Applicable",
+      "1" -> "Benign",
+      "2" -> "Likely benign",
+      "3" -> "Uncertain significance",
+      "4" -> "Likely pathogenic",
+      "5" -> "Pathogenic"
+    )
 }
 
+sealed trait Transcript
 
 final case class SNV
 (
-  id: Id[SNV],
-  codings: Set[Coding[_]],    // dbSNPId or COSMIC ID to be listed here
-  chromosome: Chromosome.Value,
+  id: Id[Variant],
+  patient: Reference[Patient],
+//  codings: Set[Coding[_]],              // dbSNPId or COSMIC ID to be listed here
+  externalIds: Set[ExternalId[SNV]],    // dbSNPId or COSMIC ID to be listed here
+  chromosome: Coding[Chromosome.Value],
   gene: Option[Coding[HGNC]],
+  transcriptId: ExternalId[Transcript],
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
@@ -293,8 +334,9 @@ object SNV
 
 final case class CNV
 (
-  id: Id[CNV],
-  chromosome: Chromosome.Value,
+  id: Id[Variant],
+  patient: Reference[Patient],
+  chromosome: Coding[Chromosome.Value],
   startRange: Option[Variant.PositionRange],
   endRange: Option[Variant.PositionRange],
   totalCopyNumber: Option[Int],
@@ -318,6 +360,12 @@ object CNV
     val HighLevelGain = Value("high-level-gain")
     val Loss          = Value("loss")
 
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+
   }
 
   implicit val format: OFormat[CNV] =
@@ -335,7 +383,8 @@ sealed abstract class Fusion[Partner] extends Variant
 
 final case class DNAFusion
 (
-  id: Id[DNAFusion],
+  id: Id[Variant],
+  patient: Reference[Patient],
   fusionPartner5pr: DNAFusion.Partner,
   fusionPartner3pr: DNAFusion.Partner,
   reportedNumReads: Int
@@ -362,7 +411,8 @@ object DNAFusion
 
 final case class RNAFusion
 (
-  id: Id[RNAFusion],
+  id: Id[Variant],
+  patient: Reference[Patient],
   fusionPartner5pr: RNAFusion.Partner,
   fusionPartner3pr: RNAFusion.Partner,
   reportedNumReads: Int
@@ -373,8 +423,6 @@ object RNAFusion
 {
 
   object Strand extends Enumeration
-//  extends CodedEnum("mtb/ngs-report/rna-fusion/strand")
-//  with DefaultCodeSystem
   {
     val Plus  = Value("+")
     val Minus = Value("-")
@@ -402,7 +450,8 @@ object RNAFusion
 
 final case class RNASeq
 (
-  id: Id[RNASeq],
+  id: Id[Variant],
+  patient: Reference[Patient],
   codings: Set[Coding[_]],    // Entrez ID, Ensembl ID or Transcript ID to be listed here
   gene: Option[Coding[HGNC]],
   fragments: RNASeq.Fragments,
@@ -411,7 +460,6 @@ final case class RNASeq
   rawCounts: Int,
   librarySize: Int,
   cohortRanking: Option[Int]
-
 )
 extends Variant
 
@@ -459,8 +507,9 @@ object NGSReport
   final case class Results
   (
     tumorCellContent: Option[TumorCellContent],
+    brcaness: Option[BRCAness],
     hrdScore: Option[HRDScore],
-    msi: Option[MSI],
+//    msi: Option[MSI],
     simpleVariants: List[SNV],
     copyNumberVariants: List[CNV],
     dnaFusions: List[DNAFusion],
