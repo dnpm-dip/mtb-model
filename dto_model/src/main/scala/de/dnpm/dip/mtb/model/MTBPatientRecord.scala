@@ -19,8 +19,10 @@ final case class MTBPatientRecord
   performanceStatus: Option[List[PerformanceStatus]],
   specimens: Option[List[TumorSpecimen]],
   histologyReports: Option[List[HistologyReport]],
+  ihcReports: Option[List[IHCReport]],
   ngsReports: Option[List[NGSReport]],
   carePlans: Option[List[MTBCarePlan]],
+  //TODO: Claims and ClaimResponses
   medicationTherapies: Option[List[MTBTherapyDocumentation]],
   responses: Option[List[Response]]
 ){
@@ -39,6 +41,9 @@ final case class MTBPatientRecord
 
   def getHistologyReports =
     histologyReports.getOrElse(List.empty)
+
+  def getIhcReports =
+    ihcReports.getOrElse(List.empty)
 
   def getNgsReports =
     ngsReports.getOrElse(List.empty)

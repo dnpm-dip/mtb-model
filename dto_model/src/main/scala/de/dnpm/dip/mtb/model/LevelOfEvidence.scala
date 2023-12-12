@@ -43,6 +43,11 @@ object LevelOfEvidence
     val IV = Value("iv")
     val Z  = Value("Z")
     val R  = Value("R")
+
+    override val display = {
+      case x => x.toString
+    }
+
   }
 
   implicit val format: OFormat[LevelOfEvidence] =

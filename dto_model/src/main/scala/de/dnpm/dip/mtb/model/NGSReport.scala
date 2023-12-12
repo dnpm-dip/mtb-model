@@ -204,6 +204,7 @@ sealed abstract class Variant
   val id: Id[Variant]
   val patient: Reference[Patient]
 }
+
 object Variant
 {
 
@@ -295,7 +296,6 @@ final case class SNV
 (
   id: Id[Variant],
   patient: Reference[Patient],
-//  codings: Set[Coding[_]],              // dbSNPId or COSMIC ID to be listed here
   externalIds: Set[ExternalId[SNV]],    // dbSNPId or COSMIC ID to be listed here
   chromosome: Coding[Chromosome.Value],
   gene: Option[Coding[HGNC]],
@@ -310,6 +310,10 @@ final case class SNV
   interpretation: Option[Coding[ClinVar]]
 )
 extends Variant
+{
+  override def toString =
+    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${aminoAcidChange.map(c => c.display.getOrElse(c.code.value))} "
+}
 
 object SNV
 {
@@ -349,6 +353,11 @@ final case class CNV
   copyNumberNeutralLoH: List[Coding[HGNC]],
 )
 extends Variant
+{
+  override def toString =
+    s"CNV ${reportedAffectedGenes.flatMap(_.display).mkString(",")} ${`type`.display.getOrElse("")} "
+}
+
 
 object CNV
 {
@@ -489,6 +498,11 @@ final case class NGSReport
   metadata: List[NGSReport.Metadata],
   results: NGSReport.Results
 )
+{
+  def variants: List[Variant] =
+    results.simpleVariants ++
+    results.copyNumberVariants
+}
 
 object NGSReport
 {

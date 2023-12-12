@@ -16,6 +16,7 @@ import de.dnpm.dip.coding.hgnc.{
   HGNC,
   Ensembl
 }
+import de.dnpm.dip.coding.hgnc.HGNC.extensions._
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
@@ -39,7 +40,8 @@ import de.dnpm.dip.model.{
   Period,
   Organization,
   GuidelineTreatmentStatus,
-  Therapy
+  Therapy,
+  TherapyRecommendation
 }
 import de.dnpm.dip.mtb.model._
 
@@ -86,12 +88,24 @@ trait Generators
       .filter(_.code.value startsWith "L01XX")
       .filter(ATC.filterByKind(Substance))
 
+  private val symbols =
+    Set(
+      "BRCA1",
+      "BRAF",
+      "KRAS",
+      "TP53",
+      "FGFR2",
+      "FGF",
+      "MDM2",
+    )
+
 
   private implicit lazy val hgnc: CodeSystem[HGNC] =
     HGNC.GeneSet
       .getInstance[cats.Id]
       .get
       .latest
+      .filter(gene => symbols contains (gene.symbol))
 
 
 
@@ -228,13 +242,12 @@ trait Generators
 
   import Therapy.Status._
 
-  val genGuidelineTherapy: Gen[MTBMedicationTherapy] =
+  def genGuidelineTherapy(
+    patient: Reference[Patient],
+    diagnosis: Reference[MTBDiagnosis],
+  ): Gen[MTBMedicationTherapy] =
     for {
       id <- Gen.of[Id[MTBMedicationTherapy]]
-
-      patient <- Gen.of[Reference[Patient]]
-
-      indication <- Gen.of[Reference[MTBDiagnosis]]
 
       therapyLine <- Gen.intsBetween(1,9)
 
@@ -253,7 +266,7 @@ trait Generators
     } yield MTBMedicationTherapy(
       id,
       patient,
-      indication,
+      diagnosis,
       Some(therapyLine),
       None,
       Some(LocalDate.now),
@@ -265,13 +278,16 @@ trait Generators
     )
 
 
-  implicit val genOncoProcedure: Gen[OncoProcedure] =
+  def genProcedure(
+    patient: Reference[Patient],
+    diagnosis: Reference[MTBDiagnosis],
+  ): Gen[OncoProcedure] =
     for { 
       id <- Gen.of[Id[OncoProcedure]]
 
-      patient <- Gen.of[Reference[Patient]]
+//      patient <- Gen.of[Reference[Patient]]
 
-      indication <- Gen.of[Reference[MTBDiagnosis]]
+//      indication <- Gen.of[Reference[MTBDiagnosis]]
 
       code <- Gen.of[Coding[OncoProcedure.Type.Value]]
 
@@ -287,7 +303,7 @@ trait Generators
     } yield OncoProcedure(
       id,
       patient,
-      indication,
+      diagnosis,
       code,
       status,
       Some(statusReason),
@@ -478,7 +494,7 @@ trait Generators
 
       proteinChg = Coding[HGVS](s"p.$refAA${(position/3).toInt}$altAA")
 
-      readDepth <- Gen.intsBetween(2,25).map(SNV.ReadDepth(_))
+      readDepth <- Gen.intsBetween(5,25).map(SNV.ReadDepth(_))
 
       allelicFreq <- Gen.doubles.map(SNV.AllelicFrequency(_))
 
@@ -545,10 +561,10 @@ trait Generators
       Some(relCopyNum),
       Some(cnA),
       Some(cnB),
-      affectedGenes,
+      affectedGenes.distinctBy(_.code),
       Some(focality),
       Coding(typ),
-      copyNumberNeutralLoH
+      copyNumberNeutralLoH.distinctBy(_.code)
     )
 
 
@@ -648,6 +664,74 @@ trait Generators
     )
 
 
+  def genTherapyRecommendation(
+    patient: Reference[Patient],
+    diagnosis: Reference[MTBDiagnosis],
+    variants: Seq[Reference[Variant]]
+  ): Gen[MTBMedicationRecommendation] =
+    for {
+      id <- Gen.of[Id[MTBMedicationRecommendation]]
+
+      priority <- Gen.of[Coding[TherapyRecommendation.Priority.Value]]
+
+      evidenceLevel <-
+        for { 
+          grading  <- Gen.of[Coding[LevelOfEvidence.Grading.Value]]
+          addendum <- Gen.of[Coding[LevelOfEvidence.Addendum.Value]]
+        } yield LevelOfEvidence(
+          grading,
+          Some(Set(addendum))
+        )
+
+      medication <- Gen.of[Coding[ATC]]
+
+      supportingVariant <- Gen.oneOf(variants)
+
+    } yield MTBMedicationRecommendation(
+      id,
+      patient,
+      diagnosis,
+      Some(evidenceLevel),
+      priority,
+      LocalDate.now,
+      Set(medication),
+      List(supportingVariant)
+    )
+
+
+  def genCarePlan(
+    patient: Reference[Patient],
+    diagnosis: Reference[MTBDiagnosis],
+    variants: Seq[Reference[Variant]]
+  ): Gen[MTBCarePlan] = 
+    for { 
+      id <- Gen.of[Id[MTBCarePlan]]
+
+      statusReason <- Gen.of[Coding[MTBCarePlan.StatusReason.Value]]
+
+      protocol = "Protocol of the MTB conference..."
+
+      recommendations <- 
+        Gen.list(
+          Gen.intsBetween(1,3),
+          genTherapyRecommendation(
+            patient,
+            diagnosis,
+            variants
+          )
+        )
+
+    } yield MTBCarePlan(
+      id,
+      patient,
+      diagnosis,
+      LocalDate.now,
+      Some(statusReason),
+      Some(protocol),
+      recommendations
+    )
+
+
 
   implicit val genResponse: Gen[Response] =
     for {
@@ -696,28 +780,18 @@ trait Generators
       guidelineTherapies <-
         Gen.list(
           Gen.intsBetween(1,3),
-          genGuidelineTherapy
-        )
-        .map(
-          _.map(
-            _.copy(
-              patient = patRef,
-              indication = Reference(diagnosis)
-            )
+          genGuidelineTherapy(
+            patRef,
+            Reference(diagnosis)
           )
         )
 
       guidelineProcedures <-
         Gen.list(
           Gen.intsBetween(1,3),
-          Gen.of[OncoProcedure]
-        )
-        .map(
-          _.map(
-            _.copy(
-              patient = patRef,
-              indication = Reference(diagnosis)
-            )
+          genProcedure(
+            patRef,
+            Reference(diagnosis)
           )
         )
 
@@ -733,11 +807,28 @@ trait Generators
           Reference(specimen)
         )
 
+      ihcReport <-
+        genIHCReport(
+          Reference(patient),
+          Reference(specimen)
+        )
+
       ngsReport <-
         genNGSReport(
           Reference(patient),
           Reference(specimen)
         )
+
+      carePlan <- 
+        genCarePlan(
+          Reference(patient),
+          Reference(diagnosis),
+          ngsReport.variants
+            .map(
+              v => Reference(v.id,Some(v.toString))
+            )
+        )
+
 
     } yield MTBPatientRecord(
       patient,
@@ -748,8 +839,9 @@ trait Generators
       Some(List(performanceStatus)),
       Some(List(specimen)),
       Some(List(histologyReport)),
+      Some(List(ihcReport)),
       Some(List(ngsReport)),
-      None,
+      Some(List(carePlan)),
       None,
       None,
     )

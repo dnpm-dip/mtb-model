@@ -25,14 +25,15 @@ final case class MTBCarePlan
 (
   id: Id[MTBCarePlan],
   patient: Reference[Patient],
-  issuedOn: LocalDate,
   indication: Reference[MTBDiagnosis],
+  issuedOn: LocalDate,
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
   protocol: Option[String],
   medicationRecommendations: List[MTBMedicationRecommendation],
   //TODO: other recommendation types
 )
 extends CarePlan
+
 
 object MTBCarePlan
 {
@@ -43,9 +44,10 @@ object MTBCarePlan
   {
     val NoTarget = Value("no-target")
 
-    override val display = {
-      case NoTarget => "Keine Therapeutische Konsequenz"
-    }
+    override val display =
+      Map(
+        NoTarget -> "Keine Therapeutische Konsequenz"
+      )
   }
 
   implicit val format: OFormat[MTBCarePlan] =

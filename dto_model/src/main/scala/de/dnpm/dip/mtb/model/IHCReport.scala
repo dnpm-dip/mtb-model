@@ -63,6 +63,9 @@ object ProteinExpression
         ThreePlus    -> "3+",
         Unknown      -> "untersucht, kein Ergebnis"
       )
+
+    implicit val format: Format[Result.Value] =
+      Json.formatEnum(this)
   }
 
   object ICScore
@@ -81,6 +84,9 @@ object ProteinExpression
         Two   -> ">= 5%",
         Three -> ">= 10%",
       )
+
+    implicit val format: Format[ICScore.Value] =
+      Json.formatEnum(this)
   }
 
   object TCScore
@@ -105,7 +111,14 @@ object ProteinExpression
         Five  -> ">= 50%",
         Six   -> ">= 75%",
       )
+
+    implicit val format: Format[TCScore.Value] =
+      Json.formatEnum(this)
   }
+
+
+  implicit val format: OFormat[ProteinExpression] =
+    Json.format[ProteinExpression]
 }
 
 
@@ -119,5 +132,11 @@ final case class IHCReport
   blockId: ExternalId[_],
   proteinExpressionResults: List[ProteinExpression],
   msiMmrResults: List[ProteinExpression]
-//  msiMmrResults: (ProteinExpression,ProteinExpression,ProteinExpression,ProteinExpression)
 )
+
+object IHCReport
+{
+
+  implicit val format: OFormat[IHCReport] =
+    Json.format[IHCReport]
+}
