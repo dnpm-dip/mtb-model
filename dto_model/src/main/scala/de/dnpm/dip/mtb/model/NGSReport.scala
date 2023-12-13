@@ -312,7 +312,7 @@ final case class SNV
 extends Variant
 {
   override def toString =
-    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${aminoAcidChange.map(c => c.display.getOrElse(c.code.value))} "
+    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${aminoAcidChange.map(c => c.display.getOrElse(c.code.value))}"
 }
 
 object SNV
@@ -355,7 +355,7 @@ final case class CNV
 extends Variant
 {
   override def toString =
-    s"CNV ${reportedAffectedGenes.flatMap(_.display).mkString(",")} ${`type`.display.getOrElse("")} "
+    s"CNV ${reportedAffectedGenes.flatMap(_.display).mkString(",")} ${`type`.display.getOrElse("")}"
 }
 
 
@@ -383,7 +383,9 @@ object CNV
 
 
 
-sealed abstract class Fusion[Partner] extends Variant
+sealed abstract class Fusion[
+  Partner <: { def gene: Coding[HGNC] }]
+extends Variant
 {
   val fusionPartner5pr: Partner
   val fusionPartner3pr: Partner

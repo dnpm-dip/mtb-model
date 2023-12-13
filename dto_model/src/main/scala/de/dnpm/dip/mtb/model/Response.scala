@@ -2,6 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
   Patient,
@@ -11,6 +12,8 @@ import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
   CodeSystem,
+  CodeSystemProvider,
+  CodeSystemProviderSPI,
   DefaultCodeSystem
 }
 import play.api.libs.json.{
@@ -40,6 +43,12 @@ with DefaultCodeSystem
     case PD  => "Progressive Disease"
     case NA  => "Not Assessable"
     case NYA => "Not Yet Assessable"
+  }
+
+  final class ProviderSPI extends CodeSystemProviderSPI
+  {
+    override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+      new Provider.Facade[F]
   }
 
 }

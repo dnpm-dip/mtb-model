@@ -2,6 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
@@ -10,6 +11,7 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.model.{
   Id,
+  ExternalId,
   Period,
   Reference,
   Patient,
@@ -19,6 +21,7 @@ import de.dnpm.dip.model.{
 import de.dnpm.dip.coding.atc.ATC
 import play.api.libs.json.{
   Json,
+  Format,
   OFormat
 }
 
@@ -42,4 +45,64 @@ object MTBMedicationRecommendation
 {
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]
+}
+
+
+
+final case class GeneticCounselingRecommendation
+(
+  id: Id[GeneticCounselingRecommendation],
+  patient: Reference[Patient],
+  issuedOn: LocalDate,
+  reason: Coding[GeneticCounselingRecommendation.Reason.Value]
+)
+
+object GeneticCounselingRecommendation
+{
+
+  object Reason
+  extends CodedEnum("dnpm-dip/mtb/recommendation/genetic-counseling/reason")
+  with DefaultCodeSystem
+  {
+    val FamilyAnamnesis = Value("family-anamnesis")
+    val SelfAnamnesis   = Value("self-anamnesis")
+    val SecondaryTumor  = Value("secondary-tumor")
+    val Other	        = Value("other")  
+    val Unknown         = Value("unknown")
+
+    override val display =
+      Map(
+        FamilyAnamnesis -> "Familienanamnese",
+        SelfAnamnesis   -> "Eigenanamnese",
+        SecondaryTumor  -> "Zweittumor",
+        Other	        -> "Andere",
+        Unknown         -> "Unbekannt"
+      )
+
+    implicit val format: Format[Value] =
+      Json.formatEnum(this)
+  }
+
+  implicit val format: OFormat[GeneticCounselingRecommendation] =
+    Json.format[GeneticCounselingRecommendation]
+}
+
+
+sealed trait Study
+
+final case class StudyEnrollmentRecommendation
+(
+  id: Id[StudyEnrollmentRecommendation],
+  patient: Reference[Patient],
+  issuedOn: LocalDate,
+  studyIds: NonEmptyList[ExternalId[Study]]
+)
+
+object StudyEnrollmentRecommendation
+{
+
+  import de.dnpm.dip.util.json._
+
+  implicit val format: OFormat[StudyEnrollmentRecommendation] =
+    Json.format[StudyEnrollmentRecommendation]
 }

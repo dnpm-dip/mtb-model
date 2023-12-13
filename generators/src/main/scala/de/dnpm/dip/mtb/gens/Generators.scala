@@ -678,9 +678,19 @@ trait Generators
         for { 
           grading  <- Gen.of[Coding[LevelOfEvidence.Grading.Value]]
           addendum <- Gen.of[Coding[LevelOfEvidence.Addendum.Value]]
+          publication <-
+            for { 
+              pmid <- Gen.uuidStrings
+              doi  <- Gen.uuidStrings
+            } yield LevelOfEvidence.Publication(
+              Some(pmid),
+              Some(doi)
+            )
+
         } yield LevelOfEvidence(
           grading,
-          Some(Set(addendum))
+          Some(Set(addendum)),
+          Some(List(publication))
         )
 
       medication <- Gen.of[Coding[ATC]]
@@ -721,6 +731,29 @@ trait Generators
           )
         )
 
+      counselingRecommendation <-
+        for { 
+          crId <- Gen.of[Id[GeneticCounselingRecommendation]]
+          reason <- Gen.of[Coding[GeneticCounselingRecommendation.Reason.Value]]
+        } yield GeneticCounselingRecommendation(
+          crId,
+          patient,
+          LocalDate.now,
+          reason
+        )
+
+      studyEnrollmentRecommendation <-
+        for { 
+          stId <- Gen.of[Id[StudyEnrollmentRecommendation]]
+          nctId <- Gen.intsBetween(10000000,50000000)
+                     .map(s => ExternalId[Study](s"NCT:$s","NCT"))
+        } yield StudyEnrollmentRecommendation(
+          stId,
+          patient,
+          LocalDate.now,
+          NonEmptyList.one(nctId)
+        )
+
     } yield MTBCarePlan(
       id,
       patient,
@@ -728,7 +761,9 @@ trait Generators
       LocalDate.now,
       Some(statusReason),
       Some(protocol),
-      recommendations
+      recommendations,
+      List(counselingRecommendation),
+      List(studyEnrollmentRecommendation)
     )
 
 

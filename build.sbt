@@ -31,6 +31,7 @@ lazy val dto_model = project
     name := "mtb-dto-model",
     settings,
     libraryDependencies ++= Seq(
+      dependencies.scalatest,
       dependencies.core,
     )
   )
