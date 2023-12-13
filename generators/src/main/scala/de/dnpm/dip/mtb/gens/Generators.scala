@@ -882,3 +882,5 @@ trait Generators
     )
 
 }
+
+object Generators extends Generators
