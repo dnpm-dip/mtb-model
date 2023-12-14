@@ -269,7 +269,7 @@ trait Generators
       diagnosis,
       Some(therapyLine),
       None,
-      Some(LocalDate.now),
+      LocalDate.now,
       status,
       Some(statusReason),
       Some(period),
@@ -284,10 +284,6 @@ trait Generators
   ): Gen[OncoProcedure] =
     for { 
       id <- Gen.of[Id[OncoProcedure]]
-
-//      patient <- Gen.of[Reference[Patient]]
-
-//      indication <- Gen.of[Reference[MTBDiagnosis]]
 
       code <- Gen.of[Coding[OncoProcedure.Type.Value]]
 
@@ -309,7 +305,7 @@ trait Generators
       Some(statusReason),
       Some(therapyLine),
       None,
-      Some(LocalDate.now),
+      LocalDate.now,
       Some(period),
       Some(note)
     )
@@ -561,10 +557,10 @@ trait Generators
       Some(relCopyNum),
       Some(cnA),
       Some(cnB),
-      affectedGenes.distinctBy(_.code),
+      affectedGenes.distinctBy(_.code).toSet,
       Some(focality),
       Coding(typ),
-      copyNumberNeutralLoH.distinctBy(_.code)
+      copyNumberNeutralLoH.distinctBy(_.code).toSet
     )
 
 

@@ -304,7 +304,7 @@ final case class SNV
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
   dnaChange: Option[Coding[HGVS]],
-  aminoAcidChange: Option[Coding[HGVS]],
+  proteinChange: Option[Coding[HGVS]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
   interpretation: Option[Coding[ClinVar]]
@@ -312,7 +312,7 @@ final case class SNV
 extends Variant
 {
   override def toString =
-    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${aminoAcidChange.map(c => c.display.getOrElse(c.code.value))}"
+    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${proteinChange.map(c => c.display.getOrElse(c.code.value))}"
 }
 
 object SNV
@@ -347,10 +347,10 @@ final case class CNV
   relativeCopyNumber: Option[Double],
   cnA: Option[Double],
   cnB: Option[Double],
-  reportedAffectedGenes: List[Coding[HGNC]],
+  reportedAffectedGenes: Set[Coding[HGNC]],
   reportedFocality: Option[String],
   `type`: Coding[CNV.Type.Value],
-  copyNumberNeutralLoH: List[Coding[HGNC]],
+  copyNumberNeutralLoH: Set[Coding[HGNC]],
 )
 extends Variant
 {

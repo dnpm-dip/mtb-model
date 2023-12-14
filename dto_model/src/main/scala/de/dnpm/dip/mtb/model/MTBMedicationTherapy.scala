@@ -31,7 +31,7 @@ final case class MTBMedicationTherapy
   indication: Reference[MTBDiagnosis],
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
-  recordedOn: Option[LocalDate],
+  recordedOn: LocalDate,
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason]],
   period: Option[Period[LocalDate]],
