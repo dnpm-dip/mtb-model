@@ -22,7 +22,6 @@ import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
 import de.dnpm.dip.coding.icd.{
   ICD10GM,
-  ICD10GMCatalogs,
   ICDO3,
   ClassKinds
 }
@@ -54,7 +53,7 @@ trait Generators
 
 
   private implicit lazy val icd10gm: CodeSystem[ICD10GM] =
-    ICD10GMCatalogs
+    ICD10GM.Catalogs
       .getInstance[cats.Id]
       .get
       .latest
@@ -649,10 +648,12 @@ trait Generators
       List(metadata),
       NGSReport.Results(
         Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Bioinformatic))),
+        Some(tmb),
         Some(brcaness),
         Some(hrdScore),
         snvs,
         cnvs,
+        //TODO: DNA-/RNA-Fusions, RNASeq
         List.empty,
         List.empty,
         List.empty,
@@ -856,7 +857,7 @@ trait Generators
           Reference(diagnosis),
           ngsReport.variants
             .map(
-              v => Reference(v.id,Some(v.toString))
+              v => Reference(v.id,Some(Variant.display(v)))
             )
         )
 

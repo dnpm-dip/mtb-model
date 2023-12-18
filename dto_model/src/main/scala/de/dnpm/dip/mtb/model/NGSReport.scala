@@ -54,7 +54,6 @@ object TMB
     val Low          = Value("low")
     val Intermediate = Value("intermediate")
     val High         = Value("high")
-
   }
 
 
@@ -220,6 +219,33 @@ object Variant
       Json.format[PositionRange]
   }
 
+
+  import HGNC.extensions._
+
+  def display(
+    variant: Variant
+  )(
+    implicit hgnc: CodeSystem[HGNC]
+  ): String =
+    variant match { 
+      case snv: SNV =>
+        s"SNV ${snv.gene.flatMap(c => hgnc.concept(c.code)).map(_.symbol).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
+
+      case cnv: CNV =>
+        s"CNV ${cnv.reportedAffectedGenes.flatMap(c => hgnc.concept(c.code)).map(_.symbol).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
+
+      case DNAFusion(_,_,partner5pr,partner3pr,_) =>
+        s"DNA-Fusion ${hgnc.concept(partner5pr.gene.code).map(_.symbol).getOrElse("intergenic")} :: ${hgnc.concept(partner3pr.gene.code).map(_.symbol).getOrElse("intergenic")}"
+      
+      case RNAFusion(_,_,partner5pr,partner3pr,_) =>
+        s"RNA-Fusion ${hgnc.concept(partner5pr.gene.code).map(_.symbol).getOrElse("intergenic")} :: ${hgnc.concept(partner3pr.gene.code).map(_.symbol).getOrElse("intergenic")}"
+      
+      case rnaSeq: RNASeq =>
+        s"RNA-Seq ${rnaSeq.gene.flatMap(c => hgnc.concept(c.code)).map(_.symbol).getOrElse("N/A")}"
+
+    }
+
+
 }
 
 object Chromosome
@@ -310,10 +336,6 @@ final case class SNV
   interpretation: Option[Coding[ClinVar]]
 )
 extends Variant
-{
-  override def toString =
-    s"SNV ${gene.flatMap(_.display).getOrElse("")} ${proteinChange.map(c => c.display.getOrElse(c.code.value))}"
-}
 
 object SNV
 {
@@ -353,10 +375,6 @@ final case class CNV
   copyNumberNeutralLoH: Set[Coding[HGNC]],
 )
 extends Variant
-{
-  override def toString =
-    s"CNV ${reportedAffectedGenes.flatMap(_.display).mkString(",")} ${`type`.display.getOrElse("")}"
-}
 
 
 object CNV
@@ -444,8 +462,7 @@ object RNAFusion
 
   final case class Partner
   (
-    codings: Set[Reference[_]],  // Transcript ID and Exon Id listed here
-//    codings: Set[Coding[_]],  // Transcript ID and Exon Id listed here
+    ids: Set[ExternalId[_]],  // Transcript ID and Exon Id listed here
     position: Long,
     gene: Coding[HGNC],
     strand: Strand.Value
@@ -463,7 +480,7 @@ final case class RNASeq
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  codings: Set[Coding[_]],    // Entrez ID, Ensembl ID or Transcript ID to be listed here
+  ids: Set[ExternalId[_]],    // Entrez ID, Ensembl ID or Transcript ID to be listed here
   gene: Option[Coding[HGNC]],
   fragments: RNASeq.Fragments,
   fromNGS: Boolean,
@@ -523,6 +540,7 @@ object NGSReport
   final case class Results
   (
     tumorCellContent: Option[TumorCellContent],
+    tmb: Option[TMB],
     brcaness: Option[BRCAness],
     hrdScore: Option[HRDScore],
 //    msi: Option[MSI],
