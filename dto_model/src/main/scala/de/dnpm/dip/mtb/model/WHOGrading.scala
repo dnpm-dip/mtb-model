@@ -37,10 +37,10 @@ object WHOGrading
 
   val codeSystem4th: CodeSystem[WHOGrading] =
     CodeSystem(
-      Coding.System[WHOGrading].uri,
-      "WHO-Grading-CNS-Tumors",
-      Some("WHO-Grading of CNS Tumors, 4th edition"),
-      Some("2016"),
+      uri     = Coding.System[WHOGrading].uri,
+      name    = "WHO-Grading-CNS-Tumors",
+      title   = Some("WHO-Grading of CNS Tumors, 4th edition"),
+      version = Some("2016"),
       I   -> "Pilocytic astrocytoma",
       II  -> "Diffuse astrocytoma",
       III -> "Anaplastic astrocytoma",
@@ -49,10 +49,10 @@ object WHOGrading
 
   val codeSystem5th: CodeSystem[WHOGrading] =
     CodeSystem(
-      Coding.System[WHOGrading].uri,
-      "WHO-Grading-CNS-Tumors",
-      Some("WHO-Grading of CNS Tumors, 5th edition"),
-      Some("2021"),
+      uri     = Coding.System[WHOGrading].uri,
+      name    = "WHO-Grading-CNS-Tumors",
+      title   = Some("WHO-Grading of CNS Tumors, 5th edition"),
+      version = Some("2021"),
       One   -> "Pilocytic astrocytoma",
       Two   -> "Diffuse astrocytoma",
       Three -> "Anaplastic astrocytoma",
