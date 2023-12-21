@@ -59,6 +59,7 @@ final case class MTBPatientRecord
 
 }
 
+
 object MTBPatientRecord
 {
   import de.dnpm.dip.util.json._

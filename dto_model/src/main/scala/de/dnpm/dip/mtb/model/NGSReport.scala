@@ -246,6 +246,61 @@ object Variant
     }
 
 
+  // Type class to check equivalence of variants,
+  // i.e. if 2 variant object are conceptually the same variant 
+  // irrespective of the patient reference on the object or interpretation values
+  sealed trait Eq[T <: Variant] extends ((T,T) => Boolean)
+
+  object Eq 
+  {
+
+    def apply[T <: Variant](implicit eq: Eq[T]) = eq
+
+    private def instance[T <: Variant](f: (T,T) => Boolean): Eq[T] =
+      new Eq[T]{
+        override def apply(v1: T, v2: T) = f(v1,v2)
+      }
+
+    implicit val snvEq: Eq[SNV] =
+      instance(
+        (v1, v2) =>
+          v1.chromosome == v2.chromosome &&
+          v1.gene == v2.gene &&
+          v1.dnaChange == v2.dnaChange &&
+          v1.proteinChange == v2.proteinChange
+      )
+  
+    implicit val cnvEq: Eq[CNV] =
+      instance(
+        (v1, v2) =>
+          v1.chromosome == v2.chromosome &&
+          v1.reportedAffectedGenes == v2.reportedAffectedGenes &&
+          v1.`type` == v2.`type`
+      )
+
+    implicit def fusionEq[F <: Fusion[_ <: { def gene: Coding[HGNC] }]]: Eq[F] =
+      instance {
+        (v1, v2) =>
+          import scala.language.reflectiveCalls
+
+          v1.fusionPartner5pr.gene == v2.fusionPartner5pr.gene &&
+          v1.fusionPartner3pr.gene == v2.fusionPartner3pr.gene
+      }
+
+    implicit val rnaSeqEq: Eq[RNASeq] =
+      instance(
+        (v1, v2) =>
+          v1.gene == v2.gene
+      )
+
+    implicit class syntax[T <: Variant](variant: T)(implicit eq: Eq[T])
+    {
+      def ===(other: T): Boolean =
+        eq(variant,other)
+    }
+
+  }
+
 }
 
 object Chromosome
@@ -272,10 +327,14 @@ with DefaultCodeSystem
       chr18,
       chr19,
       chr21,
-      chr22 = Value
+      chr22,
+      chrX,
+      chrY = Value
 
-  val chrX = Value("X")
-  val chrY = Value("Y")
+
+  override val display = {
+    case chr => chr.toString
+  }
 
   implicit val format: Format[Chromosome.Value] =
     Json.formatEnum(this)
@@ -402,7 +461,8 @@ object CNV
 
 
 sealed abstract class Fusion[
-  Partner <: { def gene: Coding[HGNC] }]
+  Partner <: { def gene: Coding[HGNC] }
+]
 extends Variant
 {
   val fusionPartner5pr: Partner
@@ -520,7 +580,9 @@ final case class NGSReport
 {
   def variants: List[Variant] =
     results.simpleVariants ++
-    results.copyNumberVariants
+    results.copyNumberVariants ++
+    results.dnaFusions ++
+    results.rnaFusions
 }
 
 object NGSReport
