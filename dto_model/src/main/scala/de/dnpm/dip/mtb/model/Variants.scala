@@ -53,40 +53,25 @@ object Variant
   }
 
 
-  private def symbol(
-    coding: Coding[HGNC]
-  )(  
-    implicit hgnc: CodeSystem[HGNC]
-  ): Option[String] = {
-
-    import HGNC.extensions._
-
-    hgnc.concept(coding.code)
-      .map(_.symbol)
-  }
-
-
   def display(
     variant: Variant
-  )(
-    implicit hgnc: CodeSystem[HGNC]
   ): String =
     variant match { 
 
       case snv: SNV =>
-        s"SNV ${snv.gene.flatMap(symbol).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
+        s"SNV ${snv.gene.flatMap(_.display).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
 
       case cnv: CNV =>
-        s"CNV ${cnv.reportedAffectedGenes.flatMap(symbol).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
+        s"CNV ${cnv.reportedAffectedGenes.flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
 
       case DNAFusion(_,_,partner5pr,partner3pr,_) =>
-        s"DNA-Fusion ${symbol(partner5pr.gene).getOrElse("N/A")}-${symbol(partner3pr.gene).getOrElse("N/A")}"
+        s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
       case RNAFusion(_,_,partner5pr,partner3pr,_) =>
-        s"RNA-Fusion ${symbol(partner5pr.gene).getOrElse("N/A")}-${symbol(partner3pr.gene).getOrElse("N/A")}"
+        s"RNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
       case rnaSeq: RNASeq =>
-        s"RNA-Seq ${rnaSeq.gene.flatMap(symbol).getOrElse("N/A")}"
+        s"RNA-Seq ${rnaSeq.gene.flatMap(_.display).getOrElse("N/A")}"
 
     }
 

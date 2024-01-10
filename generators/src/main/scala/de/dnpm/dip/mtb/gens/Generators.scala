@@ -17,7 +17,7 @@ import de.dnpm.dip.coding.hgnc.{
   HGNC,
   Ensembl
 }
-import de.dnpm.dip.coding.hgnc.HGNC.extensions._
+//import de.dnpm.dip.coding.hgnc.HGNC.extensions._
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
@@ -114,7 +114,7 @@ trait Generators
       .getInstance[cats.Id]
       .get
       .latest
-      .filter(gene => symbols contains (gene.symbol))
+      .filter(gene => symbols contains gene.display)
 
 
 
