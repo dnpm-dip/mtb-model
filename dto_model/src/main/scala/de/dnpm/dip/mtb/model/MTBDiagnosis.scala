@@ -44,7 +44,7 @@ object MTBDiagnosis
 {
 
   object TumorStage
-  extends CodedEnum("mtb/diagnosis/stage")
+  extends CodedEnum("dnpm-dip/mtb/diagnosis/stage")
   with DefaultCodeSystem
   {
     type Stage = Value
@@ -64,31 +64,6 @@ object MTBDiagnosis
     }
   }
 
-/*
-  object TumorStage
-  extends CodedEnum("mtb/diagnosis/stage")
-  {
-    type Stage = Value
-
-    val TumorFree    = Value("tumor-free")
-    val Local        = Value("local")
-    val Metastasized = Value("metastasized")
-    val Unknown      = Value("unknown")
-
-    implicit val format = Json.formatEnum(this)
-
-    implicit val codeSystem: CodeSystem[Value] =
-      CodeSystem(
-        Coding.System[Value].uri,
-        "DiagnoseStadium",
-        Some("DiagnoseStadium"),
-        TumorFree    -> "Tumorfrei",
-        Local        -> "Lokal",
-        Metastasized -> "Metastasiert",
-        Unknown      -> "Unbekannt"
-      )
-  }
-*/
 
   final case class StageOnDate
   (

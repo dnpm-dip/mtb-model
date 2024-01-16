@@ -47,7 +47,7 @@ object OncoProcedure
 {
 
   object Type
-  extends CodedEnum("mtb/procedure/type")
+  extends CodedEnum("dnpm-dip/mtb/procedure/type")
   with DefaultCodeSystem
   {
     val Surgery         = Value("surgery")

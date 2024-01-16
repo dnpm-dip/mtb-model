@@ -33,7 +33,7 @@ object TumorSpecimen
 {
 
   object Type
-  extends CodedEnum("mtb/tumor-specimen/type")
+  extends CodedEnum("dnpm-dip/mtb/tumor-specimen/type")
   with DefaultCodeSystem
   {
     val FreshTissue  = Value("fresh-tissue")
@@ -55,7 +55,7 @@ object TumorSpecimen
   {
     
     object Method
-    extends CodedEnum("mtb/tumor-specimen/collection/method")
+    extends CodedEnum("dnpm-dip/mtb/tumor-specimen/collection/method")
     with DefaultCodeSystem
     {
       val Biopsy       = Value("biopsy")
@@ -66,7 +66,7 @@ object TumorSpecimen
     }
 
     object Localization
-    extends CodedEnum("mtb/tumor-specimen/collection/localization")
+    extends CodedEnum("dnpm-dip/mtb/tumor-specimen/collection/localization")
     with DefaultCodeSystem
     {
       val PrimaryTumor = Value("primary-tumor")

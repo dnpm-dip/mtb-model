@@ -24,7 +24,7 @@ object LevelOfEvidence
 {
 
   object Grading
-  extends CodedEnum("mtb/level-of-evidence/grading")
+  extends CodedEnum("dnpm-dip/mtb/level-of-evidence/grading")
   with DefaultCodeSystem
   {
     val Undefined = Value("undefined")
@@ -38,7 +38,7 @@ object LevelOfEvidence
   }
 
   object Addendum
-  extends CodedEnum("mtb/level-of-evidence/addendum")
+  extends CodedEnum("dnpm-dip/mtb/level-of-evidence/addendum")
   with DefaultCodeSystem
   {
     val IS = Value("is")

@@ -20,6 +20,8 @@ class CodeSystemTests extends AnyFlatSpec
       .toList must contain allOf (
         Coding.System[CNV.Type.Value].uri,
         Coding.System[RECIST.Value].uri,
+        Coding.System[TMB.Interpretation.Value].uri,
+        Coding.System[HRDScore.Interpretation.Value].uri,
       )
 
   }

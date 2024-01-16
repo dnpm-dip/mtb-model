@@ -36,7 +36,7 @@ object TumorCellContent
 {
 
   object Method
-  extends CodedEnum("mtb/tumor-cell-content/method")
+  extends CodedEnum("dnpm-dip/mtb/tumor-cell-content/method")
   with DefaultCodeSystem
   {
     val Histologic    = Value("histologic")

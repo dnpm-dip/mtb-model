@@ -46,12 +46,25 @@ object TMB
 {
 
   object Interpretation
-  extends CodedEnum("mtb/ngs/tmb/interpretation")
+  extends CodedEnum("dnpm-dip/mtb/ngs/tmb/interpretation")
   with DefaultCodeSystem
   {
     val Low          = Value("low")
     val Intermediate = Value("intermediate")
     val High         = Value("high")
+
+    override val display =
+      Map(
+        Low          -> "Niedrig",
+        Intermediate -> "Mittel",
+        High         -> "Hoch"
+      )
+
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
   }
 
 
@@ -144,13 +157,25 @@ object HRDScore
 
 
   object Interpretation
-  extends CodedEnum("mtb/ngs/hrd-score/interpretation")
+  extends CodedEnum("dnpm-dip/mtb/ngs/hrd-score/interpretation")
   with DefaultCodeSystem
   {
     val Low          = Value("low")
     val Intermediate = Value("intermediate")
     val High         = Value("high")
 
+    override val display =
+      Map(
+        Low          -> "Niedrig",
+        Intermediate -> "Mittel",
+        High         -> "Hoch"
+      )
+
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
   }
 
   // Large-Scale Transitions: LST

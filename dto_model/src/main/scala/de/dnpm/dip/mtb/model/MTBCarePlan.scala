@@ -41,7 +41,7 @@ object MTBCarePlan
 {
 
   object StatusReason
-  extends CodedEnum("mtb/careplan/status-reason")
+  extends CodedEnum("dnpm-dip/mtb/careplan/status-reason")
   with DefaultCodeSystem
   {
     val NoTarget = Value("no-target")

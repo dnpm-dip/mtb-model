@@ -44,7 +44,7 @@ object ProteinExpression
 {
 
   object Result
-  extends CodedEnum("mtb/ihc/protein-expression/result")
+  extends CodedEnum("dnpm-dip/mtb/ihc/protein-expression/result")
   with DefaultCodeSystem
   {
     val Expressed    = Value("exp")
@@ -69,7 +69,7 @@ object ProteinExpression
   }
 
   object ICScore
-  extends CodedEnum("mtb/ihc/protein-expression/ic-score")
+  extends CodedEnum("dnpm-dip/mtb/ihc/protein-expression/ic-score")
   with DefaultCodeSystem
   {
     val Zero     = Value("0")
@@ -90,7 +90,7 @@ object ProteinExpression
   }
 
   object TCScore
-  extends CodedEnum("mtb/ihc/protein-expression/tc-score")
+  extends CodedEnum("dnpm-dip/mtb/ihc/protein-expression/tc-score")
   with DefaultCodeSystem
   {
     val Zero     = Value("0")

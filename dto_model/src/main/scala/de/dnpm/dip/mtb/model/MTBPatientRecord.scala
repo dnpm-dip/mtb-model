@@ -23,6 +23,8 @@ final case class MTBPatientRecord
   ngsReports: Option[List[NGSReport]],
   carePlans: Option[List[MTBCarePlan]],
   //TODO: Claims and ClaimResponses
+  claims: Option[List[Claim]],
+  claimResponses: Option[List[ClaimResponse]],
   medicationTherapies: Option[List[MTBTherapyDocumentation]],
   responses: Option[List[Response]]
 ){
@@ -50,6 +52,12 @@ final case class MTBPatientRecord
 
   def getCarePlans =
     carePlans.getOrElse(List.empty)
+
+  def getClaims =
+    claims.getOrElse(List.empty)
+
+  def getClaimResponses =
+    claimResponses.getOrElse(List.empty)
 
   def getMedicationTherapies =
     medicationTherapies.getOrElse(List.empty)

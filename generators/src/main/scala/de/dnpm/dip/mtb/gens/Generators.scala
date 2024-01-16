@@ -773,6 +773,46 @@ trait Generators
     )
 
 
+  def genClaim(
+    patient: Reference[Patient],
+    recommendation: MTBMedicationRecommendation,
+  ): Gen[Claim] =
+    for { 
+      id <- Gen.of[Id[Claim]]
+      status <- Gen.of[Coding[Claim.Status.Value]]
+    } yield Claim(
+      id,
+      patient,
+      Reference(recommendation),
+      LocalDate.now,
+      status
+    )
+
+  def genClaimResponse(
+    patient: Reference[Patient],
+    claim: Reference[Claim]
+  ): Gen[ClaimResponse] =
+    for { 
+      id     <- Gen.of[Id[Claim]]
+      status <- Gen.of[Coding[ClaimResponse.Status.Value]]
+      statusReason <-
+        status match {
+          case ClaimResponse.Status(ClaimResponse.Status.Rejected) =>
+            Gen.of[Coding[ClaimResponse.StatusReason.Value]].map(Some(_))
+          case _ =>
+            Gen.const(None)
+        }
+
+    } yield ClaimResponse(
+      id,
+      patient,
+      claim,
+      LocalDate.now,
+      status,
+      statusReason
+    )
+
+
   def genTherapy(
     patient: Reference[Patient],
     diagnosis: Reference[MTBDiagnosis],
@@ -912,6 +952,19 @@ trait Generators
             )
         )
 
+      claims <-
+        Gen.oneOfEach(
+          carePlan.medicationRecommendations
+            .map(genClaim(Reference(patient),_))
+        )
+
+      claimResponses <-
+        Gen.oneOfEach(
+          claims
+            .map(Reference(_))
+            .map(genClaimResponse(Reference(patient),_))
+        )
+
       therapies <-
         Gen.oneOfEach(
           carePlan
@@ -925,6 +978,7 @@ trait Generators
               )
             )
         )
+
       responses <-
         Gen.oneOfEach(
           therapies
@@ -950,6 +1004,8 @@ trait Generators
       Some(List(ihcReport)),
       Some(List(ngsReport)),
       Some(List(carePlan)),
+      Some(claims),
+      Some(claimResponses),
       Some(therapies.map(List(_)).map(MTBTherapyDocumentation(_))),
       Some(responses)
     )

@@ -2,12 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
-import de.dnpm.dip.coding.{
-  Coding,
-  CodeSystem,
-  CodedEnum,
-  DefaultCodeSystem
-}
+import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.coding.icd.ICDO3
 import de.dnpm.dip.model.{
   Id,

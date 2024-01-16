@@ -1,2 +1,4 @@
 de.dnpm.dip.mtb.model.CNV$Type$ProviderSPI
 de.dnpm.dip.mtb.model.RECIST$ProviderSPI
+de.dnpm.dip.mtb.model.TMB$Interpretation$ProviderSPI
+de.dnpm.dip.mtb.model.HRDScore$Interpretation$ProviderSPI
