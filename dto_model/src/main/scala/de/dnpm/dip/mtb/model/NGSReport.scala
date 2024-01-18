@@ -86,35 +86,6 @@ object TMB
     Json.format[TMB]
 }
 
-/*
-final case class MSI
-(
-  id: Id[MSI],
-  patient: Reference[Patient],
-  specimen: Reference[TumorSpecimen],
-  value: MSI.Result
-)
-extends Observation[MSI.Result]
-
-object MSI
-{
-
-  final case class Result(value: Double) extends AnyVal
-
-  implicit val resultOrder: Ordering[Result] =
-    Ordering[Double].on(_.value) 
-
-  val referenceRange =
-    LeftClosedInterval(Result(0.0))
-
-  implicit val formatResult: Format[Result] =
-    Json.valueFormat[Result]
-
-  implicit val format: OFormat[MSI] =
-    Json.format[MSI]
-}
-*/
-
 
 final case class BRCAness
 (

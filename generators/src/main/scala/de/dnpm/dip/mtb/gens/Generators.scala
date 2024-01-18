@@ -97,14 +97,11 @@ trait Generators
       "AKT1",
       "BRCA1",
       "BRAF",
-      "CARD11",
-      "FGF",
       "FGFR2",
       "FGFR3",
       "HRAS",
       "KRAS",
       "MDM2",
-      "PTPN11",
       "TP53",
     )
 
@@ -449,6 +446,7 @@ trait Generators
   private val bases = 
     Seq("A","C","G","T")
 
+/*
   private val aminoAcids = 
     Seq(
       "Ala", "Asx", "Cys", "Asp",
@@ -458,6 +456,27 @@ trait Generators
       "Ser", "Thr", "Sec", "Val",
       "Trp", "Tyr", "Glx"
      )
+*/
+
+  // Source: https://hgvs-nomenclature.org
+  private val proteinChanges =
+    Seq(
+      "p.Gly12Cys",
+      "p.Trp24Cys",
+      "p.(Gly56Ala^Ser^Cys)",
+      "p.Trp24=/Cys",
+      "p.Cys28delinsTrpVal",
+      "p.Cys28_Lys29delinsTrp",
+      "p.(Pro578_Lys579delinsLeuTer)",
+      "p.(Glu125_Ala132delinsGlyLeuHisArgPheIleValLeu)",
+      "p.His4_Gln5insAla",
+      "p.Lys2_Gly3insGlnSerLys",
+      "p.Arg78_Gly79insX[23]",
+      "p.Val7del",
+      "p.Lys23_Val25del",
+      "p.(His321Leufs*3)",
+      "p.Gly2_Met46del",
+    )
 
 
   def genSNV(patient: Reference[Patient]): Gen[SNV] =
@@ -492,11 +511,7 @@ trait Generators
 
       dnaChg = Coding[HGVS](s"c.$position$ref>$alt")
 
-      refAA <- Gen.oneOf(aminoAcids)
-
-      altAA <- Gen.oneOf(aminoAcids filter (_ != refAA))
-
-      proteinChg = Coding[HGVS](s"p.$refAA${position/3}$altAA")
+      proteinChg <- Gen.oneOf(proteinChanges).map(Coding[HGVS](_))
 
       readDepth <- Gen.intsBetween(5,25).map(SNV.ReadDepth(_))
 

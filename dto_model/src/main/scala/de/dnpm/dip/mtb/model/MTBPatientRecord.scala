@@ -22,7 +22,6 @@ final case class MTBPatientRecord
   ihcReports: Option[List[IHCReport]],
   ngsReports: Option[List[NGSReport]],
   carePlans: Option[List[MTBCarePlan]],
-  //TODO: Claims and ClaimResponses
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
   medicationTherapies: Option[List[MTBTherapyDocumentation]],
