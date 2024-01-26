@@ -4,7 +4,10 @@ package de.dnpm.dip.mtb.gens
 
 import java.net.URI
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit.YEARS
+import java.time.temporal.ChronoUnit.{
+  MONTHS,
+  YEARS
+}
 import scala.util.matching.Regex
 import cats.data.NonEmptyList
 import de.ekut.tbi.generators.Gen
@@ -17,7 +20,6 @@ import de.dnpm.dip.coding.hgnc.{
   HGNC,
   Ensembl
 }
-//import de.dnpm.dip.coding.hgnc.HGNC.extensions._
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
@@ -44,24 +46,29 @@ import de.dnpm.dip.model.{
   TherapyRecommendation
 }
 import de.dnpm.dip.mtb.model._
+import MTBMedicationTherapy.StatusReason.{
+  PaymentRefused,
+  Progression
+}
 
 
 
 trait Generators
 {
 
-  import MTBMedicationTherapy.statusReasonCodeSystem
+  private implicit val therapyStatusReason: CodeSystem[Therapy.StatusReason] =
+    MTBMedicationTherapy.StatusReason.codeSystem
 
 
-  private val icd10OncoCode =
-    """C\d{2}.\d""".r
+  private val oncoCode =
+    """C(2|5|6|7)\d.\d""".r
 
   private implicit lazy val icd10gm: CodeSystem[ICD10GM] =
     ICD10GM.Catalogs
       .getInstance[cats.Id]
       .get
       .latest
-      .filter(c => icd10OncoCode matches c.code.value)
+      .filter(c => oncoCode matches c.code.value)
 
 
   private lazy val icdo3Topography: CodeSystem[ICDO3.Topography] =
@@ -82,13 +89,16 @@ trait Generators
   private implicit val whoGradingSystem: CodeSystem[WHOGrading] =
     WHOGrading.codeSystem5th
 
+  private val atcRegex =
+    """L01(EG|XA|XX)""".r.unanchored
 
   private implicit lazy val atc: CodeSystem[ATC] =
     ATC.Catalogs
       .getInstance[cats.Id]
       .get
       .latest
-      .filter(_.code.value startsWith "L01XX")
+      .filter(c => atcRegex matches c.code.value)
+//      .filter(_.code.value startsWith "L01XX")
       .filter(ATC.filterByKind(Substance))
 
   private val symbols =
@@ -133,13 +143,21 @@ trait Generators
       .map(_.toCoding)
 
 
+  private val genGender: Gen[Coding[Gender.Value]] =
+    Gen.distribution(
+      48.0 -> Gender.Male,
+      48.0 -> Gender.Female,
+      2.0  -> Gender.Other,
+    )
+    .map(Coding(_))
+
+
   implicit val genPatient: Gen[Patient] =
     for {
       id <-
         Gen.of[Id[Patient]]
 
-      gender <-
-        Gen.of[Coding[Gender.Value]]
+      gender <- genGender
 
       birthDate <-
         localDatesBetween(
@@ -174,14 +192,28 @@ trait Generators
       )
 
 
-
   def genDiagnosis(
-    patient: Reference[Patient]
+    patient: Patient
   ): Gen[MTBDiagnosis] =
     for {
       id <- Gen.of[Id[MTBDiagnosis]]
 
       icd10 <- Gen.of[Coding[ICD10GM]]
+
+      date <-
+        patient.dateOfDeath match {
+          case Some(dod) =>
+            for {
+              os <- Gen.longsBetween(24,48)
+            } yield dod.minusMonths(os)
+
+          case _ => 
+            val age =
+              patient.ageIn(MONTHS).value.toLong
+            for {
+              onsetAge <- Gen.longsBetween(age - 48L, age - 24L)
+            } yield patient.birthDate.plusMonths(onsetAge)
+        }
 
       icdo3 =
         icdo3Topography
@@ -200,8 +232,8 @@ trait Generators
 
     } yield MTBDiagnosis(
       id,
-      patient,
-      Some(LocalDate.now),
+      Reference(patient),
+      Some(date),
       icd10,
       icdo3,
       Some(who),
@@ -252,15 +284,28 @@ trait Generators
     diagnosis: Reference[MTBDiagnosis],
   ): Gen[MTBMedicationTherapy] =
     for {
-      id <- Gen.of[Id[MTBMedicationTherapy]]
+      id <-
+        Gen.of[Id[MTBMedicationTherapy]]
 
-      therapyLine <- Gen.intsBetween(1,9)
+      therapyLine <-
+        Gen.intsBetween(1,9)
 
-      status <- Gen.of[Coding[Therapy.Status.Value]]
+//      status <- Gen.of[Coding[Therapy.Status.Value]]
+//      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
 
-      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
+      status =
+        Coding(Stopped)
 
-      period = Period(LocalDate.now.minusMonths(6))
+      statusReason =
+        Coding[Therapy.StatusReason](Progression)
+
+      period <- 
+        for {
+          monthsAgo <- Gen.longsBetween(12,24)
+          duration  <- Gen.longsBetween(8,36)
+          start     =  LocalDate.now.minusMonths(monthsAgo)
+          end       =  start.plusWeeks(duration)
+        } yield Period(start,end)
 
       medication <-
         Gen.of[Coding[ATC]]
@@ -828,6 +873,72 @@ trait Generators
     )
 
 
+  private implicit val genTherapyStatus: Gen[Coding[Therapy.Status.Value]] =
+    Gen.distribution(
+      0.1 -> NotDone,
+      0.3 -> Ongoing,
+      0.4 -> Stopped,
+      0.2 -> Completed
+    )
+    .map(Coding(_))
+
+
+  def genTherapy(
+    patient: Patient,
+    diagnosis: Reference[MTBDiagnosis],
+    recommendation: Reference[MTBMedicationRecommendation]
+  ): Gen[MTBMedicationTherapy] =
+    for {
+
+      id <- Gen.of[Id[MTBMedicationTherapy]]
+
+      status <- Gen.of[Coding[Therapy.Status.Value]]
+
+      statusReason = 
+        status match {
+          case Therapy.Status(NotDone)   => Some(Coding[Therapy.StatusReason](PaymentRefused))
+          case Therapy.Status(Stopped)   => Some(Coding[Therapy.StatusReason](Progression))
+          case _                         => None
+        }
+
+      period <-
+        status match {
+          case Therapy.Status(NotDone) => Gen.const(None)
+          case _ =>
+            val refDate = patient.dateOfDeath.getOrElse(LocalDate.now)
+            for {
+              duration  <- Gen.longsBetween(8,36)
+              start     =  refDate.minusWeeks(duration)
+              end       =  refDate
+            } yield Some(Period(start,end))
+        }
+
+      medication <-
+        status match {
+          case Therapy.Status(NotDone) => Gen.const(None)
+          case _ =>
+            Gen.of[Coding[ATC]]
+              .map(Set(_))
+              .map(Some(_))
+        }
+
+      note = "Notes on the therapy..."
+
+    } yield MTBMedicationTherapy(
+      id,
+      Reference(patient),
+      diagnosis,
+      None,
+      Some(recommendation),
+      LocalDate.now,
+      status,
+      statusReason,
+      period,
+      medication,
+      Some(note)
+    )
+
+/*
   def genTherapy(
     patient: Reference[Patient],
     diagnosis: Reference[MTBDiagnosis],
@@ -839,21 +950,22 @@ trait Generators
 
       status <- Gen.of[Coding[Therapy.Status.Value]]
 
-      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
+      statusReason = 
+        status match {
+          case Therapy.Status(NotDone)   => Some(Coding[Therapy.StatusReason](PaymentRefused))
+          case Therapy.Status(Stopped)   => Some(Coding[Therapy.StatusReason](Progression))
+          case _                         => None
+        }
 
       period <-
         status match {
           case Therapy.Status(NotDone) => Gen.const(None)
           case _ =>
-            Gen.intsBetween(8,25)
-              .map(w =>
-                Some(
-                  Period(
-                    LocalDate.now.minusWeeks(w),
-                    LocalDate.now
-                  )
-                )
-              )
+            for {
+              duration  <- Gen.longsBetween(8,36)
+              start     =  LocalDate.now.minusWeeks(duration)
+              end       =  LocalDate.now
+            } yield Some(Period(start,end))
         }
 
       medication <-
@@ -875,11 +987,24 @@ trait Generators
       Some(recommendation),
       LocalDate.now,
       status,
-      Some(statusReason),
+      statusReason,
       period,
       medication,
       Some(note)
     )
+*/
+
+  import RECIST._
+
+  private implicit val genRECIST: Gen[Coding[RECIST.Value]] =
+    Gen.distribution(
+      0.3  -> PD,
+      0.3  -> SD,
+      0.15 -> PR,
+      0.15 -> MR,
+      0.1  -> CR
+    )
+    .map(Coding(_))
 
 
   def genResponse(
@@ -888,7 +1013,6 @@ trait Generators
   ): Gen[Response] =
     for {
       id <- Gen.of[Id[Response]]
-
       value <- Gen.of[Coding[RECIST.Value]]
     } yield Response(
       id,
@@ -906,7 +1030,7 @@ trait Generators
       patient <- Gen.of[Patient]
 
       diagnosis <-
-        genDiagnosis(Reference(patient))    
+        genDiagnosis(patient)    
 
       episode <-
          genMTBEpisode(
@@ -987,7 +1111,7 @@ trait Generators
             .map(Reference(_))
             .map(
               genTherapy(
-                Reference(patient),
+                patient,
                 Reference(diagnosis),
                 _
               )
