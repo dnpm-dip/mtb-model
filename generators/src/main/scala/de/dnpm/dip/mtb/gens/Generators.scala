@@ -938,61 +938,6 @@ trait Generators
       Some(note)
     )
 
-/*
-  def genTherapy(
-    patient: Reference[Patient],
-    diagnosis: Reference[MTBDiagnosis],
-    recommendation: Reference[MTBMedicationRecommendation]
-  ): Gen[MTBMedicationTherapy] =
-    for {
-
-      id <- Gen.of[Id[MTBMedicationTherapy]]
-
-      status <- Gen.of[Coding[Therapy.Status.Value]]
-
-      statusReason = 
-        status match {
-          case Therapy.Status(NotDone)   => Some(Coding[Therapy.StatusReason](PaymentRefused))
-          case Therapy.Status(Stopped)   => Some(Coding[Therapy.StatusReason](Progression))
-          case _                         => None
-        }
-
-      period <-
-        status match {
-          case Therapy.Status(NotDone) => Gen.const(None)
-          case _ =>
-            for {
-              duration  <- Gen.longsBetween(8,36)
-              start     =  LocalDate.now.minusWeeks(duration)
-              end       =  LocalDate.now
-            } yield Some(Period(start,end))
-        }
-
-      medication <-
-        status match {
-          case Therapy.Status(NotDone) => Gen.const(None)
-          case _ =>
-            Gen.of[Coding[ATC]]
-              .map(Set(_))
-              .map(Some(_))
-        }
-
-      note = "Notes on the therapy..."
-
-    } yield MTBMedicationTherapy(
-      id,
-      patient,
-      diagnosis,
-      None,
-      Some(recommendation),
-      LocalDate.now,
-      status,
-      statusReason,
-      period,
-      medication,
-      Some(note)
-    )
-*/
 
   import RECIST._
 
@@ -1009,19 +954,23 @@ trait Generators
 
   def genResponse(
     patient: Reference[Patient],
-    therapy: Reference[MTBMedicationTherapy]
+    therapy: MTBMedicationTherapy
   ): Gen[Response] =
     for {
-      id <- Gen.of[Id[Response]]
-      value <- Gen.of[Coding[RECIST.Value]]
+      id     <- Gen.of[Id[Response]]
+      value  <- Gen.of[Coding[RECIST.Value]]
+      followUpTime <- Gen.longsBetween(8,16) 
+      date =
+        therapy.period
+          .map(_.start.plusWeeks(followUpTime))
+          .getOrElse(LocalDate.now) 
     } yield Response(
       id,
       patient,
-      therapy,
-      LocalDate.now,
+      Reference(therapy),
+      date,
       value
     )
-
 
 
   implicit val genPatientRecord: Gen[MTBPatientRecord] =
@@ -1121,7 +1070,6 @@ trait Generators
       responses <-
         Gen.oneOfEach(
           therapies
-            .map(Reference(_))
             .map(
               genResponse(
                 Reference(patient),
