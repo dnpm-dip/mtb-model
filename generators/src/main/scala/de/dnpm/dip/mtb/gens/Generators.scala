@@ -886,7 +886,7 @@ trait Generators
   def genTherapy(
     patient: Patient,
     diagnosis: Reference[MTBDiagnosis],
-    recommendation: Reference[MTBMedicationRecommendation]
+    recommendation: MTBMedicationRecommendation
   ): Gen[MTBMedicationTherapy] =
     for {
 
@@ -913,13 +913,10 @@ trait Generators
             } yield Some(Period(start,end))
         }
 
-      medication <-
+      medication =
         status match {
-          case Therapy.Status(NotDone) => Gen.const(None)
-          case _ =>
-            Gen.of[Coding[ATC]]
-              .map(Set(_))
-              .map(Some(_))
+          case Therapy.Status(NotDone) => None
+          case _                       => Some(recommendation.medication)
         }
 
       note = "Notes on the therapy..."
@@ -929,7 +926,7 @@ trait Generators
       Reference(patient),
       diagnosis,
       None,
-      Some(recommendation),
+      Some(Reference(recommendation)),
       LocalDate.now,
       status,
       statusReason,
@@ -1057,7 +1054,6 @@ trait Generators
         Gen.oneOfEach(
           carePlan
             .medicationRecommendations
-            .map(Reference(_))
             .map(
               genTherapy(
                 patient,
