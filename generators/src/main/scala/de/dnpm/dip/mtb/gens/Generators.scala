@@ -29,7 +29,7 @@ import de.dnpm.dip.coding.icd.{
   ClassKinds
 }
 import ClassKinds.Category
-import de.dnpm.dip.coding.icd.ICDO3.extensions._
+import de.dnpm.dip.coding.icd.ICD.extensions._
 import de.dnpm.dip.model.{
   Id,
   ClosedInterval,
