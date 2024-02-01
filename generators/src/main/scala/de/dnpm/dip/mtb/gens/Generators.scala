@@ -90,7 +90,7 @@ trait Generators
     WHOGrading.codeSystem5th
 
   private val atcRegex =
-    """L01(EG|XA|XX)""".r.unanchored
+    """L01(EG|XA|XX|EN|EX|FX)""".r.unanchored
 
   private implicit lazy val atc: CodeSystem[ATC] =
     ATC.Catalogs
@@ -98,7 +98,6 @@ trait Generators
       .get
       .latest
       .filter(c => atcRegex matches c.code.value)
-//      .filter(_.code.value startsWith "L01XX")
       .filter(ATC.filterByKind(Substance))
 
   private val symbols =
