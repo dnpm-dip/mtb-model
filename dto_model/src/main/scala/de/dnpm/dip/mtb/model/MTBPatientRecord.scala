@@ -13,7 +13,8 @@ final case class MTBPatientRecord
 (
   patient: Patient,
   episodes: NonEmptyList[MTBEpisode],
-  diagnoses: NonEmptyList[MTBDiagnosis],
+  diagnoses: Option[List[MTBDiagnosis]],
+//  diagnoses: NonEmptyList[MTBDiagnosis],
   guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
@@ -24,7 +25,7 @@ final case class MTBPatientRecord
   carePlans: Option[List[MTBCarePlan]],
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
-  medicationTherapies: Option[List[MTBTherapyDocumentation]],
+  medicationTherapies: Option[List[History[MTBMedicationTherapy]]],
   responses: Option[List[Response]]
 ){
 

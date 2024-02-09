@@ -6,7 +6,7 @@
 
 name := "mtb-model"
 ThisBuild / organization := "de.dnpm.dip"
-ThisBuild / scalaVersion := "2.13.10"
+ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / version      := "1.0-SNAPSHOT"
 
 
@@ -22,7 +22,9 @@ lazy val global = project
   )
   .aggregate(
      dto_model,
-     generators
+     generators,
+     dto_model_v1,
+//     mappings_v1
   )
 
 
@@ -57,6 +59,35 @@ lazy val generators = project
   )
 
 
+lazy val dto_model_v1 = project
+  .settings(
+    name := "mtb-dto-model-v1.0",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest,
+      dependencies.bwhc_mtb_dtos,
+      dependencies.bwhc_dto_gens,
+      dependencies.hgnc_geneset
+    )
+  )
+  .dependsOn(
+    dto_model
+  )
+
+
+lazy val mappings_v1 = project
+  .settings(
+    name := "mtb-dto-model-mappings",
+    settings,
+    libraryDependencies ++= Seq(
+      dependencies.scalatest,
+    )
+  )
+  .dependsOn(
+    dto_model_v1
+  )
+
+
 
 //-----------------------------------------------------------------------------
 // DEPENDENCIES
@@ -64,15 +95,17 @@ lazy val generators = project
 
 lazy val dependencies =
   new {
-    val scalatest    = "org.scalatest"  %% "scalatest"              % "3.1.1"        % Test
-    val generators   = "de.ekut.tbi"    %% "generators"             % "1.0-SNAPSHOT"
-    val core         = "de.dnpm.dip"    %% "core"                   % "1.0-SNAPSHOT"
-    val icd10gm      = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
-    val icdo3        = "de.dnpm.dip"    %% "icdo3-impl"             % "1.0-SNAPSHOT" % Test
-    val icd_catalogs = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
-    val atc_impl     = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
-    val atc_catalogs = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
-    val hgnc_geneset = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.0-SNAPSHOT" % Test
+    val scalatest     = "org.scalatest"  %% "scalatest"              % "3.1.1"        % Test
+    val generators    = "de.ekut.tbi"    %% "generators"             % "1.0-SNAPSHOT"
+    val core          = "de.dnpm.dip"    %% "core"                   % "1.0-SNAPSHOT"
+    val icd10gm       = "de.dnpm.dip"    %% "icd10gm-impl"           % "1.0-SNAPSHOT" % Test
+    val icdo3         = "de.dnpm.dip"    %% "icdo3-impl"             % "1.0-SNAPSHOT" % Test
+    val icd_catalogs  = "de.dnpm.dip"    %% "icd-claml-packaged"     % "1.0-SNAPSHOT" % Test
+    val atc_impl      = "de.dnpm.dip"    %% "atc-impl"               % "1.0-SNAPSHOT" % Test
+    val atc_catalogs  = "de.dnpm.dip"    %% "atc-catalogs-packaged"  % "1.0-SNAPSHOT" % Test
+    val hgnc_geneset  = "de.dnpm.dip"    %% "hgnc-gene-set-impl"     % "1.0-SNAPSHOT" % Test
+    val bwhc_mtb_dtos = "de.bwhc"        %% "mtb-dtos"               % "1.0"          % Test
+    val bwhc_dto_gens = "de.bwhc"        %% "mtb-dto-generators"     % "1.0"          % Test
   }
 
 

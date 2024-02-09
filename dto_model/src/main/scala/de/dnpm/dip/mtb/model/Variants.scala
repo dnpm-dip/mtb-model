@@ -24,9 +24,13 @@ import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import play.api.libs.json.{
   Json,
+  JsString,
+  JsSuccess,
+  JsError,
   Format,
   OFormat,
-  Reads
+  Reads,
+  Writes
 }
 
 
@@ -67,7 +71,7 @@ object Variant
       case DNAFusion(_,_,partner5pr,partner3pr,_) =>
         s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
-      case RNAFusion(_,_,partner5pr,partner3pr,_) =>
+      case RNAFusion(_,_,partner5pr,partner3pr,_,_,_) =>
         s"RNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
       case rnaSeq: RNASeq =>
@@ -113,8 +117,8 @@ object Variant
         (v1, v2) =>
           import scala.language.reflectiveCalls
 
-          v1.fusionPartner5pr.gene == v2.fusionPartner5pr.gene &&
-          v1.fusionPartner3pr.gene == v2.fusionPartner3pr.gene
+          v1.fusionPartner5prime.gene == v2.fusionPartner5prime.gene &&
+          v1.fusionPartner3prime.gene == v2.fusionPartner3prime.gene
       }
 
     implicit val rnaSeqEq: Eq[RNASeq] =
@@ -132,6 +136,7 @@ object Variant
   }
 
 }
+
 
 object Chromosome
 extends CodedEnum("chromosome")
@@ -156,15 +161,16 @@ with DefaultCodeSystem
       chr17,
       chr18,
       chr19,
+      chr20,
       chr21,
       chr22,
       chrX,
       chrY = Value
 
-
   override val display = {
     case chr => chr.toString
   }
+
 
   implicit val format: Format[Chromosome.Value] =
     Json.formatEnum(this)
@@ -174,21 +180,21 @@ with DefaultCodeSystem
 sealed trait dbSNP
 object dbSNP
 {
-  implicit val codingSystem =
+  implicit val codingSystem: Coding.System[dbSNP] =
     Coding.System[dbSNP]("https://www.ncbi.nlm.nih.gov/snp/")
 }
 
 sealed trait COSMIC
 object COSMIC
 {
-  implicit val codingSystem =
+  implicit val codingSystem: Coding.System[COSMIC] =
     Coding.System[COSMIC]("https://cancer.sanger.ac.uk/cosmic")
 }
 
 sealed trait ClinVar
 object ClinVar
 {
-  implicit val codingSystem =
+  implicit val codingSystem: Coding.System[ClinVar] =
     Coding.System[ClinVar]("https://www.ncbi.nlm.nih.gov/clinvar/")
 
   implicit val codeSystem: CodeSystem[ClinVar] =
@@ -214,7 +220,7 @@ final case class SNV
   externalIds: Set[ExternalId[SNV]],    // dbSNPId or COSMIC ID to be listed here
   chromosome: Coding[Chromosome.Value],
   gene: Option[Coding[HGNC]],
-  transcriptId: ExternalId[Transcript],
+  transcriptId: Option[ExternalId[Transcript]],
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
@@ -290,13 +296,10 @@ object CNV
 
 
 
-sealed abstract class Fusion[
-  Partner <: { def gene: Coding[HGNC] }
-]
-extends Variant
+sealed abstract class Fusion[Partner <: { def gene: Coding[HGNC] }] extends Variant
 {
-  val fusionPartner5pr: Partner
-  val fusionPartner3pr: Partner
+  val fusionPartner5prime: Partner
+  val fusionPartner3prime: Partner
   val reportedNumReads: Int
 }
 
@@ -304,8 +307,8 @@ final case class DNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  fusionPartner5pr: DNAFusion.Partner,
-  fusionPartner3pr: DNAFusion.Partner,
+  fusionPartner5prime: DNAFusion.Partner,
+  fusionPartner3prime: DNAFusion.Partner,
   reportedNumReads: Int
 )
 extends Fusion[DNAFusion.Partner]
@@ -316,8 +319,8 @@ object DNAFusion
   final case class Partner
   (
     chromosome: Chromosome.Value,
-    position: Long,
-    gene: Coding[HGNC]
+    gene: Coding[HGNC],
+    position: Long
   )
 
   implicit val formatPartner: OFormat[Partner] =
@@ -332,8 +335,10 @@ final case class RNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  fusionPartner5pr: RNAFusion.Partner,
-  fusionPartner3pr: RNAFusion.Partner,
+  fusionPartner5prime: RNAFusion.Partner,
+  fusionPartner3prime: RNAFusion.Partner,
+  effect: Option[String],
+  externalIds: Set[ExternalId[RNAFusion]],  // COSMIC ID
   reportedNumReads: Int
 )
 extends Fusion[RNAFusion.Partner]
@@ -346,15 +351,15 @@ object RNAFusion
     val Plus  = Value("+")
     val Minus = Value("-")
 
-    implicit val format =
+    implicit val format: Format[Value] =
       Json.formatEnum(this)
   }
 
   final case class Partner
   (
     ids: Set[ExternalId[_]],  // Transcript ID and Exon Id listed here
-    position: Long,
     gene: Coding[HGNC],
+    position: Long,
     strand: Strand.Value
   )
 
@@ -365,6 +370,13 @@ object RNAFusion
     Json.format[RNAFusion]
 }
 
+
+sealed trait Entrez
+object Entrez
+{
+  implicit val codingSystem: Coding.System[Entrez] =
+    Coding.System[Entrez]("Entrez")
+}
 
 final case class RNASeq
 (

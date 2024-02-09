@@ -94,7 +94,10 @@ final case class StudyEnrollmentRecommendation
 (
   id: Id[StudyEnrollmentRecommendation],
   patient: Reference[Patient],
+  reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
+  levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
+  supportingEvidence: List[Reference[Variant]],
   studyIds: NonEmptyList[ExternalId[Study]]
 )
 

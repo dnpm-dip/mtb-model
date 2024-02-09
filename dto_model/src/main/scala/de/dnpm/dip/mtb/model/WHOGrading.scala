@@ -31,7 +31,7 @@ object WHOGrading
   val Four  = "4"
 
 
-  implicit val codingSystem =
+  implicit val codingSystem: Coding.System[WHOGrading] =
     Coding.System[WHOGrading]("mtb/who-grading-cns-tumors")
 
 

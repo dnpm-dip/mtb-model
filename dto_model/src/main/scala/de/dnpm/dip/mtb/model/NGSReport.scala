@@ -196,6 +196,8 @@ final case class NGSReport
   id: Id[NGSReport],
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
+  issuedOn: LocalDate,
+  sequencingType: String,
   metadata: List[NGSReport.Metadata],
   results: NGSReport.Results
 )

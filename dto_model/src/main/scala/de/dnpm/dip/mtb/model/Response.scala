@@ -6,6 +6,7 @@ import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
   Patient,
+  Observation,
   Reference
 }
 import de.dnpm.dip.coding.{
@@ -63,6 +64,7 @@ final case class Response
   effectiveDate: LocalDate,
   value: Coding[RECIST.Value]
 )
+extends Observation[Coding[RECIST.Value]]
 
 object Response
 {

@@ -50,7 +50,6 @@ object MSI
   extends CodedEnum("dnpm-dip/mtb/msi/method")
   with DefaultCodeSystem
   {
-
     val IHC           = Value("IHC")
     val PCR           = Value("PCR")
     val Bioinformatic = Value("bioinformatic")
@@ -59,7 +58,6 @@ object MSI
       case Bioinformatic => "Sequenzierung"
       case x             => x.toString
     }
-
   }
 
   object Interpretation
@@ -72,6 +70,7 @@ object MSI
     val MSIHigh       = Value("msi-high")   
     val MMRProficient = Value("mmr-proficient") 
     val MMRDeficient  = Value("mmr-deficient") 
+    val Unknown       = Value("unknown") 
 
     override val display =
       Map(
@@ -79,7 +78,8 @@ object MSI
         MSILow        -> "MSI low",
         MSIHigh       -> "MSI high",
         MMRProficient -> "MMR Proficient",
-        MMRDeficient  -> "MMR Deficient"
+        MMRDeficient  -> "MMR Deficient",
+        Unknown       -> "Unbekannt" 
       )
 
   }

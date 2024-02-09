@@ -19,6 +19,7 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
+  Format,
   OFormat
 }
 
@@ -31,12 +32,12 @@ final case class MTBMedicationTherapy
   indication: Reference[MTBDiagnosis],
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
-  recordedOn: LocalDate,
+  recordedOn: Option[LocalDate],
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason]],
   period: Option[Period[LocalDate]],
   medication: Option[Set[Coding[ATC]]],
-  note: Option[String],
+  note: Option[String]
 )
 extends MedicationTherapy[ATC]
 {
@@ -46,7 +47,6 @@ extends MedicationTherapy[ATC]
 
 object MTBMedicationTherapy
 {
-
 
   object StatusReason
   {
@@ -70,7 +70,7 @@ object MTBMedicationTherapy
     val Unknown             = "unknown"
  
 
-    implicit val codeSystem =
+    implicit val codeSystem: CodeSystem[Therapy.StatusReason] =
       CodeSystem[Therapy.StatusReason](
         uri = Coding.System[Therapy.StatusReason].uri,
         name = "Therapy-StatusReason",
@@ -98,51 +98,31 @@ object MTBMedicationTherapy
   }
 
 
-/* 
-
-  import StatusReason._
-
-  implicit val statusReasonCodeSystem =
-    CodeSystem[Therapy.StatusReason](
-      uri = Coding.System[Therapy.StatusReason].uri,
-      name = "Therapy-StatusReason",
-      title = Some("Therapy-StatusReason"),
-      version = None,
-      PaymentRefused      -> "Kostenübernahme abgelehnt",
-      PaymentPending      -> "Kostenübernahme noch ausstehend",
-      PaymentEnded        -> "Ende der Kostenübernahme",
-      NoIndication        -> "Klinisch keine Indikation",
-      MedicalReason       -> "Medizinische Gründe",
-      PatientRefusal      -> "Therapie durch Patient abgelehnt",
-      PatientWish         -> "Auf Wunsch des Patienten",
-      PatientDeath        -> "Tod",
-      LostToFU            -> "Lost to follow-up",
-      Remission           -> "Anhaltende Remission",
-      Progression         -> "Progression",
-      Toxicity            -> "Toxizität",
-      OtherTherapyChosen  -> "Wahl einer anderen Therapie durch Behandler",
-      ContinuedExternally -> "Weiterbehandlung extern",
-      StateDeterioration  -> "Zustandsverschlechterung",
-      Other               -> "Weitere Gründe",
-      Unknown             -> "Unbekannt"
-    )
-*/
-
   implicit val format: OFormat[MTBMedicationTherapy] =
     Json.format[MTBMedicationTherapy]
 
 }
 
 
-final case class MTBTherapyDocumentation
+final case class History[T <: History.HasRecordingDate]
 (
-  history: List[MTBMedicationTherapy]
+  history: List[T]
 )
+{
+  import scala.language.reflectiveCalls
 
-object MTBTherapyDocumentation
+  def latest: Option[T] =
+    history
+      .filter(_.recordedOn.isDefined)
+      .maxByOption(_.recordedOn.get)
+}
+
+object History
 {
 
-  implicit val format: OFormat[MTBTherapyDocumentation] =
-    Json.format[MTBTherapyDocumentation]
+  type HasRecordingDate = { def recordedOn: Option[LocalDate] }
 
+  implicit def format[T <: History.HasRecordingDate: Format]: OFormat[History[T]] =
+    Json.format[History[T]]
 }
+

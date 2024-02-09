@@ -289,9 +289,6 @@ trait Generators
       therapyLine <-
         Gen.intsBetween(1,9)
 
-//      status <- Gen.of[Coding[Therapy.Status.Value]]
-//      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
-
       status =
         Coding(Stopped)
 
@@ -318,7 +315,7 @@ trait Generators
       diagnosis,
       Some(therapyLine),
       None,
-      LocalDate.now,
+      Some(LocalDate.now),
       status,
       Some(statusReason),
       Some(period),
@@ -354,7 +351,7 @@ trait Generators
       Some(statusReason),
       Some(therapyLine),
       None,
-      LocalDate.now,
+      Some(LocalDate.now),
       Some(period),
       Some(note)
     )
@@ -362,6 +359,7 @@ trait Generators
 
   def genTumorSpecimen(
     patient: Reference[Patient],
+    diag: MTBDiagnosis
   ): Gen[TumorSpecimen] =
     for {
       id <- Gen.of[Id[TumorSpecimen]]
@@ -375,6 +373,7 @@ trait Generators
     } yield TumorSpecimen(
       id,
       patient,
+      Reference(diag),
       typ,
       Some(
         TumorSpecimen.Collection(
@@ -544,7 +543,8 @@ trait Generators
 
       transcriptId <-
         Gen.uuidStrings
-          .map(ExternalId[Transcript](_,Some(Coding.System[Ensembl].uri)))
+          .map(ExternalId[Transcript,Ensembl](_))
+//          .map(ExternalId[Transcript](_,Some(Coding.System[Ensembl].uri)))
 
       position <-
         Gen.longsBetween(24,600)
@@ -569,7 +569,7 @@ trait Generators
       Set(dbSnpId,cosmicId),
       chr,
       Some(gene),
-      transcriptId,
+      Some(transcriptId),
       Variant.PositionRange(position,None),
       SNV.Allele(alt),
       SNV.Allele(ref),
@@ -637,6 +637,9 @@ trait Generators
   ): Gen[NGSReport] =
     for {
       id <- Gen.of[Id[NGSReport]]
+
+      seqType <-
+        Gen.oneOf("tNGS","WES","WGS","Panel")
 
       metadata <-
         for {
@@ -713,6 +716,8 @@ trait Generators
       id,
       patient,
       specimen,
+      LocalDate.now,
+      seqType,
       List(metadata),
       NGSReport.Results(
         Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Bioinformatic))),
@@ -815,7 +820,10 @@ trait Generators
         } yield StudyEnrollmentRecommendation(
           stId,
           patient,
+          recommendations.head.indication,
           LocalDate.now,
+          recommendations.head.levelOfEvidence.map(_.grading),
+          recommendations.head.supportingEvidence,
           NonEmptyList.one(nctId)
         )
 
@@ -827,7 +835,7 @@ trait Generators
       Some(statusReason),
       Some(protocol),
       recommendations,
-      List(counselingRecommendation),
+      Some(counselingRecommendation),
       List(studyEnrollmentRecommendation)
     )
 
@@ -926,7 +934,7 @@ trait Generators
       diagnosis,
       None,
       Some(Reference(recommendation)),
-      LocalDate.now,
+      Some(LocalDate.now),
       status,
       statusReason,
       period,
@@ -1006,7 +1014,7 @@ trait Generators
         )
 
       specimen <-
-        genTumorSpecimen(Reference(patient))
+        genTumorSpecimen(Reference(patient),diagnosis)
 
       histologyReport <-
         genHistologyReport(
@@ -1077,7 +1085,7 @@ trait Generators
     } yield MTBPatientRecord(
       patient,
       NonEmptyList.one(episode),
-      NonEmptyList.one(diagnosis),
+      Some(List(diagnosis)),
       Some(guidelineTherapies),
       Some(guidelineProcedures),
       Some(List(performanceStatus)),
@@ -1088,7 +1096,7 @@ trait Generators
       Some(List(carePlan)),
       Some(claims),
       Some(claimResponses),
-      Some(therapies.map(List(_)).map(MTBTherapyDocumentation(_))),
+      Some(therapies.map(List(_)).map(History(_))),
       Some(responses)
     )
 

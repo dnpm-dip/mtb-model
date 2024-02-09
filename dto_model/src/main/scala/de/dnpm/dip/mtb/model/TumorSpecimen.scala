@@ -15,6 +15,7 @@ import de.dnpm.dip.coding.{
 }
 import play.api.libs.json.{
   Json,
+  Format,
   OFormat
 }
 
@@ -24,6 +25,7 @@ final case class TumorSpecimen
 (
   id: Id[TumorSpecimen],
   patient: Reference[Patient],
+  diagnosis: Reference[MTBDiagnosis],
   `type`: Coding[TumorSpecimen.Type.Value],
   collection: Option[TumorSpecimen.Collection]
 )
@@ -42,6 +44,8 @@ object TumorSpecimen
     val FFPE         = Value("FFPE")
     val Unknown      = Value("unknown")
 
+    implicit val format: Format[Value] =
+      Json.formatEnum(this)
   }
 
   final case class Collection
@@ -63,6 +67,9 @@ object TumorSpecimen
       val LiquidBiopsy = Value("liquid-biopsy")
       val Cytology     = Value("cytology")
       val Unknown      = Value("unknown") 
+
+      implicit val format: Format[Value] =
+        Json.formatEnum(this)
     }
 
     object Localization
@@ -72,7 +79,9 @@ object TumorSpecimen
       val PrimaryTumor = Value("primary-tumor")
       val Metastatis   = Value("metastasis")
       val Unknown      = Value("unknown")
- 
+
+      implicit val format: Format[Value] =
+        Json.formatEnum(this)
     }
 
     implicit val format: OFormat[Collection] =

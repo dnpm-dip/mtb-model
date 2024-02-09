@@ -22,6 +22,7 @@ import de.dnpm.dip.coding.icd.{
 }
 import play.api.libs.json.{
   Json,
+  Format,
   OFormat
 }
 
@@ -54,7 +55,8 @@ object MTBDiagnosis
     val Metastasized = Value("metastasized")
     val Unknown      = Value("unknown")
 
-    implicit val format = Json.formatEnum(this)
+    implicit val format: Format[Value] =
+      Json.formatEnum(this)
 
     override val display = {
       case TumorFree    => "Tumorfrei"

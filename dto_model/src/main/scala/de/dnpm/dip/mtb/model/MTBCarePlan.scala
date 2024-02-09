@@ -30,7 +30,7 @@ final case class MTBCarePlan
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
   protocol: Option[String],
   medicationRecommendations: List[MTBMedicationRecommendation],
-  geneticCounselingRecommendations: List[GeneticCounselingRecommendation],
+  geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
   studyEnrollmentRecommendations: List[StudyEnrollmentRecommendation]
   //TODO: other recommendation types
 )

@@ -34,7 +34,7 @@ final case class OncoProcedure
   statusReason: Option[Coding[Therapy.StatusReason]],
   therapyLine: Option[Int],
   basedOn: Option[Reference[TherapyRecommendation]],
-  recordedOn: LocalDate,
+  recordedOn: Option[LocalDate],
   period: Option[Period[LocalDate]],
   note: Option[String]
 )

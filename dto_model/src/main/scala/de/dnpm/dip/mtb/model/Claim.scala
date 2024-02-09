@@ -105,24 +105,25 @@ object ClaimResponse
     // Standardtherapie nicht ausgeschöpft (Neuantrag erforderlich)
     // Standardtherapie nicht ausgeschöpft (kein Neuantrag erforderlich)
 
-
-    val InsufficientEvidence    = Value("insufficient-evidence")
-    val FormalReasons           = Value("formal-reasons")
-    val OtherTherapyRecommended = Value("other-therapy-recommended")
-    val InclusionInStudy        = Value("inclusion-in-study")
-    val ApprovalRevocation      = Value("approval-revocation")
-    val Other                   = Value("other")
-    val Unknown                 = Value("unknown")
+    val InsufficientEvidence        = Value("insufficient-evidence")
+    val StandardTherapyNotExhausted = Value("standard-therapy-not-exhausted")
+    val FormalReasons               = Value("formal-reasons")
+    val OtherTherapyRecommended     = Value("other-therapy-recommended")
+    val InclusionInStudy            = Value("inclusion-in-study")
+    val ApprovalRevocation          = Value("approval-revocation")
+    val Other                       = Value("other")
+    val Unknown                     = Value("unknown")
 
     override val display =
       Map(
-        InsufficientEvidence     -> "Nicht ausreichende Evidenz",
-        FormalReasons            -> "Inhaltliche Gründe",
-        OtherTherapyRecommended  -> "Andere Therapie vorgeschlagen",
-        InclusionInStudy         -> "Studieneinschluss",
-        ApprovalRevocation       -> "Rücknahme der Zulassung",
-        Other                    -> "Weitere Gründe",
-        Unknown                  -> "Unbekant"
+        InsufficientEvidence        -> "Nicht ausreichende Evidenz",
+        StandardTherapyNotExhausted -> "Standardtherapie nicht ausgeschöpft",
+        FormalReasons               -> "Inhaltliche Gründe",
+        OtherTherapyRecommended     -> "Andere Therapie vorgeschlagen",
+        InclusionInStudy            -> "Studieneinschluss",
+        ApprovalRevocation          -> "Rücknahme der Zulassung",
+        Other                       -> "Weitere Gründe",
+        Unknown                     -> "Unbekant"
       )
   }
 
