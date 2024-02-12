@@ -420,7 +420,7 @@ package object mappings
       )
 
 
-  implicit def couselingRecommendationMapping(
+  implicit def counselingRecommendationMapping(
     implicit date: LocalDate
   ): v1.GeneticCounselingRecommendation => model.GeneticCounselingRecommendation =
     rec =>

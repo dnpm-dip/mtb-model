@@ -10,6 +10,7 @@ import java.time.temporal.ChronoUnit.{
 }
 import scala.util.matching.Regex
 import cats.data.NonEmptyList
+import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
 import de.dnpm.dip.coding.{
@@ -43,7 +44,8 @@ import de.dnpm.dip.model.{
   Organization,
   GuidelineTreatmentStatus,
   Therapy,
-  TherapyRecommendation
+  TherapyRecommendation,
+  TTAN
 }
 import de.dnpm.dip.mtb.model._
 import MTBMedicationTherapy.StatusReason.{
@@ -241,12 +243,14 @@ trait Generators
     )
 
 
-  def genMTBEpisode(
+  def genEpisode(
     patient: Reference[Patient],
     diagnoses: List[Reference[MTBDiagnosis]]
   ): Gen[MTBEpisode] =
     for {
       id <- Gen.of[Id[MTBEpisode]]
+
+      ttan  <- Gen.of[Id[TTAN]]
 
       period = Period(LocalDate.now.minusMonths(6))
      
@@ -254,6 +258,7 @@ trait Generators
      
     } yield MTBEpisode(
       id,
+      ttan,
       patient,
       period,
       status,
@@ -986,7 +991,7 @@ trait Generators
         genDiagnosis(patient)    
 
       episode <-
-         genMTBEpisode(
+         genEpisode(
            Reference(patient),
            List(Reference(diagnosis))
          )
@@ -1084,6 +1089,7 @@ trait Generators
 
     } yield MTBPatientRecord(
       patient,
+      JsObject.empty,
       NonEmptyList.one(episode),
       Some(List(diagnosis)),
       Some(guidelineTherapies),

@@ -11,7 +11,8 @@ import de.dnpm.dip.model.{
   Period,
   Reference,
   Patient,
-  Episode
+  Episode,
+  TTAN
 }
 import play.api.libs.json.{
   Json, 
@@ -22,6 +23,7 @@ import play.api.libs.json.{
 final case class MTBEpisode
 (
   id: Id[MTBEpisode],
+  ttan: Id[TTAN],
   patient: Reference[Patient],
   period: Period[LocalDate],
   status: Coding[Episode.Status.Value],

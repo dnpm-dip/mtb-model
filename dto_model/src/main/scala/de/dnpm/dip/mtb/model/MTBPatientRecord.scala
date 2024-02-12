@@ -2,9 +2,14 @@ package de.dnpm.dip.mtb.model
 
 
 import cats.data.NonEmptyList
-import de.dnpm.dip.model.Patient
+import de.dnpm.dip.model.{
+  Episode,
+  Patient,
+  PatientRecord
+}
 import play.api.libs.json.{
   Json,
+  JsObject,
   OFormat
 }
 
@@ -12,9 +17,9 @@ import play.api.libs.json.{
 final case class MTBPatientRecord
 (
   patient: Patient,
+  consent: JsObject,
   episodes: NonEmptyList[MTBEpisode],
   diagnoses: Option[List[MTBDiagnosis]],
-//  diagnoses: NonEmptyList[MTBDiagnosis],
   guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
@@ -27,7 +32,9 @@ final case class MTBPatientRecord
   claimResponses: Option[List[ClaimResponse]],
   medicationTherapies: Option[List[History[MTBMedicationTherapy]]],
   responses: Option[List[Response]]
-){
+)
+extends PatientRecord
+{
 
   def getGuidelineMedicationTherapies =
     guidelineMedicationTherapies.getOrElse(List.empty)
