@@ -23,7 +23,8 @@ import play.api.libs.json.{
 final case class MTBEpisode
 (
   id: Id[MTBEpisode],
-  ttan: Id[TTAN],
+  ttan: Option[Id[TTAN]],
+//  ttan: Id[TTAN],
   patient: Reference[Patient],
   period: Period[LocalDate],
   status: Coding[Episode.Status.Value],

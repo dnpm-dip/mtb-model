@@ -4,6 +4,7 @@ package de.dnpm.dip.mtb.model
 import cats.data.NonEmptyList
 import de.dnpm.dip.model.{
   Episode,
+  History,
   Patient,
   PatientRecord
 }
@@ -35,6 +36,8 @@ final case class MTBPatientRecord
 )
 extends PatientRecord
 {
+  def getDiagnoses =
+    diagnoses.getOrElse(List.empty)
 
   def getGuidelineMedicationTherapies =
     guidelineMedicationTherapies.getOrElse(List.empty)

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.util.UUID.randomUUID
 import scala.collection.Factory
 import cats.data.NonEmptyList
+import play.api.libs.json.JsObject
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem
@@ -17,6 +18,7 @@ import de.dnpm.dip.model.{
   Id,
   ExternalId,
   Episode,
+  History,
   Patient,
   Reference,
   Therapy,
@@ -27,7 +29,6 @@ import model.{
   COSMIC,
   dbSNP,
   Entrez,
-  History,
   Study
 }
 import de.dnpm.dip.mtb.model.v1
@@ -74,6 +75,7 @@ package object mappings
     episode =>
       model.MTBEpisode(
         episode.id,
+      None,
         episode.patient,
         episode.period,
         Coding(Episode.Status.Unknown),
@@ -119,7 +121,9 @@ package object mappings
         th.therapyLine,
         th.basedOn
           .map(Reference(_,None)),
-        th.recordedOn,
+        th.recordedOn
+          .orElse(th.period.flatMap(_.endOption))
+          .getOrElse(LocalDate.now),  // TODO: seriously reconsider this fallback option to 'today'
         Coding(th.status.getOrElse(Therapy.Status.Unknown)),
         th.notDoneReason
           .orElse(th.reasonStopped),
@@ -551,6 +555,7 @@ package object mappings
 
     model.MTBPatientRecord(
       record.patient.mapTo[Patient],
+      JsObject.empty,
       NonEmptyList.one(record.episode.mapTo[model.MTBEpisode]),
       Some(diagnoses),
       Some(

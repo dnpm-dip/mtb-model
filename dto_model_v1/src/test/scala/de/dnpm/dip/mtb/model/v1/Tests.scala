@@ -5,6 +5,7 @@ package de.dnpm.dip.mtb.model.v1
 import scala.util.Random
 import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.Inspectors._
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json.{
   toJson,
@@ -39,13 +40,13 @@ class Tests extends AnyFlatSpec
 
   "Parsing v1.MTBPatientRecord from MTBFile JSON and mapping it to model.MTBPatientRecord" must "have suceeded" in {
 
-    val mtbPatientRecord =
-      Gen.of[MTBFile].next
-        .pipe(toJson(_))
-        .pipe(fromJson[MTBPatientRecord](_))
-        .map(_.mapTo[model.MTBPatientRecord])
+    val mtbPatientRecords =
+      LazyList.fill(10)(Gen.of[MTBFile].next)
+        .map(toJson(_))
+        .map(fromJson[MTBPatientRecord](_))
+        .map(_.map(_.mapTo[model.MTBPatientRecord]))
 
-    mtbPatientRecord.isSuccess must be (true)
+    forAll (mtbPatientRecords) { _.isSuccess must be (true) }
 
   }
 

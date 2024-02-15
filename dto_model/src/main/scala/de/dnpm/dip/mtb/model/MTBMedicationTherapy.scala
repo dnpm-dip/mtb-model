@@ -32,7 +32,8 @@ final case class MTBMedicationTherapy
   indication: Reference[MTBDiagnosis],
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
-  recordedOn: Option[LocalDate],
+  recordedOn: LocalDate,
+//  recordedOn: Option[LocalDate],
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason]],
   period: Option[Period[LocalDate]],
@@ -103,7 +104,7 @@ object MTBMedicationTherapy
 
 }
 
-
+/*
 final case class History[T <: History.HasRecordingDate]
 (
   history: List[T]
@@ -113,16 +114,17 @@ final case class History[T <: History.HasRecordingDate]
 
   def latest: Option[T] =
     history
-      .filter(_.recordedOn.isDefined)
-      .maxByOption(_.recordedOn.get)
+//      .filter(_.recordedOn.isDefined)
+      .maxByOption(_.recordedOn)
 }
 
 object History
 {
 
-  type HasRecordingDate = { def recordedOn: Option[LocalDate] }
+  type HasRecordingDate = { def recordedOn: LocalDate }
+//  type HasRecordingDate = { def recordedOn: Option[LocalDate] }
 
   implicit def format[T <: History.HasRecordingDate: Format]: OFormat[History[T]] =
     Json.format[History[T]]
 }
-
+*/

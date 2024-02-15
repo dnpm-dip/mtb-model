@@ -32,7 +32,6 @@ final case class MTBCarePlan
   medicationRecommendations: List[MTBMedicationRecommendation],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
   studyEnrollmentRecommendations: List[StudyEnrollmentRecommendation]
-  //TODO: other recommendation types
 )
 extends CarePlan
 

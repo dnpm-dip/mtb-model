@@ -32,17 +32,18 @@ import de.dnpm.dip.coding.icd.{
 import ClassKinds.Category
 import de.dnpm.dip.coding.icd.ICD.extensions._
 import de.dnpm.dip.model.{
-  Id,
   ClosedInterval,
   Episode,
   ExternalId,
-  Reference,
   ExternalReference,
   Gender,
+  GuidelineTreatmentStatus,
+  History,
+  Id,
   Patient,
   Period,
   Organization,
-  GuidelineTreatmentStatus,
+  Reference,
   Therapy,
   TherapyRecommendation,
   TTAN
@@ -258,7 +259,7 @@ trait Generators
      
     } yield MTBEpisode(
       id,
-      ttan,
+      Some(ttan),
       patient,
       period,
       status,
@@ -320,7 +321,7 @@ trait Generators
       diagnosis,
       Some(therapyLine),
       None,
-      Some(LocalDate.now),
+      LocalDate.now,
       status,
       Some(statusReason),
       Some(period),
@@ -356,7 +357,7 @@ trait Generators
       Some(statusReason),
       Some(therapyLine),
       None,
-      Some(LocalDate.now),
+      LocalDate.now,
       Some(period),
       Some(note)
     )
@@ -939,7 +940,7 @@ trait Generators
       diagnosis,
       None,
       Some(Reference(recommendation)),
-      Some(LocalDate.now),
+      LocalDate.now,
       status,
       statusReason,
       period,
