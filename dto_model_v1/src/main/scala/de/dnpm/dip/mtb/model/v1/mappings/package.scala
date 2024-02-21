@@ -39,6 +39,7 @@ package object mappings
 {
 
   import scala.language.implicitConversions
+  import scala.util.chaining._
   import de.dnpm.dip.util.mapping.syntax._
 
 
@@ -92,19 +93,21 @@ package object mappings
         diag.icd10,
         diag.icdO3T,
         diag.whoGrade,
-        diag.statusHistory.map(
-          st => model.MTBDiagnosis.StageOnDate(
-            Coding(st.status),
-            st.date
-          )
-        ),
+        diag.statusHistory
+          .getOrElse(List.empty)
+          .map(
+            st => model.MTBDiagnosis.StageOnDate(
+              Coding(st.status),
+              st.date
+            )
+          ),
         diag.guidelineTreatmentStatus.map(Coding(_)),
       )
 
 
   implicit def medicationTherapyMapping(
     implicit
-    diagnoses: List[model.MTBDiagnosis],
+    diagnoses: List[v1.MTBDiagnosis],
     recommendations: List[v1.MTBMedicationRecommendation]
   ): v1.MTBMedicationTherapy => model.MTBMedicationTherapy =
     th =>
@@ -117,7 +120,8 @@ package object mappings
               .flatMap(_.resolveOn(recommendations))
               .map(_.diagnosis)
           )
-          .get,
+          .getOrElse(diagnoses.head.id)
+          .asInstanceOf[Id[model.MTBDiagnosis]],
         th.therapyLine,
         th.basedOn
           .map(Reference(_,None)),
@@ -143,28 +147,61 @@ package object mappings
       )
 
 
+  // Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Scala
+  // See below for reason of usage
+  private def levenshtein(s1: String, s2: String): Int = {
+
+    import scala.collection.mutable
+
+    val memorizedCosts = mutable.Map.empty[(Int, Int), Int]
+
+    def lev: (Int, Int) => Int = {
+      (k1, k2) =>
+        memorizedCosts.getOrElseUpdate(
+          (k1 -> k2),
+          (k1 -> k2) match {
+            case (i, 0) => i
+            case (0, j) => j
+            case (i, j) =>
+              Seq(
+                1 + lev(i - 1, j),
+                1 + lev(i, j - 1),
+                lev(i - 1, j - 1) + (if (s1(i - 1) != s2(j - 1)) 1 else 0)
+              )
+              .min
+          }
+        )
+    }
+    
+    lev(s1.length, s2.length)
+  }
+
+  implicit val collectionMapping: v1.TumorSpecimen.Collection => model.TumorSpecimen.Collection =
+    coll =>
+      model.TumorSpecimen.Collection(
+        coll.date,
+        coll.method,
+        coll.localization
+      )
+
   implicit def specimenMapping(
-    implicit diagnoses: List[model.MTBDiagnosis]
+    implicit diagnoses: List[v1.MTBDiagnosis]
   ): v1.TumorSpecimen => model.TumorSpecimen = {
     specimen =>
-
-      implicit val collectionMapping: v1.TumorSpecimen.Collection => model.TumorSpecimen.Collection =
-        coll =>
-          model.TumorSpecimen.Collection(
-            coll.date,
-            coll.method,
-            coll.localization
-          )
-
 
       model.TumorSpecimen(
         specimen.id,
         specimen.patient,
+        // Levenshtein between ICD-10 codes of tumor specimen and diagnoses used here
+        // because the code on tumor specimen (determined histologically) may be different
+        // from the one documented on diagnosis, so resolve the code as a "reference"
+        // to a diagnosis by picking the most similar one
         diagnoses
-          .collectFirst {
-            case diag if diag.code == specimen.icd10 => Reference(diag) 
-          }
-          .get,
+          .minBy(
+            diag => levenshtein(diag.code.code.value,specimen.icd10.code.value)
+          )
+          .id
+          .asInstanceOf[Id[model.MTBDiagnosis]],
         Coding(specimen.`type`.getOrElse(model.TumorSpecimen.Type.Unknown)),
         specimen.collection.map(_.mapTo[model.TumorSpecimen.Collection])
       )
@@ -419,8 +456,10 @@ package object mappings
             .getOrElse(TherapyRecommendation.Priority.One) //TODO: reconsider how to handle when missing 
         ),
         rec.issuedOn.getOrElse(date),
-        rec.medication,
-        rec.supportingVariants.map(Reference(_,None))
+        rec.medication.getOrElse(Set.empty),
+        rec.supportingVariants
+          .getOrElse(List.empty)
+          .map(Reference(_,None))
       )
 
 
@@ -513,7 +552,8 @@ package object mappings
 
   implicit def therapyHistoryMapping(
     implicit
-    diagnoses: List[model.MTBDiagnosis],
+//    diagnoses: List[model.MTBDiagnosis],
+    diagnoses: List[v1.MTBDiagnosis],
     recommendations: List[v1.MTBMedicationRecommendation]
   ): History[v1.MTBMedicationTherapy] => History[model.MTBMedicationTherapy] =
     h =>
@@ -541,7 +581,8 @@ package object mappings
       record.patient.id
 
     implicit val diagnoses =
-      record.getDiagnoses.mapAllTo[model.MTBDiagnosis]
+      record.getDiagnoses
+
 
     implicit val therapyRecommendations =
       record.getRecommendations
@@ -557,7 +598,7 @@ package object mappings
       record.patient.mapTo[Patient],
       JsObject.empty,
       NonEmptyList.one(record.episode.mapTo[model.MTBEpisode]),
-      Some(diagnoses),
+      Some(diagnoses.mapAllTo[model.MTBDiagnosis]),
       Some(
         (record.getPreviousGuidelineTherapies ++ record.getLastGuidelineTherapies)
           .mapAllTo[model.MTBMedicationTherapy]

@@ -37,7 +37,7 @@ final case class MTBDiagnosis
   icdO3T: Option[Coding[ICDO3.Topography]],
   whoGrade: Option[Coding[WHOGrading]],
   histologyResults: Option[List[Id[HistologyReport]]],
-  statusHistory: Seq[MTBDiagnosis.StatusOnDate],
+  statusHistory: Option[List[MTBDiagnosis.StatusOnDate]],
   guidelineTreatmentStatus: Option[GuidelineTreatmentStatus.Value]
 )
 
