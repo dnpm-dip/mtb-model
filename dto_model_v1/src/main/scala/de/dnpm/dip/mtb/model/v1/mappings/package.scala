@@ -515,16 +515,18 @@ package object mappings
           ),
         cp.description,
         cp.recommendations
-          .getOrElse(List.empty)
-          .flatMap(_.resolveOn(therapyRecommendations))
-          .mapAllTo[model.MTBMedicationRecommendation],
+          .map(
+            _.flatMap(_.resolveOn(therapyRecommendations))
+             .mapAllTo[model.MTBMedicationRecommendation]
+          ),
         cp.geneticCounsellingRequest
           .flatMap(_.resolveOn(geneticCounselingRecommendations))
           .map(_.mapTo[model.GeneticCounselingRecommendation]),
         cp.studyInclusionRequests
-          .getOrElse(List.empty)
-          .flatMap(_.resolveOn(studyInclusionRequests))
-          .mapAllTo[model.StudyEnrollmentRecommendation]
+          .map(
+            _.flatMap(_.resolveOn(studyInclusionRequests))
+             .mapAllTo[model.StudyEnrollmentRecommendation]
+           )
       )
   }
 

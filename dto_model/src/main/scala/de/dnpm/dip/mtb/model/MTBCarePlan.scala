@@ -29,9 +29,9 @@ final case class MTBCarePlan
   issuedOn: LocalDate,
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
   protocol: Option[String],
-  medicationRecommendations: List[MTBMedicationRecommendation],
+  medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
-  studyEnrollmentRecommendations: List[StudyEnrollmentRecommendation]
+  studyEnrollmentRecommendations: Option[List[StudyEnrollmentRecommendation]]
 )
 extends CarePlan
 

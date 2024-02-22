@@ -840,9 +840,9 @@ trait Generators
       LocalDate.now,
       Some(statusReason),
       Some(protocol),
-      recommendations,
+      Some(recommendations),
       Some(counselingRecommendation),
-      List(studyEnrollmentRecommendation)
+      Some(List(studyEnrollmentRecommendation))
     )
 
 
@@ -1050,9 +1050,13 @@ trait Generators
             )
         )
 
+      recommendations =
+        carePlan.medicationRecommendations
+          .getOrElse(List.empty)
+
       claims <-
         Gen.oneOfEach(
-          carePlan.medicationRecommendations
+          recommendations
             .map(genClaim(Reference(patient),_))
         )
 
@@ -1065,8 +1069,7 @@ trait Generators
 
       therapies <-
         Gen.oneOfEach(
-          carePlan
-            .medicationRecommendations
+          recommendations
             .map(
               genTherapy(
                 patient,
