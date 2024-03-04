@@ -32,14 +32,14 @@ final case class Claim
   recommendation: Reference[MTBMedicationRecommendation],
 //  requestedMedication: Option[Set[Coding[ATC]]]
   issuedOn: LocalDate,
-  status: Coding[Claim.Status.Value],
+  stage: Coding[Claim.Stage.Value],
 )
 
 object Claim
 {
 
-  object Status
-  extends CodedEnum("dnpm-dip/mtb/claim/status")
+  object Stage
+  extends CodedEnum("dnpm-dip/mtb/claim/stage")
   with DefaultCodeSystem
   {
 
@@ -53,7 +53,7 @@ object Claim
         InitialClaim  -> "Erstantrag",
         Revocation    -> "Widerspruch",
         FollowUpClaim -> "Folgeantrag",
-        Unknown       -> "Unbekant"
+        Unknown       -> "Unbekannt"
       )
   }
 
@@ -92,7 +92,7 @@ object ClaimResponse
       Map(
         Accepted -> "Angenommen",
         Rejected -> "Abgelehnt",
-        Unknown  -> "Unbekant"
+        Unknown  -> "Unbekannt"
       )
   }
 

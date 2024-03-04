@@ -12,6 +12,9 @@ import de.dnpm.dip.model.{
   Quantity,
   UnitOfMeasure
 }
+import de.dnpm.dip.util.{
+  Displays,
+}
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
@@ -57,10 +60,8 @@ object Variant
   }
 
 
-  def display(
-    variant: Variant
-  ): String =
-    variant match { 
+  implicit val displays: Displays[Variant] =
+    Displays {
 
       case snv: SNV =>
         s"SNV ${snv.gene.flatMap(_.display).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"

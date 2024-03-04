@@ -3,6 +3,7 @@ package de.dnpm.dip.mtb.model
 
 import java.time.LocalDate
 import java.time.temporal.Temporal
+import scala.reflect.ClassTag
 import cats.data.NonEmptyList
 import play.api.libs.json.JsObject
 import json.{
@@ -17,53 +18,64 @@ import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Patient,
   Period,
-  OpenEndPeriod
+  OpenEndPeriod,
+  Reference,
+  IdReference
 }
 
 
-trait MTBJsonSchemas
+trait BaseJsonSchemas
 {
 
+/*
+  implicit def codingSchema[T: Coding.System]: Schema[Coding[T]] =
+    Json.schema[Coding[T]]
+*/
+
+    
   import Schema.`object`.Field
 
   implicit def codingSchema[T](
     implicit
-    cl: Class[T],
-    strSchema: Schema[String],
+    cl: ClassTag[T],
     sys: Coding.System[T],
   ): Schema[Coding[T]] =
-    Schema.`object`(
-      Field[String]("code",Schema[String],true),
-      Field[String]("display",Schema[String],false),
-      Field[String]("system",Schema[String],false),
-      Field[String]("version",Schema[String],false)
+    Schema.`object`[Coding[T]](
+      Field[String]("code",Schema.`string`),
+      Field[String]("display",Schema.`string`,false),
+      Field[String]("system",Schema.`string`(Schema.`string`.Format.`uri`),false,sys.uri.toString),
+      Field[String]("version",Schema.`string`,false)
     )
-    .toDefinition(s"Coding[${cl.getSimpleName}]")
+    .toDefinition(s"Coding[${cl.runtimeClass.asInstanceOf[Class[T]].getSimpleName}]")
 
 
-  implicit def periodSchema[T <: Temporal: Schema](
-    implicit cl: Class[T]
-  ): Schema[Period[T]] =
-    Json.schema[OpenEndPeriod[T]]
-      .asInstanceOf[Schema[Period[T]]]
-      .toDefinition(s"Period[${cl.getSimpleName}]")
-/*
+  implicit def referenceSchema[T]: Schema[Reference[T]] =
+    Json.schema[IdReference[T]]
+      .asInstanceOf[Schema[Reference[T]]]
+
+
   implicit val datePeriodSchema: Schema[Period[LocalDate]] =
     Json.schema[OpenEndPeriod[LocalDate]]
       .asInstanceOf[Schema[Period[LocalDate]]]
-      .toDefinition("Period[Date]")
-*/
 
-  implicit val consentSchema: Schema[JsObject] = 
-    Schema.`object`.Free[JsObject]()
+}
 
+
+
+trait MTBJsonSchemas extends BaseJsonSchemas
+{
 
   implicit val patientSchema: Schema[Patient] =
     Json.schema[Patient]
 
 
+  implicit val consentSchema: Schema[JsObject] = 
+    Schema.`object`.Free[JsObject]()
+
+
   implicit val diagnosisSchema: Schema[MTBDiagnosis] =
     Json.schema[MTBDiagnosis]
+
 
   implicit val episodeSchema: Schema[MTBEpisode] =
     Json.schema[MTBEpisode]
@@ -113,17 +125,11 @@ trait MTBJsonSchemas
     Json.schema[Response]
 
 
-/*    
-  implicit val _Schema: Schema[] =
-    Json.schema[]
-
-
-*/
-
   implicit val episodesSchema: Schema[NonEmptyList[MTBEpisode]] =
     Json.schema[NonEmptyList[MTBEpisode]]
 
-  implicit val schema: Schema[MTBPatientRecord] =
+
+  implicit val patientRecordSchema: Schema[MTBPatientRecord] =
     Json.schema[MTBPatientRecord]
 
 }

@@ -13,6 +13,7 @@ import cats.data.NonEmptyList
 import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
+import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
@@ -35,18 +36,20 @@ import de.dnpm.dip.model.{
   ClosedInterval,
   Episode,
   ExternalId,
-  ExternalReference,
+//  ExternalReference,
   Gender,
   GuidelineTreatmentStatus,
   History,
   Id,
+  Organization,
   Patient,
   Period,
-  Organization,
+  Publication,
+  PubMed,
   Reference,
   Therapy,
   TherapyRecommendation,
-  TTAN
+  TransferTAN
 }
 import de.dnpm.dip.mtb.model._
 import MTBMedicationTherapy.StatusReason.{
@@ -132,8 +135,8 @@ trait Generators
       .map(Id(_))
 
   implicit def genReference[T]: Gen[Reference[T]] =
-    Gen.uuidStrings
-      .map(Reference.id(_))
+    Gen.of[Id[T]]
+      .map(Reference.from(_))
 
   implicit def genExternalId[T]: Gen[ExternalId[T]] =
     Gen.uuidStrings
@@ -178,10 +181,8 @@ trait Generators
         )
 
       healthInsurance =
-        ExternalReference[Organization](
-          ExternalId("aok-ik","IK"),
-          Some("AOK")
-        )
+        Reference.from(ExternalId[Organization]("aok-ik","IK"))
+          .copy(display = Some("AOK"))
 
     } yield
       Patient(
@@ -234,7 +235,7 @@ trait Generators
 
     } yield MTBDiagnosis(
       id,
-      Reference(patient),
+      Reference.to(patient),
       Some(date),
       icd10,
       icdo3,
@@ -251,7 +252,7 @@ trait Generators
     for {
       id <- Gen.of[Id[MTBEpisode]]
 
-      ttan  <- Gen.of[Id[TTAN]]
+      ttan  <- Gen.of[Id[TransferTAN]]
 
       period = Period(LocalDate.now.minusMonths(6))
      
@@ -379,7 +380,7 @@ trait Generators
     } yield TumorSpecimen(
       id,
       patient,
-      Reference(diag),
+      Reference.to(diag),
       typ,
       Some(
         TumorSpecimen.Collection(
@@ -755,13 +756,10 @@ trait Generators
           grading  <- Gen.of[Coding[LevelOfEvidence.Grading.Value]]
           addendum <- Gen.of[Coding[LevelOfEvidence.Addendum.Value]]
           publication <-
-            for { 
-              pmid <- Gen.uuidStrings
-              doi  <- Gen.uuidStrings
-            } yield LevelOfEvidence.Publication(
-              Some(pmid),
-              Some(doi)
-            )
+            Gen.ints
+              .map(_.toString)
+              .map(ExternalId[Publication,PubMed](_))
+              .map(Reference.from(_))
 
         } yield LevelOfEvidence(
           grading,
@@ -852,11 +850,11 @@ trait Generators
   ): Gen[Claim] =
     for { 
       id <- Gen.of[Id[Claim]]
-      status <- Gen.of[Coding[Claim.Status.Value]]
+      status <- Gen.of[Coding[Claim.Stage.Value]]
     } yield Claim(
       id,
       patient,
-      Reference(recommendation),
+      Reference.to(recommendation),
       LocalDate.now,
       status
     )
@@ -936,10 +934,10 @@ trait Generators
 
     } yield MTBMedicationTherapy(
       id,
-      Reference(patient),
+      Reference.to(patient),
       diagnosis,
       None,
-      Some(Reference(recommendation)),
+      Some(Reference.to(recommendation)),
       LocalDate.now,
       status,
       statusReason,
@@ -977,7 +975,7 @@ trait Generators
     } yield Response(
       id,
       patient,
-      Reference(therapy),
+      Reference.to(therapy),
       date,
       value
     )
@@ -993,20 +991,20 @@ trait Generators
 
       episode <-
          genEpisode(
-           Reference(patient),
-           List(Reference(diagnosis))
+           Reference.to(patient),
+           List(Reference.to(diagnosis))
          )
 
       performanceStatus <-
-        genPerformanceStatus(Reference(patient)) 
+        genPerformanceStatus(Reference.to(patient)) 
 
 
       guidelineTherapies <-
         Gen.list(
           Gen.intsBetween(1,3),
           genGuidelineTherapy(
-            Reference(patient),
-            Reference(diagnosis)
+            Reference.to(patient),
+            Reference.to(diagnosis)
           )
         )
 
@@ -1014,39 +1012,39 @@ trait Generators
         Gen.list(
           Gen.intsBetween(1,3),
           genProcedure(
-            Reference(patient),
-            Reference(diagnosis)
+            Reference.to(patient),
+            Reference.to(diagnosis)
           )
         )
 
       specimen <-
-        genTumorSpecimen(Reference(patient),diagnosis)
+        genTumorSpecimen(Reference.to(patient),diagnosis)
 
       histologyReport <-
         genHistologyReport(
-          Reference(patient),
-          Reference(specimen)
+          Reference.to(patient),
+          Reference.to(specimen)
         )
 
       ihcReport <-
         genIHCReport(
-          Reference(patient),
-          Reference(specimen)
+          Reference.to(patient),
+          Reference.to(specimen)
         )
 
       ngsReport <-
         genNGSReport(
-          Reference(patient),
-          Reference(specimen)
+          Reference.to(patient),
+          Reference.to(specimen)
         )
 
       carePlan <- 
         genCarePlan(
-          Reference(patient),
-          Reference(diagnosis),
+          Reference.to(patient),
+          Reference.to(diagnosis),
           ngsReport.variants
             .map(
-              v => Reference(v.id,Some(Variant.display(v)))
+              v => Reference.to(v).copy(display = Some(DisplayLabel.of(v).value))
             )
         )
 
@@ -1057,14 +1055,14 @@ trait Generators
       claims <-
         Gen.oneOfEach(
           recommendations
-            .map(genClaim(Reference(patient),_))
+            .map(genClaim(Reference.to(patient),_))
         )
 
       claimResponses <-
         Gen.oneOfEach(
           claims
-            .map(Reference(_))
-            .map(genClaimResponse(Reference(patient),_))
+            .map(Reference.to)
+            .map(genClaimResponse(Reference.to(patient),_))
         )
 
       therapies <-
@@ -1073,7 +1071,7 @@ trait Generators
             .map(
               genTherapy(
                 patient,
-                Reference(diagnosis),
+                Reference.to(diagnosis),
                 _
               )
             )
@@ -1084,7 +1082,7 @@ trait Generators
           therapies
             .map(
               genResponse(
-                Reference(patient),
+                Reference.to(patient),
                 _
               )
             )

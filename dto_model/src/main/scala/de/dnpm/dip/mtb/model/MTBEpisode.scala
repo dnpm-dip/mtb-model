@@ -12,7 +12,7 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Episode,
-  TTAN
+  TransferTAN
 }
 import play.api.libs.json.{
   Json, 
@@ -23,8 +23,7 @@ import play.api.libs.json.{
 final case class MTBEpisode
 (
   id: Id[MTBEpisode],
-  ttan: Option[Id[TTAN]],
-//  ttan: Id[TTAN],
+  transferTan: Option[Id[TransferTAN]],
   patient: Reference[Patient],
   period: Period[LocalDate],
   status: Coding[Episode.Status.Value],

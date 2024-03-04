@@ -48,7 +48,7 @@ package object mappings
 
 
   private implicit def idToReference[T,U](id: Id[T]): Reference[U] =
-    Reference(id,None)
+    Reference.from(id)
 
 
   private implicit def enumValueToCoding[E <: Enumeration](
@@ -68,7 +68,7 @@ package object mappings
         patient.birthDate.atDay(1), 
         patient.dateOfDeath.map(_.atEndOfMonth),
         None,
-        patient.insurance.map(Reference(_,None)),
+        patient.insurance.map(Reference.from(_)),
       )
 
 
@@ -124,7 +124,7 @@ package object mappings
           .asInstanceOf[Id[model.MTBDiagnosis]],
         th.therapyLine,
         th.basedOn
-          .map(Reference(_,None)),
+          .map(Reference.from(_)),
         th.recordedOn
           .orElse(th.period.flatMap(_.endOption))
           .getOrElse(LocalDate.now),  // TODO: seriously reconsider this fallback option to 'today'
@@ -448,8 +448,8 @@ package object mappings
     rec =>
       model.MTBMedicationRecommendation(
         rec.id,
-        Reference(rec.patient,None),
-        Reference(rec.diagnosis,None),
+        Reference.from(rec.patient),
+        Reference.from(rec.diagnosis),
         rec.levelOfEvidence,
         Coding(
           rec.priority
@@ -459,7 +459,7 @@ package object mappings
         rec.medication.getOrElse(Set.empty),
         rec.supportingVariants
           .getOrElse(List.empty)
-          .map(Reference(_,None))
+          .map(Reference.from(_))
       )
 
 
@@ -537,7 +537,7 @@ package object mappings
         claim.patient,
         claim.therapy,
         claim.issuedOn,
-        Coding(model.Claim.Status.Unknown)
+        Coding(model.Claim.Stage.Unknown)
       )
 
   implicit val claimResponseMapping: v1.ClaimResponse => model.ClaimResponse =
@@ -554,7 +554,6 @@ package object mappings
 
   implicit def therapyHistoryMapping(
     implicit
-//    diagnoses: List[model.MTBDiagnosis],
     diagnoses: List[v1.MTBDiagnosis],
     recommendations: List[v1.MTBMedicationRecommendation]
   ): History[v1.MTBMedicationTherapy] => History[model.MTBMedicationTherapy] =
