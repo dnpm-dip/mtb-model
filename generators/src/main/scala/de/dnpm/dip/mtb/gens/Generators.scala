@@ -32,6 +32,7 @@ import de.dnpm.dip.coding.icd.{
 }
 import ClassKinds.Category
 import de.dnpm.dip.coding.icd.ICD.extensions._
+import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.model.{
   ClosedInterval,
   Episode,
@@ -287,7 +288,7 @@ trait Generators
 
   def genGuidelineTherapy(
     patient: Reference[Patient],
-    diagnosis: Reference[MTBDiagnosis],
+    diagnosis: MTBDiagnosis,
   ): Gen[MTBMedicationTherapy] =
     for {
       id <-
@@ -319,7 +320,7 @@ trait Generators
     } yield MTBMedicationTherapy(
       id,
       patient,
-      diagnosis,
+      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
       Some(therapyLine),
       None,
       LocalDate.now,
@@ -333,7 +334,7 @@ trait Generators
 
   def genProcedure(
     patient: Reference[Patient],
-    diagnosis: Reference[MTBDiagnosis],
+    diagnosis: MTBDiagnosis,
   ): Gen[OncoProcedure] =
     for { 
       id <- Gen.of[Id[OncoProcedure]]
@@ -352,7 +353,7 @@ trait Generators
     } yield OncoProcedure(
       id,
       patient,
-      diagnosis,
+      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
       code,
       status,
       Some(statusReason),
@@ -743,7 +744,7 @@ trait Generators
 
   def genTherapyRecommendation(
     patient: Reference[Patient],
-    diagnosis: Reference[MTBDiagnosis],
+    diagnosis: MTBDiagnosis,
     variants: Seq[Reference[Variant]]
   ): Gen[MTBMedicationRecommendation] =
     for {
@@ -774,7 +775,7 @@ trait Generators
     } yield MTBMedicationRecommendation(
       id,
       patient,
-      diagnosis,
+      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
       Some(evidenceLevel),
       priority,
       LocalDate.now,
@@ -785,7 +786,7 @@ trait Generators
 
   def genCarePlan(
     patient: Reference[Patient],
-    diagnosis: Reference[MTBDiagnosis],
+    diagnosis: MTBDiagnosis,
     variants: Seq[Reference[Variant]]
   ): Gen[MTBCarePlan] = 
     for { 
@@ -834,7 +835,7 @@ trait Generators
     } yield MTBCarePlan(
       id,
       patient,
-      diagnosis,
+      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
       LocalDate.now,
       Some(statusReason),
       Some(protocol),
@@ -896,7 +897,7 @@ trait Generators
 
   def genTherapy(
     patient: Patient,
-    diagnosis: Reference[MTBDiagnosis],
+    diagnosis: MTBDiagnosis,
     recommendation: MTBMedicationRecommendation
   ): Gen[MTBMedicationTherapy] =
     for {
@@ -935,7 +936,7 @@ trait Generators
     } yield MTBMedicationTherapy(
       id,
       Reference.to(patient),
-      diagnosis,
+      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
       None,
       Some(Reference.to(recommendation)),
       LocalDate.now,
@@ -1004,7 +1005,7 @@ trait Generators
           Gen.intsBetween(1,3),
           genGuidelineTherapy(
             Reference.to(patient),
-            Reference.to(diagnosis)
+            diagnosis
           )
         )
 
@@ -1013,7 +1014,7 @@ trait Generators
           Gen.intsBetween(1,3),
           genProcedure(
             Reference.to(patient),
-            Reference.to(diagnosis)
+            diagnosis
           )
         )
 
@@ -1041,10 +1042,10 @@ trait Generators
       carePlan <- 
         genCarePlan(
           Reference.to(patient),
-          Reference.to(diagnosis),
+          diagnosis,
           ngsReport.variants
             .map(
-              v => Reference.to(v).copy(display = Some(DisplayLabel.of(v).value))
+              v => Reference.to(v,DisplayLabel.of(v).value)
             )
         )
 
@@ -1061,7 +1062,7 @@ trait Generators
       claimResponses <-
         Gen.oneOfEach(
           claims
-            .map(Reference.to)
+            .map(Reference.to(_))
             .map(genClaimResponse(Reference.to(patient),_))
         )
 
@@ -1071,7 +1072,7 @@ trait Generators
             .map(
               genTherapy(
                 patient,
-                Reference.to(diagnosis),
+                diagnosis,
                 _
               )
             )

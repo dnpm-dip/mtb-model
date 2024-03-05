@@ -41,7 +41,14 @@ object TumorCellContent
   {
     val Histologic    = Value("histologic")
     val Bioinformatic = Value("bioinformatic")
+  
+    override val display =
+      Map(
+        Histologic    -> "Histologisch",
+        Bioinformatic -> "Bioinformatisch"
+      )
   }
+
 
   implicit val format: OFormat[TumorCellContent] =
     Json.format[TumorCellContent]

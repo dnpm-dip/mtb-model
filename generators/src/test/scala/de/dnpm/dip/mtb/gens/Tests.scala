@@ -33,9 +33,9 @@ with Generators
 
     record.getNgsReports.flatMap(_.variants) must not be empty
 
-    record.getCarePlans.flatMap(_.medicationRecommendations).flatMap(_.supportingEvidence) must not be empty
-
-//    printJson(record)
+    record.getCarePlans
+      .flatMap(_.medicationRecommendations.getOrElse(List.empty))
+      .flatMap(_.supportingEvidence) must not be empty
 
   }
 

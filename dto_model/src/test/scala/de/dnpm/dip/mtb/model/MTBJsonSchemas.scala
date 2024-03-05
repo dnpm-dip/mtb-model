@@ -20,49 +20,12 @@ import de.dnpm.dip.model.{
   Period,
   OpenEndPeriod,
   Reference,
-  IdReference
 }
-
-
-trait BaseJsonSchemas
-{
-
-/*
-  implicit def codingSchema[T: Coding.System]: Schema[Coding[T]] =
-    Json.schema[Coding[T]]
-*/
-
-    
-  import Schema.`object`.Field
-
-  implicit def codingSchema[T](
-    implicit
-    cl: ClassTag[T],
-    sys: Coding.System[T],
-  ): Schema[Coding[T]] =
-    Schema.`object`[Coding[T]](
-      Field[String]("code",Schema.`string`),
-      Field[String]("display",Schema.`string`,false),
-      Field[String]("system",Schema.`string`(Schema.`string`.Format.`uri`),false,sys.uri.toString),
-      Field[String]("version",Schema.`string`,false)
-    )
-    .toDefinition(s"Coding[${cl.runtimeClass.asInstanceOf[Class[T]].getSimpleName}]")
-
-
-  implicit def referenceSchema[T]: Schema[Reference[T]] =
-    Json.schema[IdReference[T]]
-      .asInstanceOf[Schema[Reference[T]]]
-
-
-  implicit val datePeriodSchema: Schema[Period[LocalDate]] =
-    Json.schema[OpenEndPeriod[LocalDate]]
-      .asInstanceOf[Schema[Period[LocalDate]]]
-
-}
+import de.dnpm.dip.model.json.BaseSchemas
 
 
 
-trait MTBJsonSchemas extends BaseJsonSchemas
+trait MTBJsonSchemas extends BaseSchemas
 {
 
   implicit val patientSchema: Schema[Patient] =
