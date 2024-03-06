@@ -1,4 +1,4 @@
-package de.dnpm.dip.mtb.model
+package de.dnpm.dip.mtb.model.json
 
 
 import java.time.LocalDate
@@ -21,12 +21,16 @@ import de.dnpm.dip.model.{
   OpenEndPeriod,
   Reference,
 }
+import de.dnpm.dip.mtb.model._
 import de.dnpm.dip.model.json.BaseSchemas
 
 
 
-trait MTBJsonSchemas extends BaseSchemas
+trait Schemas extends BaseSchemas
 {
+
+//  implicit val Schema: Schema[] =
+//    Json.schema[]
 
   implicit val patientSchema: Schema[Patient] =
     Json.schema[Patient]
@@ -59,6 +63,9 @@ trait MTBJsonSchemas extends BaseSchemas
   implicit val tumorSpecimenSchema: Schema[TumorSpecimen] =
     Json.schema[TumorSpecimen]
 
+  implicit val tumorCellContentSchema: Schema[TumorCellContent] =
+    Json.schema[TumorCellContent]
+
 
   implicit val histologyReportSchema: Schema[HistologyReport] =
     Json.schema[HistologyReport]
@@ -68,9 +75,45 @@ trait MTBJsonSchemas extends BaseSchemas
     Json.schema[IHCReport]
 
 
+  implicit val TMBSchema: Schema[TMB] =
+    Json.schema[TMB]
+
+  implicit val BRCAnessSchema: Schema[BRCAness] =
+    Json.schema[BRCAness]
+
+  implicit val HRDScoreSchema: Schema[HRDScore] =
+    Json.schema[HRDScore]
+
+  implicit val snvSchema: Schema[SNV] =
+    Json.schema[SNV]
+
+  implicit val cnvSchema: Schema[CNV] =
+    Json.schema[CNV]
+
+  implicit val dnaFusionSchema: Schema[DNAFusion] =
+    Json.schema[DNAFusion]
+
+  implicit val rnaFusionSchema: Schema[RNAFusion] =
+    Json.schema[RNAFusion]
+
+  implicit val rnaSeqSchema: Schema[RNASeq] =
+    Json.schema[RNASeq]
+
   implicit val ngsReportSchema: Schema[NGSReport] =
     Json.schema[NGSReport]
 
+
+  implicit val levelOfEvidenceSchema: Schema[LevelOfEvidence] =
+    Json.schema[LevelOfEvidence]
+
+  implicit val medicationRecommendationSchema: Schema[MTBMedicationRecommendation] =
+    Json.schema[MTBMedicationRecommendation]
+
+  implicit val geneticCounselingRecommendationSchema: Schema[GeneticCounselingRecommendation] =
+    Json.schema[GeneticCounselingRecommendation]
+
+  implicit val studyEnrollmentRecommendationSchema: Schema[StudyEnrollmentRecommendation] =
+    Json.schema[StudyEnrollmentRecommendation]
 
   implicit val carePlanSchema: Schema[MTBCarePlan] =
     Json.schema[MTBCarePlan]
@@ -78,7 +121,6 @@ trait MTBJsonSchemas extends BaseSchemas
 
   implicit val claimSchema: Schema[Claim] =
     Json.schema[Claim]
-
 
   implicit val claimResponseSchema: Schema[ClaimResponse] =
     Json.schema[ClaimResponse]
@@ -97,4 +139,4 @@ trait MTBJsonSchemas extends BaseSchemas
 
 }
 
-object MTBJsonSchemas extends MTBJsonSchemas
+object Schemas extends Schemas

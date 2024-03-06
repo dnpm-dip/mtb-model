@@ -1,4 +1,4 @@
-package de.dnpm.dip.mtb.model
+package de.dnpm.dip.mtb.model.json
 
 
 import java.time.LocalDate
@@ -18,15 +18,15 @@ import de.dnpm.dip.model.{
   Period,
   OpenEndPeriod
 }
+import de.dnpm.dip.mtb.model._
 
 
-class JsonSchemaTests extends AnyFlatSpec with MTBJsonSchemas
+class JsonSchemaTests extends AnyFlatSpec with Schemas
 {
 
   "JSON Schema derivation for MTBPatientRecord" must "have worked" in {
 
-//    Schema[MTBMedicationTherapy].asPlay(Draft04)
-    Schema[MTBMedicationTherapy].asPlay(Draft12(""))
+    Schema[MTBPatientRecord].asPlay(Draft12("MTBPatientRecord"))
       .pipe(prettyPrint(_))
       .tap(println(_))
 
