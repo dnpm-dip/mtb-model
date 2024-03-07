@@ -151,8 +151,8 @@ trait Generators
 
   private val genGender: Gen[Coding[Gender.Value]] =
     Gen.distribution(
-      48.0 -> Gender.Male,
-      48.0 -> Gender.Female,
+      49.0 -> Gender.Male,
+      49.0 -> Gender.Female,
       2.0  -> Gender.Other,
     )
     .map(Coding(_))
@@ -757,7 +757,7 @@ trait Generators
           grading  <- Gen.of[Coding[LevelOfEvidence.Grading.Value]]
           addendum <- Gen.of[Coding[LevelOfEvidence.Addendum.Value]]
           publication <-
-            Gen.ints
+            Gen.positiveInts
               .map(_.toString)
               .map(ExternalId[Publication,PubMed](_))
               .map(Reference.from(_))

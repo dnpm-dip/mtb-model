@@ -61,7 +61,7 @@ object Variant
 
 
   implicit val displays: Displays[Variant] =
-    Displays {
+    Displays[Variant] {
 
       case snv: SNV =>
         s"SNV ${snv.gene.flatMap(_.display).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
