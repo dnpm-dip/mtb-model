@@ -104,27 +104,3 @@ object MTBMedicationTherapy
 
 }
 
-/*
-final case class History[T <: History.HasRecordingDate]
-(
-  history: List[T]
-)
-{
-  import scala.language.reflectiveCalls
-
-  def latest: Option[T] =
-    history
-//      .filter(_.recordedOn.isDefined)
-      .maxByOption(_.recordedOn)
-}
-
-object History
-{
-
-  type HasRecordingDate = { def recordedOn: LocalDate }
-//  type HasRecordingDate = { def recordedOn: Option[LocalDate] }
-
-  implicit def format[T <: History.HasRecordingDate: Format]: OFormat[History[T]] =
-    Json.format[History[T]]
-}
-*/

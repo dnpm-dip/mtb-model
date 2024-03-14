@@ -13,7 +13,11 @@ import play.api.libs.json.Json.{
   prettyPrint
 }
 import de.ekut.tbi.generators.Gen
-import de.bwhc.mtb.dtos.MTBFile
+import de.bwhc.mtb.dtos.{
+  Coding,
+  MTBFile,
+  Variant
+}
 import de.bwhc.mtb.dto.gens._
 import de.dnpm.dip.coding.CodeSystem
 import de.dnpm.dip.coding.hgnc.HGNC
@@ -42,6 +46,26 @@ class Tests extends AnyFlatSpec
 
     val mtbPatientRecords =
       LazyList.fill(10)(Gen.of[MTBFile].next)
+        .map { mtbfile =>
+          val ngsReports =
+            mtbfile
+              .ngsReports.getOrElse(List.empty)
+              .map(
+                ngs =>
+                  ngs.copy(
+                    simpleVariants =
+                      ngs.simpleVariants.map(
+                        _.map(sv =>
+                          sv.copy(interpretation = Coding(Variant.Interpretation("0"),None,None))
+                        )
+                      )
+                  )
+              )
+
+          mtbfile.copy(
+            ngsReports = Some(ngsReports)
+          )
+        }
         .map(toJson(_))
         .map(fromJson[MTBPatientRecord](_))
         .map(_.map(_.mapTo[model.MTBPatientRecord]))

@@ -83,7 +83,7 @@ final case class SNV
   allelicFrequency: AllelicFrequency,
   cosmicId: Option[Id[SNV]],
   dbSNPId: Option[Id[SNV]],
-  interpretation: Option[Coding[ClinVar]]
+  interpretation: Option[Coding[ClinVar.Value]]
 )
 extends Variant
 

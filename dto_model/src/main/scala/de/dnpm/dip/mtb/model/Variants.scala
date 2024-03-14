@@ -192,23 +192,27 @@ object COSMIC
     Coding.System[COSMIC]("https://cancer.sanger.ac.uk/cosmic")
 }
 
+
 sealed trait ClinVar
 object ClinVar
+extends CodedEnum("https://www.ncbi.nlm.nih.gov/clinvar/")
+with DefaultCodeSystem
 {
-  implicit val codingSystem: Coding.System[ClinVar] =
-    Coding.System[ClinVar]("https://www.ncbi.nlm.nih.gov/clinvar/")
+  val Zero  = Value("0")
+  val One   = Value("1")
+  val Two   = Value("2")
+  val Three = Value("3")
+  val Four  = Value("4")
+  val Five  = Value("5")
 
-  implicit val codeSystem: CodeSystem[ClinVar] =
-    CodeSystem(
-      name = "ClinVar-Interpretation",
-      title = Some("ClinVar Interpretation"),
-      version = None,
-      "0" -> "Not Applicable",
-      "1" -> "Benign",
-      "2" -> "Likely benign",
-      "3" -> "Uncertain significance",
-      "4" -> "Likely pathogenic",
-      "5" -> "Pathogenic"
+  override val display =
+    Map(
+      Zero  -> "Not Applicable",
+      One   -> "Benign",
+      Two   -> "Likely benign",
+      Three -> "Uncertain significance",
+      Four  -> "Likely pathogenic",
+      Five  -> "Pathogenic"
     )
 }
 
@@ -229,7 +233,7 @@ final case class SNV
   proteinChange: Option[Coding[HGVS]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
-  interpretation: Option[Coding[ClinVar]]
+  interpretation: Option[Coding[ClinVar.Value]]
 )
 extends Variant
 

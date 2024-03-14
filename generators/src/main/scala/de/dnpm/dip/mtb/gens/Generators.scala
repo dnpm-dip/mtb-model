@@ -569,7 +569,7 @@ trait Generators
 
       allelicFreq <- Gen.doubles.map(SNV.AllelicFrequency(_))
 
-      interpretation <- Gen.of[Coding[ClinVar]]
+      interpretation <- Gen.of[Coding[ClinVar.Value]]
 
     } yield SNV(
       id,
