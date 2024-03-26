@@ -31,7 +31,7 @@ final case class OncoProcedure
   indication: Reference[MTBDiagnosis],
   code: Coding[OncoProcedure.Type.Value],
   status: Coding[Therapy.Status.Value],
-  statusReason: Option[Coding[Therapy.StatusReason]],
+  statusReason: Option[Coding[Therapy.StatusReason.Value]],
   therapyLine: Option[Int],
   basedOn: Option[Reference[TherapyRecommendation]],
   recordedOn: LocalDate,

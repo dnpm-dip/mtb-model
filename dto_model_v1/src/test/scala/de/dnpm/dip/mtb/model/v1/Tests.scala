@@ -45,7 +45,8 @@ class Tests extends AnyFlatSpec
   "Parsing v1.MTBPatientRecord from MTBFile JSON and mapping it to model.MTBPatientRecord" must "have suceeded" in {
 
     val mtbPatientRecords =
-      LazyList.fill(10)(Gen.of[MTBFile].next)
+      LazyList
+        .fill(100)(Gen.of[MTBFile].next)
         .map { mtbfile =>
           val ngsReports =
             mtbfile
@@ -68,6 +69,9 @@ class Tests extends AnyFlatSpec
         }
         .map(toJson(_))
         .map(fromJson[MTBPatientRecord](_))
+        .tapEach(
+          _.fold(errs => errs foreach println, _ => ())
+        )
         .map(_.map(_.mapTo[model.MTBPatientRecord]))
 
     forAll (mtbPatientRecords) { _.isSuccess must be (true) }

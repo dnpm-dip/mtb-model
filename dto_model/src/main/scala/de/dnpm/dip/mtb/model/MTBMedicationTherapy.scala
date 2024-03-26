@@ -24,7 +24,6 @@ import play.api.libs.json.{
 }
 
 
-
 final case class MTBMedicationTherapy
 (
   id: Id[MTBMedicationTherapy],
@@ -33,9 +32,8 @@ final case class MTBMedicationTherapy
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
   recordedOn: LocalDate,
-//  recordedOn: Option[LocalDate],
   status: Coding[Therapy.Status.Value],
-  statusReason: Option[Coding[Therapy.StatusReason]],
+  statusReason: Option[Coding[Therapy.StatusReason.Value]],
   period: Option[Period[LocalDate]],
   medication: Option[Set[Coding[ATC]]],
   note: Option[String]
@@ -49,6 +47,7 @@ extends MedicationTherapy[ATC]
 object MTBMedicationTherapy
 {
 
+/*
   object StatusReason
   {
 
@@ -97,7 +96,7 @@ object MTBMedicationTherapy
       )
 
   }
-
+*/
 
   implicit val format: OFormat[MTBMedicationTherapy] =
     Json.format[MTBMedicationTherapy]

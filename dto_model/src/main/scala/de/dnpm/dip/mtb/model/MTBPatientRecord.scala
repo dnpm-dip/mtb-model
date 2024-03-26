@@ -43,7 +43,7 @@ extends PatientRecord
     guidelineMedicationTherapies.getOrElse(List.empty)
 
   def getGuidelineProcedures =
-    guidelineMedicationTherapies.getOrElse(List.empty)
+    guidelineProcedures.getOrElse(List.empty)
 
   def getPerformanceStatus =
     performanceStatus.getOrElse(List.empty)

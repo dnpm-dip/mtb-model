@@ -37,7 +37,6 @@ import de.dnpm.dip.model.{
   ClosedInterval,
   Episode,
   ExternalId,
-//  ExternalReference,
   Gender,
   GuidelineTreatmentStatus,
   History,
@@ -53,7 +52,7 @@ import de.dnpm.dip.model.{
   TransferTAN
 }
 import de.dnpm.dip.mtb.model._
-import MTBMedicationTherapy.StatusReason.{
+import Therapy.StatusReason.{
   PaymentRefused,
   Progression
 }
@@ -62,9 +61,6 @@ import MTBMedicationTherapy.StatusReason.{
 
 trait Generators
 {
-
-  private implicit val therapyStatusReason: CodeSystem[Therapy.StatusReason] =
-    MTBMedicationTherapy.StatusReason.codeSystem
 
 
   private val oncoCode =
@@ -301,7 +297,7 @@ trait Generators
         Coding(Stopped)
 
       statusReason =
-        Coding[Therapy.StatusReason](Progression)
+        Coding(Progression)
 
       period <- 
         for {
@@ -343,7 +339,7 @@ trait Generators
 
       status <- Gen.of[Coding[Therapy.Status.Value]]
 
-      statusReason <- Gen.of[Coding[Therapy.StatusReason]]
+      statusReason <- Gen.of[Coding[Therapy.StatusReason.Value]]
 
       therapyLine <- Gen.intsBetween(1,9)
 
@@ -497,17 +493,6 @@ trait Generators
   private val bases = 
     Seq("A","C","G","T")
 
-/*
-  private val aminoAcids = 
-    Seq(
-      "Ala", "Asx", "Cys", "Asp",
-      "Glu", "Phe", "Gly", "His",
-      "Ile", "Lys", "Leu", "Met",
-      "Asn", "Pro", "Gln", "Arg",
-      "Ser", "Thr", "Sec", "Val",
-      "Trp", "Tyr", "Glx"
-     )
-*/
 
   // Source: https://hgvs-nomenclature.org
   private val proteinChanges =
@@ -552,7 +537,6 @@ trait Generators
       transcriptId <-
         Gen.uuidStrings
           .map(ExternalId[Transcript,Ensembl](_))
-//          .map(ExternalId[Transcript](_,Some(Coding.System[Ensembl].uri)))
 
       position <-
         Gen.longsBetween(24,600)
@@ -908,8 +892,8 @@ trait Generators
 
       statusReason = 
         status match {
-          case Therapy.Status(NotDone)   => Some(Coding[Therapy.StatusReason](PaymentRefused))
-          case Therapy.Status(Stopped)   => Some(Coding[Therapy.StatusReason](Progression))
+          case Therapy.Status(NotDone)   => Some(Coding(PaymentRefused))
+          case Therapy.Status(Stopped)   => Some(Coding(Progression))
           case _                         => None
         }
 

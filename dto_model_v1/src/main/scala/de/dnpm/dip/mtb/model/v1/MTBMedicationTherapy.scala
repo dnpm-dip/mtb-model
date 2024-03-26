@@ -18,7 +18,10 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
+  JsObject,
+  JsString,
   Format,
+  Reads,
   OFormat
 }
 
@@ -34,8 +37,8 @@ final case class MTBMedicationTherapy
   status: Option[Therapy.Status.Value],
   period: Option[Period[LocalDate]],
   medication: Option[Set[Coding[ATC]]],
-  notDoneReason: Option[Coding[Therapy.StatusReason]],
-  reasonStopped: Option[Coding[Therapy.StatusReason]],
+  notDoneReason: Option[Coding[Therapy.StatusReason.Value]],
+  reasonStopped: Option[Coding[Therapy.StatusReason.Value]],
   note: Option[String],
 )
 
@@ -45,6 +48,16 @@ object MTBMedicationTherapy
 
   implicit val formatTherapyStatus: Format[Therapy.Status.Value] =
     Json.formatEnum(Therapy.Status)
+
+
+  // Required to translate former Therapy StopReason value "remission" into "chronic-remission"
+  implicit def readsTherapyStatusReason(
+    implicit reads: Reads[Coding[Therapy.StatusReason.Value]]
+  ): Reads[Coding[Therapy.StatusReason.Value]] =
+    reads.preprocess { 
+      case js: JsObject if (js \ "code").as[String] == "remission" =>
+        js + ("code" -> JsString("chronic-remission"))
+    }
 
   implicit val format: OFormat[MTBMedicationTherapy] =
     Json.format[MTBMedicationTherapy]
