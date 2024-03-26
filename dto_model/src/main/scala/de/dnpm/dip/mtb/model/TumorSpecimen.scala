@@ -44,8 +44,14 @@ object TumorSpecimen
     val FFPE         = Value("FFPE")
     val Unknown      = Value("unknown")
 
-    implicit val format: Format[Value] =
-      Json.formatEnum(this)
+    override val display =
+      Map(
+        FreshTissue  -> "Frischgewebe",
+        CryoFrozen   -> "Cryo-frozen",
+        LiquidBiopsy -> "Liquid Biopsy",
+        FFPE         -> "FFPE",
+        Unknown      -> "Unbekannt"
+      )
   }
 
   final case class Collection
@@ -68,8 +74,14 @@ object TumorSpecimen
       val Cytology     = Value("cytology")
       val Unknown      = Value("unknown") 
 
-      implicit val format: Format[Value] =
-        Json.formatEnum(this)
+      override val display =
+        Map(
+          Biopsy       -> "Biopsie",
+          Resection    -> "Resektat",
+          LiquidBiopsy -> "Liquid Biopsy",
+          Cytology     -> "Zytologie",
+          Unknown      -> "Unbekannt"
+        )
     }
 
     object Localization
@@ -80,8 +92,12 @@ object TumorSpecimen
       val Metastatis   = Value("metastasis")
       val Unknown      = Value("unknown")
 
-      implicit val format: Format[Value] =
-        Json.formatEnum(this)
+      override val display =
+        Map(
+          PrimaryTumor -> "Primärtumor",
+          Metastatis   -> "Metastase",
+          Unknown      -> "Unbekannt"
+        )
     }
 
     implicit val format: OFormat[Collection] =

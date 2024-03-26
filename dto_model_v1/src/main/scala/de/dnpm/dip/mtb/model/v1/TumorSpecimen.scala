@@ -16,6 +16,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.icd.ICD10GM
 import play.api.libs.json.{
   Json,
+  Format,
   OFormat
 }
 import de.dnpm.dip.mtb.model.TumorSpecimen.Type
@@ -46,8 +47,21 @@ object TumorSpecimen
     localization: Localization.Value
   )
 
+
+  implicit val formatType: Format[Type.Value] =
+   Json.formatEnum(Type)
+
+
   object Collection
-  {
+  { 
+
+    implicit val formatMethod: Format[Method.Value] =
+     Json.formatEnum(Method)
+
+    implicit val formatLocalization: Format[Localization.Value] =
+     Json.formatEnum(Localization)
+
+
     implicit val format: OFormat[Collection] =
       Json.format[Collection]
   }
