@@ -616,10 +616,10 @@ trait Generators
       Some(relCopyNum),
       Some(cnA),
       Some(cnB),
-      affectedGenes.distinctBy(_.code).toSet,
+      Some(affectedGenes.distinctBy(_.code).toSet),
       Some(focality),
       Coding(typ),
-      copyNumberNeutralLoH.distinctBy(_.code).toSet
+      Some(copyNumberNeutralLoH.distinctBy(_.code).toSet)
     )
 
 

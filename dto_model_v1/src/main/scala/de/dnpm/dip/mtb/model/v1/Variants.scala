@@ -83,7 +83,8 @@ final case class SNV
   allelicFrequency: AllelicFrequency,
   cosmicId: Option[Id[SNV]],
   dbSNPId: Option[Id[SNV]],
-  interpretation: Option[Coding[ClinVar.Value]]
+//  interpretation: Option[Coding[ClinVar.Value]]
+  interpretation: Option[Coding[Any]]
 )
 extends Variant
 
@@ -104,10 +105,10 @@ final case class CNV
   relativeCopyNumber: Option[Double],
   cnA: Option[Double],
   cnB: Option[Double],
-  reportedAffectedGenes: Set[GeneCoding],
+  reportedAffectedGenes: Option[Set[GeneCoding]],
   reportedFocality: Option[String],
   `type`: CNVType.Value,
-  copyNumberNeutralLoH: Set[GeneCoding],
+  copyNumberNeutralLoH: Option[Set[GeneCoding]],
 )
 extends Variant
 

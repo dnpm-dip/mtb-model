@@ -67,7 +67,7 @@ object Variant
         s"SNV ${snv.gene.flatMap(_.display).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
 
       case cnv: CNV =>
-        s"CNV ${cnv.reportedAffectedGenes.flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
+        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
 
       case DNAFusion(_,_,partner5pr,partner3pr,_) =>
         s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
@@ -269,10 +269,10 @@ final case class CNV
   relativeCopyNumber: Option[Double],
   cnA: Option[Double],
   cnB: Option[Double],
-  reportedAffectedGenes: Set[Coding[HGNC]],
+  reportedAffectedGenes: Option[Set[Coding[HGNC]]],
   reportedFocality: Option[String],
   `type`: Coding[CNV.Type.Value],
-  copyNumberNeutralLoH: Set[Coding[HGNC]],
+  copyNumberNeutralLoH: Option[Set[Coding[HGNC]]],
 )
 extends Variant
 

@@ -1,7 +1,7 @@
 package de.dnpm.dip.mtb.model.v1
 
 
-
+import java.net.URI
 import scala.util.Random
 import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -13,13 +13,13 @@ import play.api.libs.json.Json.{
   prettyPrint
 }
 import de.ekut.tbi.generators.Gen
-import de.bwhc.mtb.dtos.{
-  Coding,
-  MTBFile,
-  Variant
-}
+import de.bwhc.mtb.dtos.MTBFile
 import de.bwhc.mtb.dto.gens._
-import de.dnpm.dip.coding.CodeSystem
+import de.dnpm.dip.model.Site
+import de.dnpm.dip.coding.{
+  Coding,
+  CodeSystem
+}
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.util.mapping.syntax._
 import de.dnpm.dip.mtb.model.v1.mappings._
@@ -29,6 +29,8 @@ import de.dnpm.dip.mtb.model
 
 class Tests extends AnyFlatSpec
 {
+
+  System.setProperty(Site.property,"UKx:Musterhausen")
 
 
   implicit val rnd: Random =
@@ -42,31 +44,37 @@ class Tests extends AnyFlatSpec
       .latest
 
 
+  val interpretations =
+    Seq(
+      "likely_benign",
+      "benign",
+      "null",
+      "likely_oncogenic",
+      "oncogenic",
+      "uncertain_significance"
+    )
+    .map(
+      Coding(_,URI.create("ClinVar"))
+    )
+
+
+  "Conversion of SNV.interpretation" must "have worked successfully" in {
+    interpretations
+      .flatMap(_.mapTo[Option[Coding[model.ClinVar.Value]]]) must contain allOf(
+        Coding(model.ClinVar.One),
+        Coding(model.ClinVar.Two),
+        Coding(model.ClinVar.Three),
+        Coding(model.ClinVar.Four),
+        Coding(model.ClinVar.Five),
+      )
+  }
+
+
   "Parsing v1.MTBPatientRecord from MTBFile JSON and mapping it to model.MTBPatientRecord" must "have suceeded" in {
 
     val mtbPatientRecords =
       LazyList
         .fill(100)(Gen.of[MTBFile].next)
-        .map { mtbfile =>
-          val ngsReports =
-            mtbfile
-              .ngsReports.getOrElse(List.empty)
-              .map(
-                ngs =>
-                  ngs.copy(
-                    simpleVariants =
-                      ngs.simpleVariants.map(
-                        _.map(sv =>
-                          sv.copy(interpretation = Coding(Variant.Interpretation("0"),None,None))
-                        )
-                      )
-                  )
-              )
-
-          mtbfile.copy(
-            ngsReports = Some(ngsReports)
-          )
-        }
         .map(toJson(_))
         .map(fromJson[MTBPatientRecord](_))
         .tapEach(

@@ -4,6 +4,7 @@ package de.dnpm.dip.mtb.model.v1
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 import scala.collection.Factory
+import scala.util.matching.Regex
 import cats.data.NonEmptyList
 import play.api.libs.json.JsObject
 import de.dnpm.dip.coding.{
@@ -21,11 +22,13 @@ import de.dnpm.dip.model.{
   History,
   Patient,
   Reference,
+  Site,
   Therapy,
   TherapyRecommendation
 }
 import de.dnpm.dip.mtb.model
 import model.{
+  ClinVar,
   COSMIC,
   dbSNP,
   Entrez,
@@ -41,6 +44,36 @@ package object mappings
   import scala.language.implicitConversions
   import scala.util.chaining._
   import de.dnpm.dip.util.mapping.syntax._
+
+
+  // Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Scala
+  // See below for reason of usage
+  private def levenshtein(s1: String, s2: String): Int = {
+
+    import scala.collection.mutable
+
+    val memorizedCosts = mutable.Map.empty[(Int, Int), Int]
+
+    def lev: (Int, Int) => Int = {
+      (k1, k2) =>
+        memorizedCosts.getOrElseUpdate(
+          (k1 -> k2),
+          (k1 -> k2) match {
+            case (i, 0) => i
+            case (0, j) => j
+            case (i, j) =>
+              Seq(
+                1 + lev(i - 1, j),
+                1 + lev(i, j - 1),
+                lev(i - 1, j - 1) + (if (s1(i - 1) != s2(j - 1)) 1 else 0)
+              )
+              .min
+          }
+        )
+    }
+    
+    lev(s1.length, s2.length)
+  }
 
 
   private implicit def idToId[T,U](id: Id[T]): Id[U] =
@@ -67,7 +100,7 @@ package object mappings
         Coding(patient.gender),
         patient.birthDate.atDay(1), 
         patient.dateOfDeath.map(_.atEndOfMonth),
-        None,
+        Some(Site.local),
         patient.insurance.map(Reference.from(_)),
       )
 
@@ -147,35 +180,6 @@ package object mappings
       )
 
 
-  // Source: https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Scala
-  // See below for reason of usage
-  private def levenshtein(s1: String, s2: String): Int = {
-
-    import scala.collection.mutable
-
-    val memorizedCosts = mutable.Map.empty[(Int, Int), Int]
-
-    def lev: (Int, Int) => Int = {
-      (k1, k2) =>
-        memorizedCosts.getOrElseUpdate(
-          (k1 -> k2),
-          (k1 -> k2) match {
-            case (i, 0) => i
-            case (0, j) => j
-            case (i, j) =>
-              Seq(
-                1 + lev(i - 1, j),
-                1 + lev(i, j - 1),
-                lev(i - 1, j - 1) + (if (s1(i - 1) != s2(j - 1)) 1 else 0)
-              )
-              .min
-          }
-        )
-    }
-    
-    lev(s1.length, s2.length)
-  }
-
   implicit val collectionMapping: v1.TumorSpecimen.Collection => model.TumorSpecimen.Collection =
     coll =>
       model.TumorSpecimen.Collection(
@@ -250,6 +254,38 @@ package object mappings
   }
 
 
+  implicit val interpretationCodingToClinVar: Coding[Any] => Option[Coding[ClinVar.Value]] = {
+
+    val likely     = "likely".r.unanchored
+    val benign     = "benign".r.unanchored
+    val pathogenic = "(onco|patho)genic".r.unanchored
+    val uncertain  = "uncertain".r.unanchored
+
+    coding =>
+      Option(coding.code.value.toLowerCase)
+        .collect {
+          case "1"          => ClinVar.One
+          case "2"          => ClinVar.Two
+          case "3"          => ClinVar.Three
+          case "4"          => ClinVar.Four
+          case "5"          => ClinVar.Five
+          case b @ benign() =>
+            b match {
+              case likely() => ClinVar.Two
+              case _        => ClinVar.One
+            }
+          case p @ pathogenic(_) =>
+            p match {
+              case likely() => ClinVar.Four
+              case _        => ClinVar.Five
+            }
+          case uncertain()  => ClinVar.Three
+        }
+      
+  }
+
+
+
   implicit def ngsReportMapping(
     implicit hgnc: CodeSystem[HGNC]
   ): v1.NGSReport => model.NGSReport = {
@@ -267,6 +303,7 @@ package object mappings
           )
           .get
           .toCoding
+
 
 
     implicit def snvMapping(
@@ -288,7 +325,9 @@ package object mappings
           snv.aminoAcidChange,
           snv.readDepth,
           snv.allelicFrequency,
-          snv.interpretation
+          snv.interpretation.flatMap(_.mapTo[Option[Coding[ClinVar.Value]]])
+//          snv.interpretation.map(_.mapTo[Coding[ClinVar.Value]])
+//          snv.interpretation
         )
 
 
@@ -306,10 +345,10 @@ package object mappings
           cnv.relativeCopyNumber,
           cnv.cnA,
           cnv.cnB,
-          cnv.reportedAffectedGenes.mapAllTo[Coding[HGNC]],
+          cnv.reportedAffectedGenes.map(_.mapAllTo[Coding[HGNC]]),
           cnv.reportedFocality,
           cnv.`type`,
-          cnv.copyNumberNeutralLoH.mapAllTo[Coding[HGNC]],
+          cnv.copyNumberNeutralLoH.map(_.mapAllTo[Coding[HGNC]]),
         )
 
 
@@ -471,7 +510,7 @@ package object mappings
         rec.id,
         rec.patient,
         rec.issuedOn.getOrElse(date),
-        Coding[model.GeneticCounselingRecommendation.Reason.Value](rec.reason)
+        Coding(model.GeneticCounselingRecommendation.Reason.Unknown)
       )
 
 
@@ -557,10 +596,10 @@ package object mappings
     diagnoses: List[v1.MTBDiagnosis],
     recommendations: List[v1.MTBMedicationRecommendation]
   ): History[v1.MTBMedicationTherapy] => History[model.MTBMedicationTherapy] =
-    h =>
-      h.copy(
-        history = h.history.mapAllTo[model.MTBMedicationTherapy]
-      )
+    h => h.copy(
+      history = h.history.mapAllTo[model.MTBMedicationTherapy]
+    )
+
 
   implicit val responseMapping: v1.Response => model.Response =
     response =>
@@ -583,7 +622,6 @@ package object mappings
 
     implicit val diagnoses =
       record.getDiagnoses
-
 
     implicit val therapyRecommendations =
       record.getRecommendations
