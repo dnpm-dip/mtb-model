@@ -285,7 +285,6 @@ package object mappings
   }
 
 
-
   implicit def ngsReportMapping(
     implicit hgnc: CodeSystem[HGNC]
   ): v1.NGSReport => model.NGSReport = {
@@ -326,8 +325,6 @@ package object mappings
           snv.readDepth,
           snv.allelicFrequency,
           snv.interpretation.flatMap(_.mapTo[Option[Coding[ClinVar.Value]]])
-//          snv.interpretation.map(_.mapTo[Coding[ClinVar.Value]])
-//          snv.interpretation
         )
 
 
