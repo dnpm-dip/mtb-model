@@ -237,7 +237,7 @@ trait Generators
       icd10,
       icdo3,
       Some(who),
-      stageHistory,
+      Some(stageHistory),
       Some(gl)
     )
 

@@ -36,7 +36,7 @@ final case class MTBDiagnosis
   code: Coding[ICD10GM],
   topography: Option[Coding[ICDO3.Topography]],
   whoGrading: Option[Coding[WHOGrading]],
-  stageHistory: Seq[MTBDiagnosis.StageOnDate],
+  stageHistory: Option[Seq[MTBDiagnosis.StageOnDate]],
   guidelineTreatmentStatus: Option[Coding[GuidelineTreatmentStatus.Value]]
 )
 extends Diagnosis

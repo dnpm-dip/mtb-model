@@ -126,14 +126,14 @@ package object mappings
         diag.icd10,
         diag.icdO3T,
         diag.whoGrade,
-        diag.statusHistory
-          .getOrElse(List.empty)
-          .map(
+        diag.statusHistory.map(
+          _.map(
             st => model.MTBDiagnosis.StageOnDate(
               Coding(st.status),
               st.date
             )
-          ),
+          )
+        ),
         diag.guidelineTreatmentStatus.map(Coding(_)),
       )
 
@@ -252,7 +252,6 @@ package object mappings
         )
       )
   }
-
 
   implicit val interpretationCodingToClinVar: Coding[Any] => Option[Coding[ClinVar.Value]] = {
 

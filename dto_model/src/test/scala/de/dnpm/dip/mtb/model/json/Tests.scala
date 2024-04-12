@@ -27,8 +27,8 @@ class JsonSchemaTests extends AnyFlatSpec with Schemas
   "JSON Schema derivation for MTBPatientRecord" must "have worked" in {
 
     Schema[MTBPatientRecord].asPlay(Draft12("MTBPatientRecord"))
-      .pipe(prettyPrint(_))
-      .tap(println(_))
+//      .pipe(prettyPrint(_))
+//      .tap(println(_))
 
     succeed   
   }
