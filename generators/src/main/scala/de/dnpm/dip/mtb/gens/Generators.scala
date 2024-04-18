@@ -764,7 +764,7 @@ trait Generators
       priority,
       LocalDate.now,
       Set(medication),
-      List(supportingVariant)
+      Some(List(supportingVariant))
     )
 
 
@@ -812,7 +812,7 @@ trait Generators
           recommendations.head.indication,
           LocalDate.now,
           recommendations.head.levelOfEvidence.map(_.grading),
-          recommendations.head.supportingEvidence,
+          recommendations.head.supportingEvidence.get,
           NonEmptyList.one(nctId)
         )
 

@@ -493,8 +493,7 @@ package object mappings
         rec.issuedOn.getOrElse(date),
         rec.medication.getOrElse(Set.empty),
         rec.supportingVariants
-          .getOrElse(List.empty)
-          .map(Reference.from(_))
+          .map(_.map(Reference.from(_)))
       )
 
 
@@ -613,8 +612,8 @@ package object mappings
   ): v1.MTBPatientRecord => model.MTBPatientRecord = {
     record =>
 
-    implicit val patient: Reference[Patient] =
-      record.patient.id
+    implicit val patient =
+      Reference.from(record.patient.id)
 
     implicit val diagnoses =
       record.getDiagnoses
@@ -638,11 +637,11 @@ package object mappings
         (record.getPreviousGuidelineTherapies ++ record.getLastGuidelineTherapies)
           .mapAllTo[model.MTBMedicationTherapy]
       ),
-      None,   // No OncoProcedures
+      None,   // No OncoProcedures in V1 MTB model
       record.ecogStatus.map(_.mapAllTo[model.PerformanceStatus]),
       record.specimens.map(_.mapAllTo[model.TumorSpecimen]),
       record.histologyReports.map(_.mapAllTo[model.HistologyReport]),
-      None,   // No IHC-Reports
+      None,   // No IHC-Reports in V1 MTB model
       record.ngsReports.map(_.mapAllTo[model.NGSReport]),
       record.carePlans.map(_.mapAllTo[model.MTBCarePlan]),
       record.claims.map(_.mapAllTo[model.Claim]),

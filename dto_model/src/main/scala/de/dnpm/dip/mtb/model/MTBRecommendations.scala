@@ -36,7 +36,7 @@ final case class MTBMedicationRecommendation
   priority: Coding[TherapyRecommendation.Priority.Value],
   issuedOn: LocalDate,
   medication: Set[Coding[ATC]],
-  supportingEvidence: List[Reference[Variant]]
+  supportingEvidence: Option[List[Reference[Variant]]]
 )
 extends MedicationRecommendation[ATC]
 
