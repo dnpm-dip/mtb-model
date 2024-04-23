@@ -24,6 +24,7 @@ import de.dnpm.dip.coding.icd.{
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
+  History,
   Patient,
   Site,
   Reference,
@@ -309,6 +310,17 @@ trait Completers
         )
       )
 
+
+    implicit def therapyHistoryCompleter(
+      implicit diagnoses: Seq[MTBDiagnosis]
+    ): Completer[History[MTBMedicationTherapy]] =
+      Completer.of(
+        th => th.copy(
+          history = th.history.complete.sortBy(_.recordedOn)(Ordering[LocalDate].reverse)
+        )
+      )
+
+
     implicit val responseCompleter: Completer[Response] =
       Completer.of(
         response => response.copy(
@@ -339,14 +351,7 @@ trait Completers
         ihcReports = record.ihcReports.complete,
         ngsReports = record.ngsReports.complete,
         carePlans = record.carePlans.complete, 
-        medicationTherapies =
-          record.medicationTherapies.map(
-            _.map(
-              th => th.copy(
-                history = th.history.complete.sortBy(_.recordedOn)(Ordering[LocalDate].reverse)
-              )
-            )
-          ),
+        medicationTherapies = record.medicationTherapies.complete,
         responses = record.responses.complete, 
       )
 

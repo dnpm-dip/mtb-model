@@ -545,9 +545,9 @@ trait Generators
 
       alt <- Gen.oneOf(bases filter (_ != ref))
 
-      dnaChg = Coding[HGVS](s"c.$position$ref>$alt")
+      dnaChg = Coding[HGVS.DNA](s"c.$position$ref>$alt")
 
-      proteinChg <- Gen.oneOf(proteinChanges).map(Coding[HGVS](_))
+      proteinChg <- Gen.oneOf(proteinChanges).map(Coding[HGVS.Protein](_))
 
       readDepth <- Gen.intsBetween(5,25).map(SNV.ReadDepth(_))
 

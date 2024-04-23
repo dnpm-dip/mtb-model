@@ -77,13 +77,12 @@ final case class SNV
   startEnd: PositionRange,
   altAllele: Allele,
   refAllele: Allele,
-  dnaChange: Option[Coding[HGVS]],
-  aminoAcidChange: Option[Coding[HGVS]],
+  dnaChange: Option[Coding[HGVS.DNA]],
+  aminoAcidChange: Option[Coding[HGVS.Protein]],
   readDepth: ReadDepth,
   allelicFrequency: AllelicFrequency,
   cosmicId: Option[Id[SNV]],
   dbSNPId: Option[Id[SNV]],
-//  interpretation: Option[Coding[ClinVar.Value]]
   interpretation: Option[Coding[Any]]
 )
 extends Variant

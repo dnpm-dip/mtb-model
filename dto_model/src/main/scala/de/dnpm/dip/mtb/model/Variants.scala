@@ -229,8 +229,8 @@ final case class SNV
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
-  dnaChange: Option[Coding[HGVS]],
-  proteinChange: Option[Coding[HGVS]],
+  dnaChange: Option[Coding[HGVS.DNA]],
+  proteinChange: Option[Coding[HGVS.Protein]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
   interpretation: Option[Coding[ClinVar.Value]]
