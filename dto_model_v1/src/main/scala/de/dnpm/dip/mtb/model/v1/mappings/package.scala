@@ -20,6 +20,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Episode,
   History,
+  NGSReport,
   Patient,
   Reference,
   Site,
@@ -286,7 +287,7 @@ package object mappings
 
   implicit def ngsReportMapping(
     implicit hgnc: CodeSystem[HGNC]
-  ): v1.NGSReport => model.NGSReport = {
+  ): v1.SomaticNGSReport => model.SomaticNGSReport = {
 
     import HGNC.extensions._
 
@@ -301,7 +302,6 @@ package object mappings
           )
           .get
           .toCoding
-
 
 
     implicit def snvMapping(
@@ -454,14 +454,15 @@ package object mappings
       implicit val specimen: Reference[model.TumorSpecimen] =
         report.specimen
 
-      model.NGSReport(
+      model.SomaticNGSReport(
         report.id,
         patient,
         specimen,
         report.issueDate,
-        report.sequencingType,
+        report.sequencingType.mapTo[Coding[NGSReport.SequencingType.Value]],
+//        report.sequencingType,
         report.metadata,
-        model.NGSReport.Results(
+        model.SomaticNGSReport.Results(
           report.tumorCellContent.map(_.mapTo[model.TumorCellContent]),
           report.tmb.map(_.mapTo[model.TMB]),
           report.brcaness.map(_.mapTo[model.BRCAness]),
@@ -642,7 +643,7 @@ package object mappings
       record.specimens.map(_.mapAllTo[model.TumorSpecimen]),
       record.histologyReports.map(_.mapAllTo[model.HistologyReport]),
       None,   // No IHC-Reports in V1 MTB model
-      record.ngsReports.map(_.mapAllTo[model.NGSReport]),
+      record.ngsReports.map(_.mapAllTo[model.SomaticNGSReport]),
       record.carePlans.map(_.mapAllTo[model.MTBCarePlan]),
       record.claims.map(_.mapAllTo[model.Claim]),
       record.claimResponses.map(_.mapAllTo[model.ClaimResponse]),

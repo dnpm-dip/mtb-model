@@ -25,7 +25,7 @@ final case class MTBPatientRecord
   specimens: Option[List[TumorSpecimen]],
 //  molecularPathologyFindings: Option[List[MolecularPathologyFinding]]
   histologyReports: Option[List[HistologyReport]],
-  ngsReports: Option[List[NGSReport]],
+  ngsReports: Option[List[SomaticNGSReport]],
   carePlans: Option[List[MTBCarePlan]],
   recommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounsellingRequests: Option[List[GeneticCounselingRecommendation]],

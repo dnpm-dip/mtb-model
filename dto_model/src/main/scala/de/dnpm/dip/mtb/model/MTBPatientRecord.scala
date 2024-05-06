@@ -27,7 +27,7 @@ final case class MTBPatientRecord
   specimens: Option[List[TumorSpecimen]],
   histologyReports: Option[List[HistologyReport]],
   ihcReports: Option[List[IHCReport]],
-  ngsReports: Option[List[NGSReport]],
+  ngsReports: Option[List[SomaticNGSReport]],
   carePlans: Option[List[MTBCarePlan]],
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],

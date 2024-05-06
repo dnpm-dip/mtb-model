@@ -34,7 +34,7 @@ final case class MTBMedicationRecommendation
   priority: Option[TherapyRecommendation.Priority.Value],
   issuedOn: Option[LocalDate],
   medication: Option[Set[Coding[ATC]]],
-  ngsReport: Option[Id[NGSReport]],
+  ngsReport: Option[Id[SomaticNGSReport]],
   supportingVariants: Option[List[Id[Variant]]]
 )
 

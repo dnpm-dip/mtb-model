@@ -41,6 +41,7 @@ import de.dnpm.dip.model.{
   GuidelineTreatmentStatus,
   History,
   Id,
+  NGSReport,
   Organization,
   Patient,
   Period,
@@ -270,7 +271,6 @@ trait Generators
   ): Gen[PerformanceStatus] =
     for {
       id <- Gen.of[Id[PerformanceStatus]]
-      patient <- Gen.of[Reference[Patient]]
       value <- Gen.of[Coding[ECOG.Value]]
     } yield PerformanceStatus(
       id,
@@ -626,17 +626,18 @@ trait Generators
   def genNGSReport(
     patient: Reference[Patient],
     specimen: Reference[TumorSpecimen]
-  ): Gen[NGSReport] =
+  ): Gen[SomaticNGSReport] =
     for {
-      id <- Gen.of[Id[NGSReport]]
+      id <- Gen.of[Id[SomaticNGSReport]]
 
       seqType <-
-        Gen.oneOf("tNGS","WES","WGS","Panel")
+        Gen.of[Coding[NGSReport.SequencingType.Value]]
+//        Gen.oneOf("tNGS","WES","WGS","Panel")
 
       metadata <-
         for {
           refGenome <- Gen.oneOf("HG19","HG38","GRCh37")
-        } yield NGSReport.Metadata(
+        } yield SomaticNGSReport.Metadata(
           "Kit Type",
           "Manufacturer",
           "Sequencer",
@@ -704,14 +705,14 @@ trait Generators
           genCNV(patient)
         )  
 
-    } yield NGSReport(
+    } yield SomaticNGSReport(
       id,
       patient,
       specimen,
       LocalDate.now,
       seqType,
       List(metadata),
-      NGSReport.Results(
+      SomaticNGSReport.Results(
         Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Bioinformatic))),
         Some(tmb),
         Some(brcaness),

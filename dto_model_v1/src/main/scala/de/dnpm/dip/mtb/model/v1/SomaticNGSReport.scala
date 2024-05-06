@@ -4,6 +4,7 @@ package de.dnpm.dip.mtb.model.v1
 import java.net.URI
 import java.time.LocalDate
 import cats.Applicative
+import de.dnpm.dip.util.json
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
@@ -11,6 +12,7 @@ import de.dnpm.dip.model.{
   Reference,
   ClosedInterval,
   LeftClosedInterval,
+  NGSReport,
   Observation,
   Quantity,
   UnitOfMeasure
@@ -27,19 +29,21 @@ import play.api.libs.json.{
   Json,
   Format,
   OFormat,
-  Reads
+  Reads,
+  JsonValidationError,
+  Writes
 }
-import de.dnpm.dip.mtb.model.NGSReport.Metadata
+import de.dnpm.dip.mtb.model.SomaticNGSReport.Metadata
 
 
 
-final case class NGSReport
+final case class SomaticNGSReport
 (
-  id: Id[NGSReport],
+  id: Id[SomaticNGSReport],
   patient: Id[Patient],
   specimen: Id[TumorSpecimen],
   issueDate: LocalDate,
-  sequencingType: String,
+  sequencingType: NGSReport.SequencingType.Value,
   metadata: List[Metadata],
   tumorCellContent: Option[TumorCellContent],
   brcaness: Option[Double],
@@ -52,8 +56,13 @@ final case class NGSReport
   rnaSeqs: Option[List[RNASeq]]
 )
 
-object NGSReport
+object SomaticNGSReport
 {
-  implicit val format: OFormat[NGSReport] =
-    Json.format[NGSReport]
+  
+  implicit val formatSequencingType: Format[NGSReport.SequencingType.Value] =
+    json.enumFormat(NGSReport.SequencingType)
+
+  implicit val format: OFormat[SomaticNGSReport] =
+    Json.format[SomaticNGSReport]
+
 }

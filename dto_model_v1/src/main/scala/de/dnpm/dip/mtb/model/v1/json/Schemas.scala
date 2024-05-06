@@ -99,8 +99,8 @@ trait Schemas extends BaseSchemas
     Json.schema[RNASeq]
       .toSimpleNameDefinition
 
-  implicit val ngsReportSchema: Schema[NGSReport] =
-    Json.schema[NGSReport]
+  implicit val ngsReportSchema: Schema[SomaticNGSReport] =
+    Json.schema[SomaticNGSReport]
       .toSimpleNameDefinition
 
 

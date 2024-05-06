@@ -13,9 +13,15 @@ import play.api.libs.json.Json.{
   prettyPrint
 }
 import de.ekut.tbi.generators.Gen
-import de.bwhc.mtb.dtos.MTBFile
+import de.bwhc.mtb.dtos.{
+  MTBFile,
+  SomaticNGSReport
+}
 import de.bwhc.mtb.dto.gens._
-import de.dnpm.dip.model.Site
+import de.dnpm.dip.model.{
+  NGSReport,
+  Site
+}
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem
@@ -72,9 +78,24 @@ class Tests extends AnyFlatSpec
 
   "Parsing v1.MTBPatientRecord from MTBFile JSON and mapping it to model.MTBPatientRecord" must "have suceeded" in {
 
+    // Adapt generator to return only valid sequencing types
+    val generator =
+      for {
+        seqType <- Gen.`enum`(NGSReport.SequencingType)  // DNPM:DIP model SequencingType
+        record <- Gen.of[MTBFile]
+      } yield record.copy(
+        ngsReports =
+          record.ngsReports.map(
+            _.map(
+              ngs => ngs.copy(sequencingType = SomaticNGSReport.SequencingType(seqType.toString)) // bwHC SequencingType
+            )
+          )
+      )
+
+
     val mtbPatientRecords =
       LazyList
-        .fill(100)(Gen.of[MTBFile].next)
+        .fill(100)(generator.next)
         .map(toJson(_))
         .map(fromJson[MTBPatientRecord](_))
         .tapEach(

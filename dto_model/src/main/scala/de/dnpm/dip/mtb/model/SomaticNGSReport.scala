@@ -11,6 +11,7 @@ import de.dnpm.dip.model.{
   Reference,
   ClosedInterval,
   LeftClosedInterval,
+  NGSReport,
   Observation,
   Quantity,
   UnitOfMeasure
@@ -191,16 +192,18 @@ object HRDScore
 }
 
 
-final case class NGSReport
+final case class SomaticNGSReport
 (
-  id: Id[NGSReport],
+  id: Id[SomaticNGSReport],
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
   issuedOn: LocalDate,
-  sequencingType: String,
-  metadata: List[NGSReport.Metadata],
-  results: NGSReport.Results
+  sequencingType: Coding[NGSReport.SequencingType.Value],
+//  sequencingType: String,
+  metadata: List[SomaticNGSReport.Metadata],
+  results: SomaticNGSReport.Results
 )
+extends NGSReport
 {
   def variants: List[Variant] =
     results.simpleVariants ++
@@ -209,7 +212,7 @@ final case class NGSReport
     results.rnaFusions
 }
 
-object NGSReport
+object SomaticNGSReport
 {
 
 
@@ -243,6 +246,6 @@ object NGSReport
   implicit val formatResults: OFormat[Results] =
     Json.format[Results]
 
-  implicit val format: OFormat[NGSReport] =
-    Json.format[NGSReport]
+  implicit val format: OFormat[SomaticNGSReport] =
+    Json.format[SomaticNGSReport]
 }

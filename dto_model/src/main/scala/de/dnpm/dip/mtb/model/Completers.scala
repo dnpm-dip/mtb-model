@@ -248,7 +248,7 @@ trait Completers
       )
 
 
-    implicit val ngsReportCompleter: Completer[NGSReport] =
+    implicit val ngsReportCompleter: Completer[SomaticNGSReport] =
       Completer.of(
         report => report.copy(
           results = report.results.copy(
