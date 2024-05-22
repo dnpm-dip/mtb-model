@@ -109,13 +109,14 @@ trait Completers
 
   implicit val mtbPatientRecordCompleter: Completer[MTBPatientRecord] = {
 
+/*    
     implicit val episodeCompleter: Completer[MTBEpisode] =
       Completer.of(
         episode => episode.copy(
          status = episode.status.complete
         )
       )
-
+*/
     implicit val diagnosisCompleter: Completer[MTBDiagnosis] =
       Completer.of(
         diagnosis => diagnosis.copy(
@@ -341,7 +342,7 @@ trait Completers
 
         record.copy(
         patient = record.patient.complete,
-        episodes = record.episodes.complete,
+//        episodes = record.episodes.complete,
         diagnoses = Option(completedDiagnoses),
         guidelineMedicationTherapies = record.guidelineMedicationTherapies.complete,
         guidelineProcedures = record.guidelineProcedures.complete,

@@ -254,14 +254,11 @@ trait Generators
 
       period = Period(LocalDate.now.minusMonths(6))
      
-      status <- Gen.of[Coding[Episode.Status.Value]]
-     
     } yield MTBEpisode(
       id,
       Some(ttan),
       patient,
       period,
-      status,
       diagnoses
     )
 

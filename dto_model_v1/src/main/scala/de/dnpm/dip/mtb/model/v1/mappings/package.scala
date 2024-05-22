@@ -113,7 +113,6 @@ package object mappings
       None,
         episode.patient,
         episode.period,
-        Coding(Episode.Status.Unknown),
         List.empty
       )
 

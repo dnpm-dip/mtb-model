@@ -26,7 +26,6 @@ final case class MTBEpisode
   transferTan: Option[Id[TransferTAN]],
   patient: Reference[Patient],
   period: Period[LocalDate],
-  status: Coding[Episode.Status.Value],
   diagnoses: List[Reference[MTBDiagnosis]]
 )
 extends Episode
