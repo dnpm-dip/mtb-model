@@ -81,13 +81,15 @@ class Tests extends AnyFlatSpec
     // Adapt generator to return only valid sequencing types
     val generator =
       for {
-        seqType <- Gen.`enum`(NGSReport.SequencingType)  // DNPM:DIP model SequencingType
+//        seqType <- Gen.`enum`(NGSReport.SequencingType)  // DNPM:DIP model SequencingType
+        seqType <- Gen.oneOf("Panel","WES","WGS")  // DNPM:DIP model SequencingType
         record <- Gen.of[MTBFile]
       } yield record.copy(
         ngsReports =
           record.ngsReports.map(
             _.map(
-              ngs => ngs.copy(sequencingType = SomaticNGSReport.SequencingType(seqType.toString)) // bwHC SequencingType
+              ngs => ngs.copy(sequencingType = SomaticNGSReport.SequencingType(seqType)) // bwHC SequencingType
+//              ngs => ngs.copy(sequencingType = SomaticNGSReport.SequencingType(seqType.toString)) // bwHC SequencingType
             )
           )
       )

@@ -284,6 +284,23 @@ package object mappings
   }
 
 
+  implicit val sequencingTypeToEnum: String => Coding[NGSReport.SequencingType.Value] = {
+
+    val panel = "panel".r.unanchored
+    val wes   = "wes".r.unanchored
+    val wgs   = "wgs".r.unanchored
+    val lrgs  = "lrgs".r.unanchored  
+
+    seqType => seqType.toLowerCase match {
+      case panel() => NGSReport.SequencingType.Panel
+      case wes()   => NGSReport.SequencingType.Exome
+      case wgs()   => NGSReport.SequencingType.GenomeShortRead
+      case lrgs()  => NGSReport.SequencingType.GenomeLongRead
+    }
+
+  }
+
+
   implicit def ngsReportMapping(
     implicit hgnc: CodeSystem[HGNC]
   ): v1.SomaticNGSReport => model.SomaticNGSReport = {
