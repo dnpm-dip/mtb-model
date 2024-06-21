@@ -41,8 +41,8 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
-  implicit val episodeSchema: Schema[MTBEpisode] =
-    Json.schema[MTBEpisode]
+  implicit val episodeSchema: Schema[MTBEpisodeOfCare] =
+    Json.schema[MTBEpisodeOfCare]
       .toSimpleNameDefinition
 
 
@@ -129,8 +129,8 @@ trait Schemas extends BaseSchemas
     Json.schema[GeneticCounselingRecommendation]
       .toSimpleNameDefinition
 
-  implicit val studyEnrollmentRecommendationSchema: Schema[StudyEnrollmentRecommendation] =
-    Json.schema[StudyEnrollmentRecommendation]
+  implicit val studyEnrollmentRecommendationSchema: Schema[MTBStudyEnrollmentRecommendation] =
+    Json.schema[MTBStudyEnrollmentRecommendation]
       .toSimpleNameDefinition
 
   implicit val carePlanSchema: Schema[MTBCarePlan] =

@@ -25,15 +25,19 @@ final case class MTBCarePlan
 (
   id: Id[MTBCarePlan],
   patient: Reference[Patient],
-  indication: Reference[MTBDiagnosis],
+  indication: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
-  protocol: Option[String],
   medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
-  studyEnrollmentRecommendations: Option[List[StudyEnrollmentRecommendation]]
+  studyEnrollmentRecommendations: Option[List[MTBStudyEnrollmentRecommendation]],
+//  studyEnrollmentRecommendation: Option[MTBStudyEnrollmentRecommendation],
+  notes: Option[String]
 )
 extends CarePlan
+{
+  val therapyRecommendations = None
+}
 
 
 object MTBCarePlan

@@ -18,12 +18,12 @@ import de.dnpm.dip.coding.hgnc.{
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
-  Episode,
   History,
   NGSReport,
   Patient,
   Reference,
   Site,
+  Study,
   Therapy,
   TherapyRecommendation
 }
@@ -32,8 +32,7 @@ import model.{
   ClinVar,
   COSMIC,
   dbSNP,
-  Entrez,
-  Study
+  Entrez
 }
 import de.dnpm.dip.mtb.model.v1
 
@@ -106,14 +105,14 @@ package object mappings
       )
 
 
-  implicit val episodeMapping: v1.MTBEpisode => model.MTBEpisode =
+  implicit val episodeMapping: v1.MTBEpisode => model.MTBEpisodeOfCare =
     episode =>
-      model.MTBEpisode(
+      model.MTBEpisodeOfCare(
         episode.id,
-      None,
+      None,   //TODO: Transfer TAN
         episode.patient,
         episode.period,
-        List.empty
+        None
       )
 
 
@@ -286,16 +285,19 @@ package object mappings
 
   implicit val sequencingTypeToEnum: String => Coding[NGSReport.SequencingType.Value] = {
 
+/*
     val panel = "panel".r.unanchored
     val wes   = "wes".r.unanchored
     val wgs   = "wgs".r.unanchored
     val lrgs  = "lrgs".r.unanchored  
+*/
 
     seqType => seqType.toLowerCase match {
-      case panel() => NGSReport.SequencingType.Panel
-      case wes()   => NGSReport.SequencingType.Exome
-      case wgs()   => NGSReport.SequencingType.GenomeShortRead
-      case lrgs()  => NGSReport.SequencingType.GenomeLongRead
+//      case "panel" => NGSReport.SequencingType.Panel
+      case "wes"   => NGSReport.SequencingType.Exome
+      case "wgs"   => NGSReport.SequencingType.GenomeShortRead
+      case "lrgs"  => NGSReport.SequencingType.GenomeLongRead
+      case s       => NGSReport.SequencingType.withName(s)
     }
 
   }
@@ -501,7 +503,7 @@ package object mappings
       model.MTBMedicationRecommendation(
         rec.id,
         Reference.from(rec.patient),
-        Reference.from(rec.diagnosis),
+        Some(Reference.from(rec.diagnosis)),
         rec.levelOfEvidence,
         Coding(
           rec.priority
@@ -525,12 +527,12 @@ package object mappings
         Coding(model.GeneticCounselingRecommendation.Reason.Unknown)
       )
 
-
+/*
   implicit def studyEnrollmentRecommendationMapping(
     implicit date: LocalDate
-  ): v1.StudyEnrollmentRecommendation => model.StudyEnrollmentRecommendation =
+  ): v1.StudyEnrollmentRecommendation => model.MTBStudyEnrollmentRecommendation =
     rec =>
-      model.StudyEnrollmentRecommendation(
+      model.MTBStudyEnrollmentRecommendation(
         rec.id,
         rec.patient,
         rec.reason,
@@ -539,6 +541,25 @@ package object mappings
         List.empty,
         NonEmptyList.one(
           ExternalId[Study](rec.nctNumber,None)
+        )
+      )
+*/
+
+  implicit def studyEnrollmentRecommendationMapping(
+    implicit date: LocalDate
+  ): v1.StudyEnrollmentRecommendation => model.MTBStudyEnrollmentRecommendation =
+    rec =>
+      model.MTBStudyEnrollmentRecommendation(
+        rec.id,
+        rec.patient,
+        rec.reason,
+        rec.issuedOn.getOrElse(date),
+        None,
+        None,
+        Some(
+          List(
+            ExternalId[Study](rec.nctNumber,None)
+          )
         )
       )
 
@@ -558,13 +579,12 @@ package object mappings
       model.MTBCarePlan(
         cp.id,
         cp.patient,
-        cp.diagnosis,
+        Some(cp.diagnosis),
         issueDate,
         cp.noTargetFinding
           .map(
             _ => Coding(model.MTBCarePlan.StatusReason.NoTarget)
           ),
-        cp.description,
         cp.recommendations
           .map(
             _.flatMap(_.resolveOn(therapyRecommendations))
@@ -576,8 +596,9 @@ package object mappings
         cp.studyInclusionRequests
           .map(
             _.flatMap(_.resolveOn(studyInclusionRequests))
-             .mapAllTo[model.StudyEnrollmentRecommendation]
-           )
+             .mapAllTo[model.MTBStudyEnrollmentRecommendation]
+           ),
+        cp.description
       )
   }
 
@@ -648,7 +669,7 @@ package object mappings
     model.MTBPatientRecord(
       record.patient.mapTo[Patient],
       JsObject.empty,
-      NonEmptyList.one(record.episode.mapTo[model.MTBEpisode]),
+      NonEmptyList.one(record.episode.mapTo[model.MTBEpisodeOfCare]),
       Some(diagnoses.mapAllTo[model.MTBDiagnosis]),
       Some(
         (record.getPreviousGuidelineTherapies ++ record.getLastGuidelineTherapies)

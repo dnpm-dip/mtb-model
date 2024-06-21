@@ -110,7 +110,7 @@ trait Completers
   implicit val mtbPatientRecordCompleter: Completer[MTBPatientRecord] = {
 
 /*    
-    implicit val episodeCompleter: Completer[MTBEpisode] =
+    implicit val episodeCompleter: Completer[MTBEpisodeOfCare] =
       Completer.of(
         episode => episode.copy(
          status = episode.status.complete
@@ -279,8 +279,8 @@ trait Completers
             ),
             priority        = recommendation.priority.complete,
             medication      = recommendation.medication.complete,
-            supportingEvidence =
-              recommendation.supportingEvidence
+            supportingVariants =
+              recommendation.supportingVariants
                 .map(
                   _.flatMap {
                     _.resolveOn(variants)
@@ -317,8 +317,9 @@ trait Completers
     ): Completer[History[MTBMedicationTherapy]] =
       Completer.of(
         th => th.copy(
-          history = th.history.complete.sortBy(_.recordedOn)(Ordering[LocalDate].reverse)
+          history = th.history.complete
         )
+        .ordered
       )
 
 

@@ -9,8 +9,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.model.{
   Id,
   Period,
-  Patient,
-  Episode
+  Patient
 }
 import play.api.libs.json.{
   Json, 

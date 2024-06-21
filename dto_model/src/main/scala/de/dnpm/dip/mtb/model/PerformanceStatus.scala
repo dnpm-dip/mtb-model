@@ -5,7 +5,6 @@ import java.time.LocalDate
 import de.dnpm.dip.model.{
   Id,
   Reference,
-  Quantity,
   Observation,
   Patient
 }

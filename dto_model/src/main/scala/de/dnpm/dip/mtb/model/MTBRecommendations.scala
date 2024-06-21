@@ -16,7 +16,9 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   TherapyRecommendation,
-  MedicationRecommendation
+  MedicationRecommendation,
+  Study,
+  StudyEnrollmentRecommendation
 }
 import de.dnpm.dip.coding.atc.ATC
 import play.api.libs.json.{
@@ -31,18 +33,37 @@ final case class MTBMedicationRecommendation
 (
   id: Id[MTBMedicationRecommendation],
   patient: Reference[Patient],
-  indication: Reference[MTBDiagnosis],
+  indication: Option[Reference[MTBDiagnosis]],
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Coding[TherapyRecommendation.Priority.Value],
   issuedOn: LocalDate,
   medication: Set[Coding[ATC]],
-  supportingEvidence: Option[List[Reference[Variant]]]
+//  useType: Coding[MTBMedicationRecommendation.UseType.Value],
+  supportingVariants: Option[List[Reference[Variant]]]
 )
 extends MedicationRecommendation[ATC]
 
 
 object MTBMedicationRecommendation
 {
+
+  object UseType
+  extends CodedEnum("dnpm-dip/mtb/recommendation/medication/use-type")
+  with DefaultCodeSystem
+  {
+    val InLabel       = Value("in-label")
+    val OffLabel      = Value("off-label")
+    val Compassionate = Value("compassionate")
+
+    override val display =
+      Map(
+        InLabel       -> "In-Label Use",
+        OffLabel      -> "Off-Label USe",
+        Compassionate -> "Compassionate Use",
+      )
+
+  }
+
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]
 }
@@ -79,8 +100,6 @@ object GeneticCounselingRecommendation
         Unknown         -> "Unbekannt"
       )
 
-    implicit val format: Format[Value] =
-      Json.formatEnum(this)
   }
 
   implicit val format: OFormat[GeneticCounselingRecommendation] =
@@ -88,24 +107,20 @@ object GeneticCounselingRecommendation
 }
 
 
-sealed trait Study
-
-final case class StudyEnrollmentRecommendation
+final case class MTBStudyEnrollmentRecommendation
 (
-  id: Id[StudyEnrollmentRecommendation],
+  id: Id[MTBStudyEnrollmentRecommendation],
   patient: Reference[Patient],
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
-  supportingEvidence: List[Reference[Variant]],
-  studyIds: NonEmptyList[ExternalId[Study]]
+  supportingVariants: Option[List[Reference[Variant]]],
+  studies: Option[List[ExternalId[Study]]]
 )
+extends StudyEnrollmentRecommendation
 
-object StudyEnrollmentRecommendation
+object MTBStudyEnrollmentRecommendation
 {
-
-  import de.dnpm.dip.util.json._
-
-  implicit val format: OFormat[StudyEnrollmentRecommendation] =
-    Json.format[StudyEnrollmentRecommendation]
+  implicit val format: OFormat[MTBStudyEnrollmentRecommendation] =
+    Json.format[MTBStudyEnrollmentRecommendation]
 }

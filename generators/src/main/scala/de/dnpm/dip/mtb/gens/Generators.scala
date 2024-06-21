@@ -35,7 +35,6 @@ import de.dnpm.dip.coding.icd.ICD.extensions._
 import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.model.{
   ClosedInterval,
-  Episode,
   ExternalId,
   Gender,
   GuidelineTreatmentStatus,
@@ -48,6 +47,7 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Reference,
+  Study,
   Therapy,
   TherapyRecommendation,
   TransferTAN
@@ -246,20 +246,20 @@ trait Generators
   def genEpisode(
     patient: Reference[Patient],
     diagnoses: List[Reference[MTBDiagnosis]]
-  ): Gen[MTBEpisode] =
+  ): Gen[MTBEpisodeOfCare] =
     for {
-      id <- Gen.of[Id[MTBEpisode]]
+      id <- Gen.of[Id[MTBEpisodeOfCare]]
 
       ttan  <- Gen.of[Id[TransferTAN]]
 
       period = Period(LocalDate.now.minusMonths(6))
      
-    } yield MTBEpisode(
+    } yield MTBEpisodeOfCare(
       id,
       Some(ttan),
       patient,
       period,
-      diagnoses
+      Some(diagnoses)
     )
 
 
@@ -757,7 +757,7 @@ trait Generators
     } yield MTBMedicationRecommendation(
       id,
       patient,
-      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       Some(evidenceLevel),
       priority,
       LocalDate.now,
@@ -801,29 +801,29 @@ trait Generators
 
       studyEnrollmentRecommendation <-
         for { 
-          stId <- Gen.of[Id[StudyEnrollmentRecommendation]]
+          stId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
           nctId <- Gen.intsBetween(10000000,50000000)
                      .map(s => ExternalId[Study](s"NCT:$s","NCT"))
-        } yield StudyEnrollmentRecommendation(
+        } yield MTBStudyEnrollmentRecommendation(
           stId,
           patient,
-          recommendations.head.indication,
+          recommendations.head.indication.get,
           LocalDate.now,
           recommendations.head.levelOfEvidence.map(_.grading),
-          recommendations.head.supportingEvidence.get,
-          NonEmptyList.one(nctId)
+          recommendations.head.supportingVariants,
+          Some(List(nctId))
         )
 
     } yield MTBCarePlan(
       id,
       patient,
-      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       LocalDate.now,
       Some(statusReason),
-      Some(protocol),
       Some(recommendations),
       Some(counselingRecommendation),
-      Some(List(studyEnrollmentRecommendation))
+      Some(List(studyEnrollmentRecommendation)),
+      Some(protocol)
     )
 
 
@@ -1087,7 +1087,7 @@ trait Generators
       Some(List(carePlan)),
       Some(claims),
       Some(claimResponses),
-      Some(therapies.map(List(_)).map(History(_))),
+      Some(therapies.map(History(_))),
       Some(responses)
     )
 

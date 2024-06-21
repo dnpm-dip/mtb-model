@@ -11,7 +11,7 @@ import de.dnpm.dip.model.{
   Period,
   Reference,
   Patient,
-  Episode,
+  EpisodeOfCare,
   TransferTAN
 }
 import play.api.libs.json.{
@@ -20,19 +20,19 @@ import play.api.libs.json.{
 }
 
 
-final case class MTBEpisode
+final case class MTBEpisodeOfCare
 (
-  id: Id[MTBEpisode],
+  id: Id[MTBEpisodeOfCare],
   transferTan: Option[Id[TransferTAN]],
   patient: Reference[Patient],
   period: Period[LocalDate],
-  diagnoses: List[Reference[MTBDiagnosis]]
+  diagnoses: Option[List[Reference[MTBDiagnosis]]]
 )
-extends Episode
+extends EpisodeOfCare
 
 
-object MTBEpisode
+object MTBEpisodeOfCare
 {
-  implicit val format: OFormat[MTBEpisode] =
-    Json.format[MTBEpisode]
+  implicit val format: OFormat[MTBEpisodeOfCare] =
+    Json.format[MTBEpisodeOfCare]
 }

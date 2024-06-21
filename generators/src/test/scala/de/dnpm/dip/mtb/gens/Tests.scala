@@ -35,7 +35,7 @@ with Generators
 
     record.getCarePlans
       .flatMap(_.medicationRecommendations.getOrElse(List.empty))
-      .flatMap(_.supportingEvidence) must not be empty
+      .flatMap(_.supportingVariants) must not be empty
 
   }
 

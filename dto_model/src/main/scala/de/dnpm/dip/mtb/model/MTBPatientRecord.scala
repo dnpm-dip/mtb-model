@@ -3,7 +3,6 @@ package de.dnpm.dip.mtb.model
 
 import cats.data.NonEmptyList
 import de.dnpm.dip.model.{
-  Episode,
   History,
   Patient,
   PatientRecord
@@ -19,7 +18,7 @@ final case class MTBPatientRecord
 (
   patient: Patient,
   consent: JsObject,
-  episodes: NonEmptyList[MTBEpisode],
+  episodesOfCare: NonEmptyList[MTBEpisodeOfCare],
   diagnoses: Option[List[MTBDiagnosis]],
   guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
