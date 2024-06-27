@@ -35,8 +35,11 @@ final case class MTBDiagnosis
   recordedOn: Option[LocalDate],
   code: Coding[ICD10GM],
   topography: Option[Coding[ICDO3.Topography]],
+  tumorGrade: Option[Coding[TumorGrade.Value]],
   whoGrading: Option[Coding[WHOGrading]],
-  stageHistory: Option[Seq[MTBDiagnosis.StageOnDate]],
+  //TODO: consider modelling "tumor grade" as
+  // tumorGrade: Option[Coding[TumorGrade.Value :+: WHOGrading :+: CNil]]
+  stageHistory: Option[Seq[MTBDiagnosis.TumorSpread]],
   guidelineTreatmentStatus: Option[Coding[GuidelineTreatmentStatus.Value]]
 )
 extends Diagnosis
@@ -44,12 +47,10 @@ extends Diagnosis
 object MTBDiagnosis
 {
 
-  object TumorStage
-  extends CodedEnum("dnpm-dip/mtb/diagnosis/stage")
+  object TumorSpread
+  extends CodedEnum("dnpm-dip/mtb/diagnosis/tumor-spread") 
   with DefaultCodeSystem
   {
-    type Stage = Value
-
     val TumorFree    = Value("tumor-free")
     val Local        = Value("local")
     val Metastasized = Value("metastasized")
@@ -58,24 +59,25 @@ object MTBDiagnosis
     implicit val format: Format[Value] =
       Json.formatEnum(this)
 
-    override val display = {
-      case TumorFree    => "Tumorfrei"
-      case Local        => "Lokal"
-      case Metastasized => "Metastasiert"
-      case Unknown      => "Unbekannt"
-    }
+    override val display =
+      Map(
+        TumorFree    -> "Tumorfrei",
+        Local        -> "Lokal",
+        Metastasized -> "Metastasiert",
+        Unknown      -> "Unbekannt"
+      )
   }
 
 
-  final case class StageOnDate
+  final case class TumorSpread
   (
-    stage: Coding[TumorStage.Value],
+    stage: Coding[TumorSpread.Value],
     date: LocalDate
   )
 
 
-  implicit val formatStage: OFormat[StageOnDate] =
-    Json.format[StageOnDate]
+  implicit val formatStage: OFormat[TumorSpread] =
+    Json.format[TumorSpread]
 
   implicit val format: OFormat[MTBDiagnosis] =
     Json.format[MTBDiagnosis]

@@ -343,9 +343,9 @@ trait Completers
 
         record.copy(
         patient = record.patient.complete,
-//        episodes = record.episodes.complete,
         diagnoses = Option(completedDiagnoses),
-        guidelineMedicationTherapies = record.guidelineMedicationTherapies.complete,
+        guidelineTherapies = record.guidelineTherapies.complete,
+//        guidelineMedicationTherapies = record.guidelineMedicationTherapies.complete,
         guidelineProcedures = record.guidelineProcedures.complete,
         performanceStatus = record.performanceStatus.complete,
         specimens = record.specimens.complete,
@@ -353,7 +353,8 @@ trait Completers
         ihcReports = record.ihcReports.complete,
         ngsReports = record.ngsReports.complete,
         carePlans = record.carePlans.complete, 
-        medicationTherapies = record.medicationTherapies.complete,
+        therapies = record.therapies.complete,
+//        medicationTherapies = record.medicationTherapies.complete,
         responses = record.responses.complete, 
       )
 

@@ -189,7 +189,8 @@ trait Generators
         birthDate,
         dateOfDeath,
         None,
-        Some(healthInsurance)
+        Some(healthInsurance),
+        None
       )
 
 
@@ -222,11 +223,13 @@ trait Generators
           .find(_.code.value == icd10.code.value)
           .map(_.toCoding)
 
+      grade <- Gen.of[Coding[TumorGrade.Value]]
+
       who <- Gen.of[Coding[WHOGrading]]
 
       stageHistory <-
-        Gen.of[Coding[MTBDiagnosis.TumorStage.Value]]
-          .map(MTBDiagnosis.StageOnDate(_,LocalDate.now))
+        Gen.of[Coding[MTBDiagnosis.TumorSpread.Value]]
+          .map(MTBDiagnosis.TumorSpread(_,LocalDate.now))
           .map(Seq(_))
 
       gl <- Gen.of[Coding[GuidelineTreatmentStatus.Value]]
@@ -237,6 +240,7 @@ trait Generators
       Some(date),
       icd10,
       icdo3,
+      Some(grade),
       Some(who),
       Some(stageHistory),
       Some(gl)
@@ -313,7 +317,7 @@ trait Generators
     } yield MTBMedicationTherapy(
       id,
       patient,
-      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       Some(therapyLine),
       None,
       LocalDate.now,
@@ -346,7 +350,7 @@ trait Generators
     } yield OncoProcedure(
       id,
       patient,
-      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       code,
       status,
       Some(statusReason),
@@ -758,9 +762,9 @@ trait Generators
       id,
       patient,
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
-      Some(evidenceLevel),
-      priority,
       LocalDate.now,
+      Some(evidenceLevel),
+      Some(priority),
       Set(medication),
       Some(List(supportingVariant))
     )
@@ -918,7 +922,7 @@ trait Generators
     } yield MTBMedicationTherapy(
       id,
       Reference.to(patient),
-      Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value),
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       None,
       Some(Reference.to(recommendation)),
       LocalDate.now,

@@ -20,7 +20,8 @@ final case class MTBPatientRecord
   consent: JsObject,
   episodesOfCare: NonEmptyList[MTBEpisodeOfCare],
   diagnoses: Option[List[MTBDiagnosis]],
-  guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
+  guidelineTherapies: Option[List[MTBMedicationTherapy]],
+//  guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
   specimens: Option[List[TumorSpecimen]],
@@ -30,7 +31,8 @@ final case class MTBPatientRecord
   carePlans: Option[List[MTBCarePlan]],
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
-  medicationTherapies: Option[List[History[MTBMedicationTherapy]]],
+  therapies: Option[List[History[MTBMedicationTherapy]]],
+//  medicationTherapies: Option[List[History[MTBMedicationTherapy]]],
   responses: Option[List[Response]]
 )
 extends PatientRecord
@@ -38,8 +40,10 @@ extends PatientRecord
   def getDiagnoses =
     diagnoses.getOrElse(List.empty)
 
-  def getGuidelineMedicationTherapies =
-    guidelineMedicationTherapies.getOrElse(List.empty)
+  def getGuidelineTherapies =
+    guidelineTherapies.getOrElse(List.empty)
+//  def getGuidelineMedicationTherapies =
+//    guidelineMedicationTherapies.getOrElse(List.empty)
 
   def getGuidelineProcedures =
     guidelineProcedures.getOrElse(List.empty)
@@ -68,8 +72,10 @@ extends PatientRecord
   def getClaimResponses =
     claimResponses.getOrElse(List.empty)
 
-  def getMedicationTherapies =
-    medicationTherapies.getOrElse(List.empty)
+  def getTherapies =
+    therapies.getOrElse(List.empty)
+//  def getMedicationTherapies =
+//    medicationTherapies.getOrElse(List.empty)
 
   def getResponses =
     responses.getOrElse(List.empty)

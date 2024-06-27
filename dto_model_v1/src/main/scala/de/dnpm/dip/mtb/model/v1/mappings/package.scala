@@ -102,6 +102,7 @@ package object mappings
         patient.dateOfDeath.map(_.atEndOfMonth),
         Some(Site.local),
         patient.insurance.map(Reference.from(_)),
+        None
       )
 
 
@@ -124,10 +125,11 @@ package object mappings
         diag.recordedOn,
         diag.icd10,
         diag.icdO3T,
+        None,
         diag.whoGrade,
         diag.statusHistory.map(
           _.map(
-            st => model.MTBDiagnosis.StageOnDate(
+            st => model.MTBDiagnosis.TumorSpread(
               Coding(st.status),
               st.date
             )
@@ -146,6 +148,7 @@ package object mappings
       model.MTBMedicationTherapy(
         th.id,
         th.patient,
+/*        
         th.diagnosis
           .orElse(
             th.basedOn
@@ -154,6 +157,8 @@ package object mappings
           )
           .getOrElse(diagnoses.head.id)
           .asInstanceOf[Id[model.MTBDiagnosis]],
+*/
+        th.diagnosis.map(Reference.from(_)),
         th.therapyLine,
         th.basedOn
           .map(Reference.from(_)),
@@ -504,12 +509,9 @@ package object mappings
         rec.id,
         Reference.from(rec.patient),
         Some(Reference.from(rec.diagnosis)),
-        rec.levelOfEvidence,
-        Coding(
-          rec.priority
-            .getOrElse(TherapyRecommendation.Priority.One) //TODO: reconsider how to handle when missing 
-        ),
         rec.issuedOn.getOrElse(date),
+        rec.levelOfEvidence,
+        rec.priority.map(Coding(_)),
         rec.medication.getOrElse(Set.empty),
         rec.supportingVariants
           .map(_.map(Reference.from(_)))
@@ -527,23 +529,6 @@ package object mappings
         Coding(model.GeneticCounselingRecommendation.Reason.Unknown)
       )
 
-/*
-  implicit def studyEnrollmentRecommendationMapping(
-    implicit date: LocalDate
-  ): v1.StudyEnrollmentRecommendation => model.MTBStudyEnrollmentRecommendation =
-    rec =>
-      model.MTBStudyEnrollmentRecommendation(
-        rec.id,
-        rec.patient,
-        rec.reason,
-        rec.issuedOn.getOrElse(date),
-        None,
-        List.empty,
-        NonEmptyList.one(
-          ExternalId[Study](rec.nctNumber,None)
-        )
-      )
-*/
 
   implicit def studyEnrollmentRecommendationMapping(
     implicit date: LocalDate

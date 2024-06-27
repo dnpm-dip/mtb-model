@@ -28,7 +28,7 @@ final case class OncoProcedure
 (
   id: Id[OncoProcedure],
   patient: Reference[Patient],
-  indication: Reference[MTBDiagnosis],
+  indication: Option[Reference[MTBDiagnosis]],
   code: Coding[OncoProcedure.Type.Value],
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason.Value]],
@@ -36,7 +36,7 @@ final case class OncoProcedure
   basedOn: Option[Reference[TherapyRecommendation]],
   recordedOn: LocalDate,
   period: Option[Period[LocalDate]],
-  note: Option[String]
+  notes: Option[String]
 )
 extends Procedure[OncoProcedure.Type.Value]
 {

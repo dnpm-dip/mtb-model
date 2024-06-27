@@ -45,11 +45,11 @@ final case class MTBDiagnosis
 object MTBDiagnosis
 {
 
-  import de.dnpm.dip.mtb.model.MTBDiagnosis.TumorStage
+  import de.dnpm.dip.mtb.model.MTBDiagnosis.TumorSpread
 
   final case class StatusOnDate
   (
-    status: TumorStage.Value,
+    status: TumorSpread.Value,
     date: LocalDate
   )
 

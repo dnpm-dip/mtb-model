@@ -199,7 +199,6 @@ final case class SomaticNGSReport
   specimen: Reference[TumorSpecimen],
   issuedOn: LocalDate,
   sequencingType: Coding[NGSReport.SequencingType.Value],
-//  sequencingType: String,
   metadata: List[SomaticNGSReport.Metadata],
   results: SomaticNGSReport.Results
 )

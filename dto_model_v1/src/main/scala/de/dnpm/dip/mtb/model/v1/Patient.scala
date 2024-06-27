@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter
 import scala.util.Try
 import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
+  Address,
   Gender,
   Id,
   Organization
@@ -31,7 +32,8 @@ final case class Patient
   gender: Gender.Value,
   birthDate: YearMonth,
   dateOfDeath: Option[YearMonth],
-  insurance: Option[Id[Organization]]
+  insurance: Option[Id[Organization]],
+  address: Option[Address]
 )
 
 object Patient

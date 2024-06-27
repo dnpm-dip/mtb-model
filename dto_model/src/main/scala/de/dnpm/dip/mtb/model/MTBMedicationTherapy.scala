@@ -28,15 +28,16 @@ final case class MTBMedicationTherapy
 (
   id: Id[MTBMedicationTherapy],
   patient: Reference[Patient],
-  indication: Reference[MTBDiagnosis],
+  indication: Option[Reference[MTBDiagnosis]],
   therapyLine: Option[Int],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
   recordedOn: LocalDate,
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason.Value]],
   period: Option[Period[LocalDate]],
+//  medication: Option[Set[Coding[ATC :+: Unregistered :+: CNil]]],
   medication: Option[Set[Coding[ATC]]],
-  note: Option[String]
+  notes: Option[String]
 )
 extends MedicationTherapy[ATC]
 {

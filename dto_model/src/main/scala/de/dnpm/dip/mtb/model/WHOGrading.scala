@@ -16,7 +16,6 @@ import de.dnpm.dip.coding.{
 
 
 sealed trait WHOGrading
-
 object WHOGrading
 {
 

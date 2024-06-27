@@ -34,9 +34,9 @@ final case class MTBMedicationRecommendation
   id: Id[MTBMedicationRecommendation],
   patient: Reference[Patient],
   indication: Option[Reference[MTBDiagnosis]],
-  levelOfEvidence: Option[LevelOfEvidence],
-  priority: Coding[TherapyRecommendation.Priority.Value],
   issuedOn: LocalDate,
+  levelOfEvidence: Option[LevelOfEvidence],
+  priority: Option[Coding[TherapyRecommendation.Priority.Value]],
   medication: Set[Coding[ATC]],
 //  useType: Coding[MTBMedicationRecommendation.UseType.Value],
   supportingVariants: Option[List[Reference[Variant]]]
@@ -58,7 +58,7 @@ object MTBMedicationRecommendation
     override val display =
       Map(
         InLabel       -> "In-Label Use",
-        OffLabel      -> "Off-Label USe",
+        OffLabel      -> "Off-Label Use",
         Compassionate -> "Compassionate Use",
       )
 
