@@ -37,6 +37,7 @@ final case class MTBMedicationRecommendation
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Option[Coding[TherapyRecommendation.Priority.Value]],
+//  medication: Set[Coding[ATC]],
   medication: Set[Coding[ATC]],
 //  useType: Coding[MTBMedicationRecommendation.UseType.Value],
   supportingVariants: Option[List[Reference[Variant]]]

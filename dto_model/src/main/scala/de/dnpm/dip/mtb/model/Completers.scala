@@ -22,8 +22,8 @@ import de.dnpm.dip.coding.icd.{
   ICDO3
 }
 import de.dnpm.dip.coding.hgnc.HGNC
-import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.model.{
+  BaseCompleters,
   History,
   Patient,
   Site,
@@ -32,7 +32,7 @@ import de.dnpm.dip.model.{
 
 
 
-trait Completers
+trait Completers extends BaseCompleters
 {
 
   import scala.util.chaining._
@@ -49,25 +49,6 @@ trait Completers
 
   protected implicit val whoGrading: CodeSystemProvider[WHOGrading,Id,Applicative[Id]] = 
     new WHOGrading.Provider.Facade[Id]
-
-
-
-  private implicit val patientCompleter: Completer[Patient] =
-    Completer.of(
-      pat =>
-        pat.copy(
-          gender       = pat.gender.complete,
-          managingSite = Some(Site.local)
-        )
-    )
-
-
-  private implicit def hgvsCompleter[S <: HGVS]: Completer[Coding[S]] =
-    Completer.of(
-      coding => coding.copy(
-        display = coding.display.orElse(Some(coding.code.value))
-      )
-    )
 
 
   private implicit val icdo3tCompleter: Completer[Coding[ICDO3.T]] =
@@ -345,7 +326,6 @@ trait Completers
         patient = record.patient.complete,
         diagnoses = Option(completedDiagnoses),
         guidelineTherapies = record.guidelineTherapies.complete,
-//        guidelineMedicationTherapies = record.guidelineMedicationTherapies.complete,
         guidelineProcedures = record.guidelineProcedures.complete,
         performanceStatus = record.performanceStatus.complete,
         specimens = record.specimens.complete,
@@ -354,7 +334,6 @@ trait Completers
         ngsReports = record.ngsReports.complete,
         carePlans = record.carePlans.complete, 
         therapies = record.therapies.complete,
-//        medicationTherapies = record.medicationTherapies.complete,
         responses = record.responses.complete, 
       )
 

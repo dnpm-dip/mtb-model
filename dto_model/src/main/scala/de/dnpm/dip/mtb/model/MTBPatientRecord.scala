@@ -21,7 +21,6 @@ final case class MTBPatientRecord
   episodesOfCare: NonEmptyList[MTBEpisodeOfCare],
   diagnoses: Option[List[MTBDiagnosis]],
   guidelineTherapies: Option[List[MTBMedicationTherapy]],
-//  guidelineMedicationTherapies: Option[List[MTBMedicationTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
   specimens: Option[List[TumorSpecimen]],
@@ -32,7 +31,6 @@ final case class MTBPatientRecord
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
   therapies: Option[List[History[MTBMedicationTherapy]]],
-//  medicationTherapies: Option[List[History[MTBMedicationTherapy]]],
   responses: Option[List[Response]]
 )
 extends PatientRecord
@@ -42,8 +40,6 @@ extends PatientRecord
 
   def getGuidelineTherapies =
     guidelineTherapies.getOrElse(List.empty)
-//  def getGuidelineMedicationTherapies =
-//    guidelineMedicationTherapies.getOrElse(List.empty)
 
   def getGuidelineProcedures =
     guidelineProcedures.getOrElse(List.empty)
@@ -74,8 +70,6 @@ extends PatientRecord
 
   def getTherapies =
     therapies.getOrElse(List.empty)
-//  def getMedicationTherapies =
-//    medicationTherapies.getOrElse(List.empty)
 
   def getResponses =
     responses.getOrElse(List.empty)

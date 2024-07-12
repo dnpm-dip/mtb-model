@@ -11,6 +11,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   Id,
+  Medications,
   Period,
   Reference,
   Patient,
@@ -35,11 +36,12 @@ final case class MTBMedicationTherapy
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[Therapy.StatusReason.Value]],
   period: Option[Period[LocalDate]],
-//  medication: Option[Set[Coding[ATC :+: Unregistered :+: CNil]]],
+//  medication: Option[Set[Coding[Medications]]],
   medication: Option[Set[Coding[ATC]]],
   notes: Option[String]
 )
 extends MedicationTherapy[ATC]
+//extends MedicationTherapy[Medications]
 {
   val category = None
 }
@@ -47,9 +49,6 @@ extends MedicationTherapy[ATC]
 
 object MTBMedicationTherapy
 {
-
   implicit val format: OFormat[MTBMedicationTherapy] =
     Json.format[MTBMedicationTherapy]
-
 }
-
