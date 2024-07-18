@@ -22,7 +22,6 @@ final case class LevelOfEvidence
   grading: Coding[LevelOfEvidence.Grading.Value],
   addendums: Option[Set[Coding[LevelOfEvidence.Addendum.Value]]],
   publications: Option[List[Reference[Publication]]]
-//  publications: Option[List[LevelOfEvidence.Publication]]
 )
 
 object LevelOfEvidence
@@ -57,17 +56,6 @@ object LevelOfEvidence
 
   }
 
-/*
-  final case class Publication
-  (
-    pmid: Option[String],
-    doi: Option[String],
-  )
-
-
-  implicit val formatPublication: OFormat[Publication] =
-    Json.format[Publication]
-*/
   implicit val format: OFormat[LevelOfEvidence] =
     Json.format[LevelOfEvidence]
 

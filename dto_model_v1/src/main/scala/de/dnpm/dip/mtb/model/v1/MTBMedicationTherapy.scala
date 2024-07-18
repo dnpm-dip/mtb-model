@@ -36,7 +36,7 @@ final case class MTBMedicationTherapy
   recordedOn: Option[LocalDate],
   status: Option[Therapy.Status.Value],
   period: Option[Period[LocalDate]],
-  medication: Option[Set[Coding[ATC]]],
+  medication: Option[Set[Coding[Any]]],
   notDoneReason: Option[Coding[Therapy.StatusReason.Value]],
   reasonStopped: Option[Coding[Therapy.StatusReason.Value]],
   note: Option[String],

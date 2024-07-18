@@ -33,7 +33,7 @@ final case class MTBMedicationRecommendation
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Option[TherapyRecommendation.Priority.Value],
   issuedOn: Option[LocalDate],
-  medication: Option[Set[Coding[ATC]]],
+  medication: Option[Set[Coding[Any]]],
   ngsReport: Option[Id[SomaticNGSReport]],
   supportingVariants: Option[List[Id[Variant]]]
 )

@@ -16,6 +16,7 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   TherapyRecommendation,
+  Medications,
   MedicationRecommendation,
   Study,
   StudyEnrollmentRecommendation
@@ -37,12 +38,11 @@ final case class MTBMedicationRecommendation
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Option[Coding[TherapyRecommendation.Priority.Value]],
-//  medication: Set[Coding[ATC]],
-  medication: Set[Coding[ATC]],
+  medication: Set[Coding[Medications]],
 //  useType: Coding[MTBMedicationRecommendation.UseType.Value],
   supportingVariants: Option[List[Reference[Variant]]]
 )
-extends MedicationRecommendation[ATC]
+extends MedicationRecommendation[Medications]
 
 
 object MTBMedicationRecommendation

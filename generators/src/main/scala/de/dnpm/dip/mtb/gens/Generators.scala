@@ -40,6 +40,7 @@ import de.dnpm.dip.model.{
   GuidelineTreatmentStatus,
   History,
   Id,
+  Medications,
   NGSReport,
   Organization,
   Patient,
@@ -310,6 +311,7 @@ trait Generators
 
       medication <-
         Gen.of[Coding[ATC]]
+          .map(_.asInstanceOf[Coding[Medications]])
           .map(Set(_))
 
       note = "Notes on the therapy..."

@@ -11,6 +11,8 @@ import de.dnpm.dip.coding.{
   Coding,
   CodeSystem
 }
+import de.dnpm.dip.coding.atc.ATC
+import de.dnpm.dip.coding.UnregisteredMedication
 import de.dnpm.dip.coding.hgnc.{
   HGNC,
   Ensembl
@@ -19,6 +21,7 @@ import de.dnpm.dip.model.{
   Id,
   ExternalId,
   History,
+  Medications,
   NGSReport,
   Patient,
   Reference,
@@ -92,6 +95,20 @@ package object mappings
     Coding(v)
 
 
+  implicit val anyToMedicationsCoding: Coding[Any] => Coding[Medications] = {
+
+    val atc = "(?i)(atc)".r.unanchored
+
+    coding =>
+      coding.copy(
+        system = coding.system.toString match {
+          case atc(_) => Coding.System[ATC].uri
+          case _      => Coding.System[UnregisteredMedication].uri
+        }
+      )
+      .asInstanceOf[Coding[Medications]]
+  }
+
 
   implicit val patientMapping: v1.Patient => Patient =
     patient =>
@@ -148,16 +165,6 @@ package object mappings
       model.MTBMedicationTherapy(
         th.id,
         th.patient,
-/*        
-        th.diagnosis
-          .orElse(
-            th.basedOn
-              .flatMap(_.resolveOn(recommendations))
-              .map(_.diagnosis)
-          )
-          .getOrElse(diagnoses.head.id)
-          .asInstanceOf[Id[model.MTBDiagnosis]],
-*/
         th.diagnosis.map(Reference.from(_)),
         th.therapyLine,
         th.basedOn
@@ -169,7 +176,7 @@ package object mappings
         th.notDoneReason
           .orElse(th.reasonStopped),
         th.period,
-        th.medication,
+        th.medication.map(_.mapAllTo[Coding[Medications]]),
         th.note
       )
 
@@ -290,15 +297,7 @@ package object mappings
 
   implicit val sequencingTypeToEnum: String => Coding[NGSReport.SequencingType.Value] = {
 
-/*
-    val panel = "panel".r.unanchored
-    val wes   = "wes".r.unanchored
-    val wgs   = "wgs".r.unanchored
-    val lrgs  = "lrgs".r.unanchored  
-*/
-
     seqType => seqType.toLowerCase match {
-//      case "panel" => NGSReport.SequencingType.Panel
       case "wes"   => NGSReport.SequencingType.Exome
       case "wgs"   => NGSReport.SequencingType.GenomeShortRead
       case "lrgs"  => NGSReport.SequencingType.GenomeLongRead
@@ -512,7 +511,8 @@ package object mappings
         rec.issuedOn.getOrElse(date),
         rec.levelOfEvidence,
         rec.priority.map(Coding(_)),
-        rec.medication.getOrElse(Set.empty),
+//        rec.medication.getOrElse(Set.empty),
+        rec.medication.getOrElse(Set.empty).mapAllTo[Coding[Medications]],
         rec.supportingVariants
           .map(_.map(Reference.from(_)))
       )
