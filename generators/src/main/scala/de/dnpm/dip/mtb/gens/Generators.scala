@@ -107,15 +107,28 @@ trait Generators
 
   private val symbols =
     Set(
+      "AACS",
+      "AAGAB",
+      "ABCA3",
+      "ABCA4",
+      "ABRAXAS1",
+      "ACAD10",
       "ABL1",
       "AKT1",
+      "ATRX",
       "BRCA1",
       "BRAF",
+      "BRAFP1",
+      "CDH13",
+      "CDK6",
+      "EGFR",
       "FGFR2",
       "FGFR3",
       "HRAS",
       "KRAS",
       "MDM2",
+      "MTOR",
+      "RET",
       "TP53",
     )
 
@@ -596,17 +609,16 @@ trait Generators
 
       cnB <- Gen.doubles
 
-      affectedGenes <- Gen.list(Gen.intsBetween(1,4),Gen.of[Coding[HGNC]])
+      affectedGenes <- Gen.list(Gen.intsBetween(4,20),Gen.of[Coding[HGNC]])
 
       focality = "partial q-arm"
 
-      copyNumberNeutralLoH <- Gen.list(Gen.intsBetween(1,4),Gen.of[Coding[HGNC]])
+      copyNumberNeutralLoH <- Gen.list(Gen.intsBetween(3,15),Gen.of[Coding[HGNC]])
 
       typ = copyNum match { 
         case n if n < 2 => CNV.Type.Loss
         case n if n < 4 => CNV.Type.LowLevelGain
         case n          => CNV.Type.HighLevelGain
-
       }
 
     } yield CNV(
