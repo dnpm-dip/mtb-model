@@ -99,16 +99,13 @@ object Variant
     implicit val snvEq: Eq[SNV] =
       instance(
         (v1, v2) =>
-//          v1.chromosome == v2.chromosome &&
           v1.gene == v2.gene &&
-          v1.dnaChange == v2.dnaChange &&
           v1.proteinChange == v2.proteinChange
       )
   
     implicit val cnvEq: Eq[CNV] =
       instance(
         (v1, v2) =>
-//          v1.chromosome == v2.chromosome &&
           v1.reportedAffectedGenes == v2.reportedAffectedGenes &&
           v1.`type` == v2.`type`
       )

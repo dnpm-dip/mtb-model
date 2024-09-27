@@ -127,7 +127,6 @@ package object mappings
     episode =>
       model.MTBEpisodeOfCare(
         episode.id,
-      None,   //TODO: Transfer TAN
         episode.patient,
         episode.period,
         None
@@ -482,7 +481,6 @@ package object mappings
         specimen,
         report.issueDate,
         report.sequencingType.mapTo[Coding[NGSReport.SequencingType.Value]],
-//        report.sequencingType,
         report.metadata,
         model.SomaticNGSReport.Results(
           report.tumorCellContent.map(_.mapTo[model.TumorCellContent]),
@@ -511,7 +509,6 @@ package object mappings
         rec.issuedOn.getOrElse(date),
         rec.levelOfEvidence,
         rec.priority.map(Coding(_)),
-//        rec.medication.getOrElse(Set.empty),
         rec.medication.getOrElse(Set.empty).mapAllTo[Coding[Medications]],
         rec.supportingVariants
           .map(_.map(Reference.from(_)))

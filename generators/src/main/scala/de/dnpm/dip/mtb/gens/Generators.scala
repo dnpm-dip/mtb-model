@@ -50,8 +50,7 @@ import de.dnpm.dip.model.{
   Reference,
   Study,
   Therapy,
-  TherapyRecommendation,
-  TransferTAN
+  TherapyRecommendation
 }
 import de.dnpm.dip.mtb.model._
 import Therapy.StatusReason.{
@@ -268,13 +267,10 @@ trait Generators
     for {
       id <- Gen.of[Id[MTBEpisodeOfCare]]
 
-      ttan  <- Gen.of[Id[TransferTAN]]
-
       period = Period(LocalDate.now.minusMonths(6))
      
     } yield MTBEpisodeOfCare(
       id,
-      Some(ttan),
       patient,
       period,
       Some(diagnoses)

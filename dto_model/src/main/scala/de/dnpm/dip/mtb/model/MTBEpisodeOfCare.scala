@@ -12,7 +12,6 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   EpisodeOfCare,
-  TransferTAN
 }
 import play.api.libs.json.{
   Json, 
@@ -23,7 +22,6 @@ import play.api.libs.json.{
 final case class MTBEpisodeOfCare
 (
   id: Id[MTBEpisodeOfCare],
-  transferTan: Option[Id[TransferTAN]],
   patient: Reference[Patient],
   period: Period[LocalDate],
   diagnoses: Option[List[Reference[MTBDiagnosis]]]
