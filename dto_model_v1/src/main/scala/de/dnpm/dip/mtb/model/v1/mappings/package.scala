@@ -650,7 +650,6 @@ package object mappings
 
     model.MTBPatientRecord(
       record.patient.mapTo[Patient],
-      JsObject.empty,
       NonEmptyList.one(record.episode.mapTo[model.MTBEpisodeOfCare]),
       Some(diagnoses.mapAllTo[model.MTBDiagnosis]),
       Some(

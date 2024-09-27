@@ -31,11 +31,6 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
-  implicit val consentSchema: Schema[JsObject] = 
-    Schema.`object`.Free[JsObject]()
-      .toDefinition("Consent")
-
-
   implicit val diagnosisSchema: Schema[MTBDiagnosis] =
     Json.schema[MTBDiagnosis]
       .toSimpleNameDefinition

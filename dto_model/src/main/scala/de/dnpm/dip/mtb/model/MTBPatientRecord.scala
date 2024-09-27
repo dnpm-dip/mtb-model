@@ -17,7 +17,6 @@ import play.api.libs.json.{
 final case class MTBPatientRecord
 (
   patient: Patient,
-  consent: JsObject,
   episodesOfCare: NonEmptyList[MTBEpisodeOfCare],
   diagnoses: Option[List[MTBDiagnosis]],
   guidelineTherapies: Option[List[MTBMedicationTherapy]],

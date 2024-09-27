@@ -1088,7 +1088,6 @@ trait Generators
 
     } yield MTBPatientRecord(
       patient,
-      JsObject.empty,
       NonEmptyList.one(episode),
       Some(List(diagnosis)),
       Some(guidelineTherapies),
