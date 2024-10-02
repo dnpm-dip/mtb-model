@@ -90,14 +90,6 @@ trait Completers extends BaseCompleters
 
   implicit val mtbPatientRecordCompleter: Completer[MTBPatientRecord] = {
 
-/*    
-    implicit val episodeCompleter: Completer[MTBEpisodeOfCare] =
-      Completer.of(
-        episode => episode.copy(
-         status = episode.status.complete
-        )
-      )
-*/
     implicit val diagnosisCompleter: Completer[MTBDiagnosis] =
       Completer.of(
         diagnosis => diagnosis.copy(
@@ -116,7 +108,7 @@ trait Completers extends BaseCompleters
       Completer.of(
         ref => ref.copy(
           display =
-            ref.resolveOn(diagnoses)
+            ref.resolve 
               .map(_.code)
               .map(DisplayLabel.of(_).value)
         )
@@ -260,11 +252,12 @@ trait Completers extends BaseCompleters
             ),
             priority        = recommendation.priority.complete,
             medication      = recommendation.medication.complete,
+            // TODO: consider allowing the client to define the display value for referenced variants, and to complete it only if undefined
             supportingVariants =
               recommendation.supportingVariants
                 .map(
                   _.flatMap {
-                    _.resolveOn(variants)
+                    _.resolve
                      .map(
                        variant =>
                          Reference.to(variant)
