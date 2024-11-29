@@ -6,9 +6,7 @@ import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.coding.icd.ICDO3
 import de.dnpm.dip.model.{
   Id,
-  Patient,
-  Reference,
-  Observation
+  Patient
 }
 import play.api.libs.json.{
   Json,

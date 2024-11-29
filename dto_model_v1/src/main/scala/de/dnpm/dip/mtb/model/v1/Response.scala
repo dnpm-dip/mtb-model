@@ -2,20 +2,11 @@ package de.dnpm.dip.mtb.model.v1
 
 
 import java.time.LocalDate
-import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
   Patient,
-  Reference
 }
-import de.dnpm.dip.coding.{
-  Coding,
-  CodedEnum,
-  CodeSystem,
-  CodeSystemProvider,
-  CodeSystemProviderSPI,
-  DefaultCodeSystem
-}
+import de.dnpm.dip.coding.Coding
 import play.api.libs.json.{
   Json,
   OFormat

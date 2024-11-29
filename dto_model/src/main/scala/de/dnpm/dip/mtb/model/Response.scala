@@ -12,7 +12,6 @@ import de.dnpm.dip.model.{
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
   CodeSystemProvider,
   CodeSystemProviderSPI,
   DefaultCodeSystem

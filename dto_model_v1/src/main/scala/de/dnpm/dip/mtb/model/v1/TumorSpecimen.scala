@@ -4,15 +4,9 @@ package de.dnpm.dip.mtb.model.v1
 import java.time.LocalDate
 import de.dnpm.dip.model.{
   Id,
-  Reference,
   Patient
 }
-import de.dnpm.dip.coding.{
-  Coding,
-  CodeSystem,
-  CodedEnum,
-  DefaultCodeSystem,
-}
+import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.coding.icd.ICD10GM
 import play.api.libs.json.{
   Json,

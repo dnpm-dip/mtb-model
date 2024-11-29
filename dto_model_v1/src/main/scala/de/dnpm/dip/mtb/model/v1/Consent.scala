@@ -2,13 +2,10 @@ package de.dnpm.dip.mtb.model.v1
 
 
 import de.dnpm.dip.coding.{ 
-  Coding,
   CodedEnum,
   DefaultCodeSystem
 }
-import de.dnpm.dip.model.{
-  Id
-}
+import de.dnpm.dip.model.Id
 import play.api.libs.json.{
   Json,
   Format,

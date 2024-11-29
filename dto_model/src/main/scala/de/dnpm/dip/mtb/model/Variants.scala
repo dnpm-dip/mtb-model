@@ -1,8 +1,6 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.net.URI
-import java.time.LocalDate
 import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
@@ -17,7 +15,6 @@ import de.dnpm.dip.util.{
 }
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
   CodeSystemProvider,
@@ -27,13 +24,9 @@ import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import play.api.libs.json.{
   Json,
-  JsString,
-  JsSuccess,
-  JsError,
   Format,
   OFormat,
   Reads,
-  Writes
 }
 
 
@@ -412,4 +405,14 @@ object RNASeq
   implicit val format: OFormat[RNASeq] =
     Json.format[RNASeq]
 }
+
+
+
+/*
+final case class GeneAlteration
+(
+  gene: Coding[HGNC],
+//  variant: Option[]
+)
+*/
 

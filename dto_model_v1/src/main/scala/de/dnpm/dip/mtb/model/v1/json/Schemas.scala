@@ -1,36 +1,15 @@
 package de.dnpm.dip.mtb.model.v1.json
 
 
-import java.time.{
-  LocalDate,
-  YearMonth
-}
-import java.time.temporal.Temporal
-import scala.reflect.ClassTag
-import scala.util.chaining._
-import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import json.{
   Json,
   Schema
 }
 import com.github.andyglow.jsonschema.CatsSupport._
-import de.dnpm.dip.coding.{
-  CodedEnum,
-  Coding
-}
-import de.dnpm.dip.model.{
-  Patient,
-  Period,
-  OpenEndPeriod,
-  Reference,
-}
+import de.dnpm.dip.model.Patient
 import de.dnpm.dip.mtb.model.LevelOfEvidence
 import de.dnpm.dip.mtb.model.v1._
 import de.dnpm.dip.model.json.BaseSchemas
-
-import shapeless.Witness
-import com.github.andyglow.json.Value
 
 
 trait Schemas extends BaseSchemas

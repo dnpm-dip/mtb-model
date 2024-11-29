@@ -1,25 +1,10 @@
 package de.dnpm.dip.mtb.model.v1
 
 
-import java.net.URI
-import java.time.LocalDate
-import cats.Applicative
-import de.dnpm.dip.model.{
-  Id,
-  ExternalId,
-  Patient,
-  Reference,
-  Quantity,
-  UnitOfMeasure
-}
+import de.dnpm.dip.model.Id
 import de.dnpm.dip.coding.{
   Code,
-  Coding,
-  CodeSystem,
-  CodedEnum,
-  DefaultCodeSystem,
-  CodeSystemProvider,
-  CodeSystemProviderSPI
+  Coding
 }
 import de.dnpm.dip.coding.hgnc.{
   Ensembl,
@@ -29,14 +14,11 @@ import de.dnpm.dip.coding.hgvs.HGVS
 import play.api.libs.json.{
   Json,
   Format,
-  OFormat,
-  Reads
+  OFormat
 }
 import de.dnpm.dip.mtb.model.{
   Chromosome,
-  ClinVar,
   COSMIC,
-  dbSNP,
   Entrez,
   Transcript,
 }

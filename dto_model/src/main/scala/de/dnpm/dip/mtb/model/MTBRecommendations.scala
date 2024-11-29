@@ -2,17 +2,14 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
-import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
   DefaultCodeSystem
 }
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
-  Period,
   Reference,
   Patient,
   TherapyRecommendation,
@@ -21,25 +18,23 @@ import de.dnpm.dip.model.{
   Study,
   StudyEnrollmentRecommendation
 }
-import de.dnpm.dip.coding.atc.ATC
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
-
 
 
 final case class MTBMedicationRecommendation
 (
   id: Id[MTBMedicationRecommendation],
   patient: Reference[Patient],
+//  reason: Option[Reference[MTBDiagnosis]], //TODO
   indication: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Option[Coding[TherapyRecommendation.Priority.Value]],
   medication: Set[Coding[Medications]],
-//  useType: Coding[MTBMedicationRecommendation.UseType.Value],
+//  useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]], //TODO
   supportingVariants: Option[List[Reference[Variant]]]
 )
 extends MedicationRecommendation[Medications]
@@ -55,12 +50,16 @@ object MTBMedicationRecommendation
     val InLabel       = Value("in-label")
     val OffLabel      = Value("off-label")
     val Compassionate = Value("compassionate")
+    val SecPreventive = Value("sec-preventive")
+    val Unknown       = Value("unknown")
 
     override val display =
       Map(
         InLabel       -> "In-Label Use",
         OffLabel      -> "Off-Label Use",
         Compassionate -> "Compassionate Use",
+        SecPreventive -> "Sec-preventive",
+        Unknown       -> "Unknown"
       )
 
   }
@@ -68,6 +67,20 @@ object MTBMedicationRecommendation
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]
 }
+
+
+
+final case class MTBProcedureRecommendation
+(
+  id: Id[MTBProcedureRecommendation],
+  patient: Reference[Patient],
+  indication: Option[Reference[MTBDiagnosis]],
+  issuedOn: LocalDate,
+  priority: Option[Coding[TherapyRecommendation.Priority.Value]],
+  code: Coding[OncoProcedure.Type.Value],
+  supportingVariants: Option[List[Reference[Variant]]]
+)
+extends TherapyRecommendation
 
 
 

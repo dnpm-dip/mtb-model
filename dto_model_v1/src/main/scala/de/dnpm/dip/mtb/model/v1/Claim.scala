@@ -1,22 +1,10 @@
 package de.dnpm.dip.mtb.model.v1
 
 
-
 import java.time.LocalDate
-import de.dnpm.dip.coding.{
-  Coding,
-  CodedEnum,
-  CodeSystem,
-  DefaultCodeSystem,
-}
-import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   Id,
-  Period,
-  Reference,
-  Patient,
-  Therapy,
-  MedicationTherapy
+  Patient
 }
 import play.api.libs.json.{
   Json,

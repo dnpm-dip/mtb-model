@@ -1,10 +1,7 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.time.Year
-import java.net.URI
 import cats.Applicative
-import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   Version,

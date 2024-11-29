@@ -1,9 +1,7 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.net.URI
 import java.time.LocalDate
-import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
@@ -13,18 +11,14 @@ import de.dnpm.dip.model.{
 }
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
-  DefaultCodeSystem,
-  CodeSystemProvider,
-  CodeSystemProviderSPI
+  DefaultCodeSystem
 }
 import de.dnpm.dip.coding.hgnc.HGNC
 import play.api.libs.json.{
   Json,
   Format,
   OFormat,
-  Reads
 }
 
 final case class ProteinExpression

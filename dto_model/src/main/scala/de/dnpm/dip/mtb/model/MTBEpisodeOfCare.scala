@@ -2,10 +2,6 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
-import de.dnpm.dip.coding.{
-  Coding,
-  CodeSystem
-}
 import de.dnpm.dip.model.{
   Id,
   Period,

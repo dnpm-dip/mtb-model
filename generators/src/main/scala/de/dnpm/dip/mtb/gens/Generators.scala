@@ -8,12 +8,9 @@ import java.time.temporal.ChronoUnit.{
   MONTHS,
   YEARS
 }
-import scala.util.matching.Regex
 import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
-import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
@@ -614,7 +611,7 @@ trait Generators
       typ = copyNum match { 
         case n if n < 2 => CNV.Type.Loss
         case n if n < 4 => CNV.Type.LowLevelGain
-        case n          => CNV.Type.HighLevelGain
+        case _          => CNV.Type.HighLevelGain
       }
 
     } yield CNV(
@@ -643,7 +640,6 @@ trait Generators
 
       seqType <-
         Gen.of[Coding[NGSReport.SequencingType.Value]]
-//        Gen.oneOf("tNGS","WES","WGS","Panel")
 
       metadata <-
         for {
@@ -668,7 +664,7 @@ trait Generators
           id,
           patient,
           specimen,
-          TMB.Result(value),
+          TMB.Result(value.toDouble),
           Some(interpretation)
         )
 

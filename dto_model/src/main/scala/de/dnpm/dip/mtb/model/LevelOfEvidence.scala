@@ -4,7 +4,6 @@ package de.dnpm.dip.mtb.model
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
   DefaultCodeSystem,
 }
 import de.dnpm.dip.model.{

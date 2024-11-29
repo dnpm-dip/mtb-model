@@ -1,26 +1,14 @@
 package de.dnpm.dip.mtb.model.json
 
 
-import java.time.LocalDate
-import java.time.temporal.Temporal
-import scala.reflect.ClassTag
-import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import json.{
   Json,
   Schema
 }
-import com.github.andyglow.jsonschema.CatsSupport._
-import de.dnpm.dip.coding.Coding
-import de.dnpm.dip.model.{
-  Patient,
-  Period,
-  OpenEndPeriod,
-  Reference,
-}
+import com.github.andyglow.jsonschema.CatsSupport._ // For correct handling of NonEmptyList in Schema derivation
+import de.dnpm.dip.model.Patient
 import de.dnpm.dip.mtb.model._
 import de.dnpm.dip.model.json.BaseSchemas
-
 
 
 trait Schemas extends BaseSchemas

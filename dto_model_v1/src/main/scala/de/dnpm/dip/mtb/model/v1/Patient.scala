@@ -7,7 +7,6 @@ import java.time.{
 }
 import java.time.format.DateTimeFormatter
 import scala.util.Try
-import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Address,
   Gender,

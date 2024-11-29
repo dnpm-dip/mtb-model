@@ -3,14 +3,12 @@ package de.dnpm.dip.mtb.model.v1
 
 import java.net.URI
 import scala.util.Random
-import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.Inspectors._
 import org.scalatest.matchers.must.Matchers._
 import play.api.libs.json.Json.{
   toJson,
-  fromJson,
-  prettyPrint
+  fromJson
 }
 import de.ekut.tbi.generators.Gen
 import de.bwhc.mtb.dtos.{
@@ -18,10 +16,7 @@ import de.bwhc.mtb.dtos.{
   SomaticNGSReport
 }
 import de.bwhc.mtb.dto.gens._
-import de.dnpm.dip.model.{
-  NGSReport,
-  Site
-}
+import de.dnpm.dip.model.Site
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem

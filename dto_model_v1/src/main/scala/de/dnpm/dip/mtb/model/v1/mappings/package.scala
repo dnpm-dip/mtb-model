@@ -3,10 +3,7 @@ package de.dnpm.dip.mtb.model.v1
 
 import java.time.LocalDate
 import java.util.UUID.randomUUID
-import scala.collection.Factory
-import scala.util.matching.Regex
 import cats.data.NonEmptyList
-import play.api.libs.json.JsObject
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem
@@ -28,7 +25,6 @@ import de.dnpm.dip.model.{
   Site,
   Study,
   Therapy,
-  TherapyRecommendation
 }
 import de.dnpm.dip.mtb.model
 import model.{
@@ -44,8 +40,6 @@ import de.dnpm.dip.mtb.model.v1
 package object mappings
 {
 
-  import scala.language.implicitConversions
-  import scala.util.chaining._
   import de.dnpm.dip.util.mapping.syntax._
 
 
@@ -157,8 +151,7 @@ package object mappings
 
   implicit def medicationTherapyMapping(
     implicit
-    diagnoses: List[v1.MTBDiagnosis],
-    recommendations: List[v1.MTBMedicationRecommendation]
+    @annotation.unused recommendations: List[v1.MTBMedicationRecommendation]
   ): v1.MTBMedicationTherapy => model.MTBMedicationTherapy =
     th =>
       model.MTBMedicationTherapy(
@@ -608,7 +601,7 @@ package object mappings
 
   implicit def therapyHistoryMapping(
     implicit
-    diagnoses: List[v1.MTBDiagnosis],
+//    diagnoses: List[v1.MTBDiagnosis],
     recommendations: List[v1.MTBMedicationRecommendation]
   ): History[v1.MTBMedicationTherapy] => History[model.MTBMedicationTherapy] =
     h => h.copy(
@@ -631,9 +624,6 @@ package object mappings
     implicit hgnc: CodeSystem[HGNC]
   ): v1.MTBPatientRecord => model.MTBPatientRecord = {
     record =>
-
-    implicit val patient =
-      Reference.from(record.patient.id)
 
     implicit val diagnoses =
       record.getDiagnoses

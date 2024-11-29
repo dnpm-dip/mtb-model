@@ -2,13 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
-import de.dnpm.dip.coding.{
-  Coding,
-  CodedEnum,
-  CodeSystem,
-  DefaultCodeSystem,
-}
-import de.dnpm.dip.coding.atc.ATC
+import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Id,
   Medications,
@@ -20,7 +14,6 @@ import de.dnpm.dip.model.{
 }
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
 

@@ -1,7 +1,6 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.time.LocalDate
 import cats.{
   Applicative,
   Id
@@ -11,9 +10,7 @@ import de.dnpm.dip.util.{
   DisplayLabel
 }
 import de.dnpm.dip.coding.{
-  Code,
   Coding,
-  CodeSystem,
   CodeSystemProvider
 }
 import de.dnpm.dip.coding.atc.ATC
@@ -25,8 +22,6 @@ import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.{
   BaseCompleters,
   History,
-  Patient,
-  Site,
   Reference,
 }
 
@@ -35,7 +30,6 @@ import de.dnpm.dip.model.{
 trait Completers extends BaseCompleters
 {
 
-  import scala.util.chaining._
   import Completer.syntax._
 
 

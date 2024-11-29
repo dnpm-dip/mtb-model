@@ -107,14 +107,54 @@ lazy val dependencies =
 lazy val settings = commonSettings
 
 
+// Compiler options from: https://alexn.org/blog/2020/05/26/scala-fatal-warnings/
 lazy val compilerOptions = Seq(
-  "-encoding", "utf8",
-  "-unchecked",
+  // Feature options
+  "-encoding", "utf-8",
+  "-explaintypes",
   "-feature",
+  "-language:existentials",
+  "-language:experimental.macros",
+  "-language:higherKinds",
+  "-language:implicitConversions",
   "-language:postfixOps",
+  "-Ymacro-annotations",
+
+  // Warnings as errors!
   "-Xfatal-warnings",
-  "-deprecation",
+
+  // Linting options
+  "-unchecked",
+  "-Xcheckinit",
+  "-Xlint:adapted-args",
+  "-Xlint:constant",
+  "-Xlint:delayedinit-select",
+  "-Xlint:deprecation",
+  "-Xlint:doc-detached",
+  "-Xlint:inaccessible",
+  "-Xlint:infer-any",
+  "-Xlint:missing-interpolator",
+  "-Xlint:nullary-unit",
+  "-Xlint:option-implicit",
+  "-Xlint:package-object-classes",
+  "-Xlint:poly-implicit-overload",
+  "-Xlint:private-shadow",
+  "-Xlint:stars-align",
+  "-Xlint:type-parameter-shadow",
+  "-Wdead-code",
+  "-Wextra-implicit",
+  "-Wnumeric-widen",
+  "-Wunused:imports",
+  "-Wunused:locals",
+  "-Wunused:patvars",
+  "-Wunused:privates",
+  "-Wunused:implicits",
+  "-Wvalue-discard",
+
+  // Deactivated to avoid many false positives from 'evidence' parameters in context bounds
+//  "-Wunused:params",
 )
+
 
 lazy val commonSettings = Seq(
   scalacOptions ++= compilerOptions,

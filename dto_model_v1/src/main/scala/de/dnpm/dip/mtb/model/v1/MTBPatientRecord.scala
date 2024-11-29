@@ -1,13 +1,8 @@
 package de.dnpm.dip.mtb.model.v1
 
 
-import java.time.LocalDate
-import cats.data.NonEmptyList
 import play.api.libs.json.{
   Json,
-  Reads,
-  Writes,
-  OWrites,
   OFormat
 }
 import de.dnpm.dip.model.History

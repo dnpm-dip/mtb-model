@@ -1,11 +1,9 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.net.URI
 import java.time.LocalDate
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem
 }

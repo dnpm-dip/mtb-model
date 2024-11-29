@@ -4,17 +4,9 @@ package de.dnpm.dip.mtb.model.v1
 import java.time.LocalDate
 import de.dnpm.dip.model.{
   Id,
-  Reference,
-  Quantity,
-  Observation,
   Patient
 }
-import de.dnpm.dip.coding.{
-  Coding,
-  CodeSystem,
-  CodedEnum,
-  DefaultCodeSystem
-}
+import de.dnpm.dip.coding.Coding
 import play.api.libs.json.{
   Json,
   OFormat

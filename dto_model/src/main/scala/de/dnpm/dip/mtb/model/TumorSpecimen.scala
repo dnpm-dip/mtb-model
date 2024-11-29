@@ -9,13 +9,11 @@ import de.dnpm.dip.model.{
 }
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
 }
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
 

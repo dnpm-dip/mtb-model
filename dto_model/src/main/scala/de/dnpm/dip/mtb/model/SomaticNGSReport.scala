@@ -6,7 +6,6 @@ import java.time.LocalDate
 import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
-  ExternalId,
   Patient,
   Reference,
   ClosedInterval,
@@ -18,7 +17,6 @@ import de.dnpm.dip.model.{
 }
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
   CodeSystemProvider,

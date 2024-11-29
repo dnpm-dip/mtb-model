@@ -6,17 +6,12 @@ import java.time.LocalDate
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
-  DefaultCodeSystem,
+  DefaultCodeSystem
 }
-import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.model.{
   Id,
-  Period,
   Reference,
   Patient,
-  Therapy,
-  MedicationTherapy
 }
 import play.api.libs.json.{
   Json,
@@ -30,9 +25,9 @@ final case class Claim
   id: Id[Claim],
   patient: Reference[Patient],
   recommendation: Reference[MTBMedicationRecommendation],
-//  requestedMedication: Option[Set[Coding[ATC]]]
+//  requestedMedication: Option[Set[Coding[Medications]]],
   issuedOn: LocalDate,
-  stage: Coding[Claim.Stage.Value],
+  stage: Coding[Claim.Stage.Value]
 )
 
 object Claim

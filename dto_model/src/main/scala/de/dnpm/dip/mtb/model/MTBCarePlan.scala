@@ -4,13 +4,11 @@ package de.dnpm.dip.mtb.model
 import java.time.LocalDate
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem
 }
 import de.dnpm.dip.model.{
   Id,
-  Period,
   Reference,
   Patient,
   CarePlan

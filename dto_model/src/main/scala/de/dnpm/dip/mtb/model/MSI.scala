@@ -2,31 +2,22 @@
 package de.dnpm.dip.mtb.model
 
 
-import java.net.URI
-import java.time.LocalDate
-import cats.Applicative
 import de.dnpm.dip.model.{
   Id,
-  ExternalId,
   Patient,
   Reference,
-  ClosedInterval,
   LeftClosedInterval,
   Observation,
-  Quantity,
-  UnitOfMeasure
 }
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
   CodedEnum,
   DefaultCodeSystem,
 }
 import play.api.libs.json.{
   Json,
   Format,
-  OFormat,
-  Reads
+  OFormat
 }
 
 

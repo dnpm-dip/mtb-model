@@ -5,7 +5,6 @@ import java.time.LocalDate
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  CodeSystem,
   DefaultCodeSystem,
 }
 import de.dnpm.dip.model.{
