@@ -22,6 +22,7 @@ import de.dnpm.dip.model.{
   NGSReport,
   Patient,
   Reference,
+  GeneAlterationReference,
   Site,
   Study,
   Therapy,
@@ -504,7 +505,7 @@ package object mappings
         rec.priority.map(Coding(_)),
         rec.medication.getOrElse(Set.empty).mapAllTo[Coding[Medications]],
         rec.supportingVariants
-          .map(_.map(Reference.from(_)))
+          .map(_.map(GeneAlterationReference(None,_,None)))
       )
 
 

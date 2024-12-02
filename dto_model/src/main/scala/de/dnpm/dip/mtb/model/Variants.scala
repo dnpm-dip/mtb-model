@@ -7,6 +7,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Patient,
   Reference,
+  GeneAlterationReference,
   Quantity,
   UnitOfMeasure
 }
@@ -73,6 +74,22 @@ object Variant
 
     }
 
+
+  implicit def displaysGeneAlteration(
+    implicit res: Reference.Resolver[Variant]
+  ): Displays[GeneAlterationReference[Variant]] =
+    Displays[GeneAlterationReference[Variant]]{
+      case GeneAlterationReference(gene,variant,_) =>
+        s"${gene.flatMap(_.display).orElse(gene.map(_.code.value)).getOrElse("[Gene N/A]")} ${
+          variant.resolve.map { 
+            case snv: SNV => snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("SNV")
+            case cnv: CNV => cnv.`type`.display.getOrElse("CNV")
+            case _: DNAFusion => "Fusion"
+            case _: RNAFusion => "Fusion"
+            case _: RNASeq    => "RNASeq"
+          }
+        }"
+    }
 
   // Type class to check equivalence of variants,
   // i.e. if 2 variant object are conceptually the same variant 
@@ -407,12 +424,30 @@ object RNASeq
 }
 
 
-
 /*
 final case class GeneAlteration
 (
   gene: Coding[HGNC],
-//  variant: Option[]
+  variant: Variant
 )
-*/
+{
+  def `type`: GeneAlteration.Type.Value =
+    variant match {
+      case _: SNV       => GeneAlteration.Type.SNV
+      case _: CNV       => GeneAlteration.Type.CNV
+      case _: DNAFusion => GeneAlteration.Type.Fusion
+      case _: RNAFusion => GeneAlteration.Type.Fusion
+      case _: RNASeq    => GeneAlteration.Type.RNASeq
+    }
+}
 
+object GeneAlteration
+{
+
+  object Type extends Enumeration
+  {
+    val SNV, CNV, Fusion, RNASeq = Value
+  }
+
+}
+*/

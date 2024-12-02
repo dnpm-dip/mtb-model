@@ -35,8 +35,8 @@ import de.dnpm.dip.model.{
   ExternalId,
   Gender,
   GuidelineTreatmentStatus,
-  History,
   Id,
+  History,
   Medications,
   NGSReport,
   Organization,
@@ -45,6 +45,7 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Reference,
+  GeneAlterationReference,
   Study,
   Therapy,
   TherapyRecommendation
@@ -737,7 +738,8 @@ trait Generators
   def genTherapyRecommendation(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-    variants: Seq[Reference[Variant]]
+//    variants: Seq[Reference[Variant]]
+    variants: Seq[Variant]
   ): Gen[MTBMedicationRecommendation] =
     for {
       id <- Gen.of[Id[MTBMedicationRecommendation]]
@@ -762,7 +764,22 @@ trait Generators
 
       medication <- Gen.of[Coding[ATC]]
 
-      supportingVariant <- Gen.oneOf(variants)
+//      supportingVariant <- Gen.oneOf(variants)
+
+      supportingVariant <- Gen.oneOf(variants).map {
+        variant =>
+          GeneAlterationReference(
+            variant match {
+              case snv: SNV          => snv.gene
+              case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
+              case fusion: DNAFusion => Some(fusion.fusionPartner5prime.gene)
+              case fusion: RNAFusion => Some(fusion.fusionPartner5prime.gene)
+              case rnaSeq: RNASeq    => rnaSeq.gene
+            },
+            variant
+          )
+
+      }
 
     } yield MTBMedicationRecommendation(
       id,
@@ -779,7 +796,8 @@ trait Generators
   def genCarePlan(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-    variants: Seq[Reference[Variant]]
+//    variants: Seq[Reference[Variant]]
+    variants: Seq[Variant]
   ): Gen[MTBCarePlan] = 
     for { 
       id <- Gen.of[Id[MTBCarePlan]]
@@ -1036,9 +1054,7 @@ trait Generators
           Reference.to(patient),
           diagnosis,
           ngsReport.variants
-            .map(
-              v => Reference.to(v,DisplayLabel.of(v).value)
-            )
+//            .map(v => Reference.to(v,DisplayLabel.of(v).value))
         )
 
       recommendations =

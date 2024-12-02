@@ -10,6 +10,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
+  GeneAlterationReference,
   Reference,
   Patient,
   TherapyRecommendation,
@@ -35,7 +36,8 @@ final case class MTBMedicationRecommendation
   priority: Option[Coding[TherapyRecommendation.Priority.Value]],
   medication: Set[Coding[Medications]],
 //  useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]], //TODO
-  supportingVariants: Option[List[Reference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+//  supportingVariants: Option[List[Reference[Variant]]]
 )
 extends MedicationRecommendation[Medications]
 
@@ -78,7 +80,8 @@ final case class MTBProcedureRecommendation
   issuedOn: LocalDate,
   priority: Option[Coding[TherapyRecommendation.Priority.Value]],
   code: Coding[OncoProcedure.Type.Value],
-  supportingVariants: Option[List[Reference[Variant]]]
+//  supportingVariants: Option[List[Reference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
 extends TherapyRecommendation
 
@@ -128,7 +131,8 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
-  supportingVariants: Option[List[Reference[Variant]]],
+//  supportingVariants: Option[List[Reference[Variant]]],
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
   studies: Option[List[ExternalId[Study]]]
 )
 extends StudyEnrollmentRecommendation

@@ -148,10 +148,10 @@ lazy val compilerOptions = Seq(
   "-Wunused:locals",
   "-Wunused:patvars",
   "-Wunused:privates",
-  "-Wunused:implicits",
   "-Wvalue-discard",
 
   // Deactivated to avoid many false positives from 'evidence' parameters in context bounds
+//  "-Wunused:implicits",
 //  "-Wunused:params",
 )
 
