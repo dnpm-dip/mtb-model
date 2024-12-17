@@ -1,7 +1,6 @@
 package de.dnpm.dip.mtb.model
 
 
-import scala.util.chaining._
 import cats.{
   Applicative,
   Id
@@ -247,7 +246,7 @@ trait Completers extends BaseCompleters
             ),
             priority        = recommendation.priority.complete,
             medication      = recommendation.medication.complete,
-            // TODO: consider allowing the client to define the display value for referenced variants, and to complete it only if undefined
+/*              
             supportingVariants =
               recommendation.supportingVariants.map(
                 _.map(
@@ -257,7 +256,7 @@ trait Completers extends BaseCompleters
                    )
                 )
               )
-/*              
+*/              
             supportingVariants =
               recommendation.supportingVariants
                 .map(
@@ -270,7 +269,6 @@ trait Completers extends BaseCompleters
                      )
                   }
                 )
-*/              
           )
       )
 

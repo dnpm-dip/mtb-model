@@ -7,7 +7,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Patient,
   Reference,
-  GeneAlterationReference,
+//  GeneAlterationReference,
   Quantity,
   UnitOfMeasure
 }
@@ -74,7 +74,7 @@ object Variant
 
     }
 
-
+/*
   implicit def displaysGeneAlteration(
     implicit res: Reference.Resolver[Variant]
   ): Displays[GeneAlterationReference[Variant]] =
@@ -90,6 +90,8 @@ object Variant
           }
         }"
     }
+*/
+
 
   // Type class to check equivalence of variants,
   // i.e. if 2 variant object are conceptually the same variant 
@@ -307,7 +309,6 @@ object CNV
 }
 
 
-
 sealed abstract class Fusion[Partner <: { def gene: Coding[HGNC] }] extends Variant
 {
   val fusionPartner5prime: Partner
@@ -424,30 +425,3 @@ object RNASeq
 }
 
 
-/*
-final case class GeneAlteration
-(
-  gene: Coding[HGNC],
-  variant: Variant
-)
-{
-  def `type`: GeneAlteration.Type.Value =
-    variant match {
-      case _: SNV       => GeneAlteration.Type.SNV
-      case _: CNV       => GeneAlteration.Type.CNV
-      case _: DNAFusion => GeneAlteration.Type.Fusion
-      case _: RNAFusion => GeneAlteration.Type.Fusion
-      case _: RNASeq    => GeneAlteration.Type.RNASeq
-    }
-}
-
-object GeneAlteration
-{
-
-  object Type extends Enumeration
-  {
-    val SNV, CNV, Fusion, RNASeq = Value
-  }
-
-}
-*/

@@ -45,7 +45,7 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Reference,
-  GeneAlterationReference,
+//  GeneAlterationReference,
   Study,
   Therapy,
   TherapyRecommendation
@@ -137,6 +137,11 @@ trait Generators
       .latest
       .filter(gene => symbols contains gene.display)
 
+
+  implicit def genEnum[E <: Enumeration](
+    implicit w: shapeless.Witness.Aux[E]
+  ): Gen[E#Value] =
+    Gen.`enum`(w.value)
 
 
   implicit def genId[T]: Gen[Id[T]] =
@@ -631,6 +636,63 @@ trait Generators
       Some(copyNumberNeutralLoH.distinctBy(_.code).toSet)
     )
 
+  implicit val genDNAFusionPartner: Gen[DNAFusion.Partner] =
+    for { 
+      chr <- Gen.of[Chromosome.Value]
+//      chr <- Gen.of[Coding[Chromosome.Value]]
+      gene <- Gen.of[Coding[HGNC]]
+      position <- Gen.longsBetween(42L,1000L)
+    } yield DNAFusion.Partner(
+      chr,
+      gene,
+      position
+    )
+
+  def genDNAFusion(patient: Reference[Patient]): Gen[DNAFusion] =
+    for {
+      id <- Gen.of[Id[Variant]]
+      partner5pr <- Gen.of[DNAFusion.Partner]
+      partner3pr <- Gen.of[DNAFusion.Partner]
+      reads <- Gen.intsBetween(3,10)
+    } yield DNAFusion(
+      id,
+      patient,
+      partner5pr,
+      partner3pr,
+      reads
+    )
+
+
+  implicit val genRNAFusionPartner: Gen[RNAFusion.Partner] =
+    for { 
+      id <- Gen.uuidStrings.map(ExternalId[Transcript,Ensembl](_))
+      gene <- Gen.of[Coding[HGNC]]
+      position <- Gen.longsBetween(42L,1000L)
+      strand <- Gen.of[RNAFusion.Strand.Value]
+    } yield RNAFusion.Partner(
+      Set(id),
+      gene,
+      position,
+      strand
+    )
+
+  def genRNAFusion(patient: Reference[Patient]): Gen[RNAFusion] =
+    for {
+      id <- Gen.of[Id[Variant]]
+      partner5pr <- Gen.of[RNAFusion.Partner]
+      partner3pr <- Gen.of[RNAFusion.Partner]
+      cosmicId <- Gen.uuidStrings.map(ExternalId[RNAFusion,COSMIC](_))
+      reads <- Gen.intsBetween(3,10)
+    } yield RNAFusion(
+      id,
+      patient,
+      partner5pr,
+      partner3pr,
+      Some("Effect..."),
+      Set(cosmicId),
+      reads
+    )
+
 
   def genNGSReport(
     patient: Reference[Patient],
@@ -713,6 +775,18 @@ trait Generators
           genCNV(patient)
         )  
 
+      dnaFusions <-
+        Gen.list(
+          Gen.intsBetween(4,10),
+          genDNAFusion(patient)
+        )  
+
+      rnaFusions <-
+        Gen.list(
+          Gen.intsBetween(4,10),
+          genRNAFusion(patient)
+        )  
+
     } yield SomaticNGSReport(
       id,
       patient,
@@ -727,9 +801,9 @@ trait Generators
         Some(hrdScore),
         snvs,
         cnvs,
-        //TODO: DNA-/RNA-Fusions, RNASeq
-        List.empty,
-        List.empty,
+        dnaFusions,
+        rnaFusions,
+        //TODO: RNASeq
         List.empty,
       )
     )
@@ -764,8 +838,9 @@ trait Generators
 
       medication <- Gen.of[Coding[ATC]]
 
-//      supportingVariant <- Gen.oneOf(variants)
+      supportingVariant <- Gen.oneOf(variants).map(Reference.to(_))
 
+/*
       supportingVariant <- Gen.oneOf(variants).map {
         variant =>
           GeneAlterationReference(
@@ -778,8 +853,8 @@ trait Generators
             },
             variant
           )
-
       }
+*/
 
     } yield MTBMedicationRecommendation(
       id,
@@ -796,7 +871,6 @@ trait Generators
   def genCarePlan(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-//    variants: Seq[Reference[Variant]]
     variants: Seq[Variant]
   ): Gen[MTBCarePlan] = 
     for { 
@@ -870,6 +944,7 @@ trait Generators
       status
     )
 
+
   def genClaimResponse(
     patient: Reference[Patient],
     claim: Reference[Claim]
@@ -918,9 +993,9 @@ trait Generators
 
       statusReason = 
         status match {
-          case Therapy.Status(NotDone)   => Some(Coding(PaymentRefused))
-          case Therapy.Status(Stopped)   => Some(Coding(Progression))
-          case _                         => None
+          case Therapy.Status(NotDone) => Some(Coding(PaymentRefused))
+          case Therapy.Status(Stopped) => Some(Coding(Progression))
+          case _                       => None
         }
 
       period <-
@@ -929,9 +1004,9 @@ trait Generators
           case _ =>
             val refDate = patient.dateOfDeath.getOrElse(LocalDate.now)
             for {
-              duration  <- Gen.longsBetween(8,36)
-              start     =  refDate.minusWeeks(duration)
-              end       =  refDate
+              duration <- Gen.longsBetween(8,36)
+              start    =  refDate.minusWeeks(duration)
+              end      =  refDate
             } yield Some(Period(start,end))
         }
 
@@ -1054,7 +1129,6 @@ trait Generators
           Reference.to(patient),
           diagnosis,
           ngsReport.variants
-//            .map(v => Reference.to(v,DisplayLabel.of(v).value))
         )
 
       recommendations =
