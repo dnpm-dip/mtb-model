@@ -35,11 +35,11 @@ import de.dnpm.dip.model.{
   ExternalId,
   Gender,
   GuidelineTreatmentStatus,
+  HealthInsurance,
   Id,
   History,
   Medications,
   NGSReport,
-  Organization,
   Patient,
   Period,
   Publication,
@@ -195,7 +195,7 @@ trait Generators
         )
 
       healthInsurance =
-        Reference.from(ExternalId[Organization]("aok-ik","IK"))
+        Reference.from(ExternalId[HealthInsurance]("IK of the AOK...","IK"))
           .copy(display = Some("AOK"))
 
     } yield

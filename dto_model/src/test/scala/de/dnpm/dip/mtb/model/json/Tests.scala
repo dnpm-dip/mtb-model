@@ -19,7 +19,7 @@ class JsonSchemaTests extends AnyFlatSpec with Schemas
     val schema =
       Schema[MTBPatientRecord].asPlay(Draft12("MTBPatientRecord"))
         .pipe(prettyPrint(_))
-        .tap(println(_))
+//        .tap(println(_))
 
     schema must not contain ("Coding[")
     schema must contain noneOf ("head","tail")

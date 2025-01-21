@@ -53,7 +53,8 @@ lazy val generators = project
       dependencies.icd_catalogs,
       dependencies.atc_impl,
       dependencies.atc_catalogs,
-      dependencies.hgnc_geneset
+      dependencies.hgnc_geneset,
+      dependencies.json_schema_validator
     )
   )
   .dependsOn(
@@ -97,6 +98,7 @@ lazy val dependencies =
     val scala_jsonschema      = "com.github.andyglow" %% "scala-jsonschema"           % "0.7.11"
     val scala_jsonschema_cats = "com.github.andyglow" %% "scala-jsonschema-cats"      % "0.7.11"
     val scala_jsonschema_play = "com.github.andyglow" %% "scala-jsonschema-play-json" % "0.7.11"
+    val json_schema_validator = "com.networknt"       % "json-schema-validator"       % "1.5.5"        % Test
   }
 
 
