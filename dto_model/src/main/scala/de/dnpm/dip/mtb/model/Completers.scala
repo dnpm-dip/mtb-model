@@ -88,8 +88,8 @@ trait Completers extends BaseCompleters
       Completer.of(
         diagnosis => diagnosis.copy(
           code                     = diagnosis.code.complete, 
-          whoGrading               = diagnosis.whoGrading.complete, 
-          stageHistory             = diagnosis.stageHistory.map(_.map(st => st.copy(stage = st.stage.complete))), 
+//          whoGrading               = diagnosis.whoGrading.complete, 
+//          stageHistory             = diagnosis.stageHistory.map(_.map(st => st.copy(stage = st.stage.complete))), 
           guidelineTreatmentStatus = diagnosis.guidelineTreatmentStatus.complete,
           topography               = diagnosis.topography.complete
         )
