@@ -1,11 +1,13 @@
 package de.dnpm.dip.mtb.model
 
 
+import java.net.URI
 import java.time.LocalDate
 import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.coding.icd.ICDO3
 import de.dnpm.dip.model.{
   Id,
+  DiagnosticReport,
   Patient,
   Reference,
   Observation
@@ -41,6 +43,18 @@ final case class HistologyReport
   issuedOn: LocalDate,
   results: HistologyReport.Results
 )
+extends DiagnosticReport 
+{
+   override val `type` =
+    Coding(
+      "histology",
+      "Histologie",
+      URI.create("dnpm-dip/mtb/histology")
+    )
+
+   override val notes =
+     None
+}
 
 object HistologyReport
 {

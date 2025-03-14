@@ -2,18 +2,20 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.Applicative
 import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  DefaultCodeSystem
+  DefaultCodeSystem,
+  CodeSystemProvider,
+  CodeSystemProviderSPI
 }
 import de.dnpm.dip.model.{
   Id,
   Reference,
   Patient,
   Diagnosis,
-  GuidelineTreatmentStatus
 }
 import de.dnpm.dip.coding.icd.{
   ICD10GM,
@@ -37,8 +39,9 @@ final case class MTBDiagnosis
   topography: Option[Coding[ICDO3.T]],
   grading: Option[List[TumorGrading]],
   staging: NonEmptyList[TumorStaging],
-  guidelineTreatmentStatus: Option[Coding[GuidelineTreatmentStatus.Value]],
-  histology: Option[List[Reference[HistologyReport]]]
+  guidelineTreatmentStatus: Option[Coding[MTBDiagnosis.GuidelineTreatmentStatus.Value]],
+  histology: Option[List[Reference[HistologyReport]]],
+  notes: Option[List[String]]
 )
 extends Diagnosis
 
@@ -70,6 +73,33 @@ object MTBDiagnosis
 
     implicit val format: OFormat[Type] =
       Json.format[Type]
+  }
+
+  object GuidelineTreatmentStatus
+  extends CodedEnum("dnpm-dip/mtb/diagnosis/guideline-treatment-status")
+  with DefaultCodeSystem
+  {
+ 
+    val Exhaustive            = Value("exhausted")
+    val NonExhaustive         = Value("non-exhausted")
+    val Impossible            = Value("impossible")
+    val NoGuidelinesAvailable = Value("no-guidelines-available")
+    val Unknown               = Value("unknown")
+ 
+    override val display =
+      Map(
+        Exhaustive            -> "Leitlinien ausgeschöpft",
+        NonExhaustive         -> "Leitlinien nicht ausgeschöpft",
+        Impossible            -> "Leitlinientherapie nicht möglich",
+        NoGuidelinesAvailable -> "Keine Leitlinien vorhanden",
+        Unknown               -> "Unbekannt"
+      )
+ 
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
   }
 
 

@@ -69,6 +69,5 @@ object WHOGrading
       new Provider.Facade[F]
   }
 
-
 }
 

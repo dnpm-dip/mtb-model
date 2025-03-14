@@ -59,7 +59,7 @@ final case class Response
 (
   id: Id[Response],
   patient: Reference[Patient],
-  therapy: Reference[MTBMedicationTherapy],
+  therapy: Reference[MTBSystemicTherapy],
   effectiveDate: LocalDate,
   value: Coding[RECIST.Value]
 )

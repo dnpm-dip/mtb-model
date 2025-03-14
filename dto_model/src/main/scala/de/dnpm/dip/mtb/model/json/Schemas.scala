@@ -29,8 +29,8 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
-  implicit val medicationTherapySchema: Schema[MTBMedicationTherapy] =
-    Json.schema[MTBMedicationTherapy]
+  implicit val medicationTherapySchema: Schema[MTBSystemicTherapy] =
+    Json.schema[MTBSystemicTherapy]
       .toSimpleNameDefinition
 
 

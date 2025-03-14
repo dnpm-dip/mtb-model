@@ -44,7 +44,6 @@ object TumorStaging
   }
 
 
-
   final case class TNM
   (
     tumor: Coding[TNM.Systems],
@@ -88,9 +87,6 @@ object TumorStaging
     val Local        = Value("local")
     val Metastasized = Value("metastasized")
     val Unknown      = Value("unknown")
-
-//    implicit val format: Format[Value] =
-//      Json.formatEnum(this)
 
     override val display =
       Map(

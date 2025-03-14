@@ -2,6 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
@@ -9,10 +10,10 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.model.{
   Id,
-  ExternalId,
-//  GeneAlterationReference,
+  GeneAlterationReference,
   Reference,
   Patient,
+  Recommendation,
   TherapyRecommendation,
   Medications,
   MedicationRecommendation,
@@ -29,15 +30,14 @@ final case class MTBMedicationRecommendation
 (
   id: Id[MTBMedicationRecommendation],
   patient: Reference[Patient],
-//  reason: Option[Reference[MTBDiagnosis]], //TODO
-  indication: Option[Reference[MTBDiagnosis]],
+  reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
-  priority: Option[Coding[TherapyRecommendation.Priority.Value]],
+  priority: Option[Coding[Recommendation.Priority.Value]],
   medication: Set[Coding[Medications]],
 //  useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]], //TODO
-//  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
-  supportingVariants: Option[List[Reference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+//  supportingVariants: Option[List[Reference[Variant]]]
 )
 extends MedicationRecommendation[Medications]
 
@@ -76,12 +76,12 @@ final case class MTBProcedureRecommendation
 (
   id: Id[MTBProcedureRecommendation],
   patient: Reference[Patient],
-  indication: Option[Reference[MTBDiagnosis]],
+  reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  priority: Option[Coding[TherapyRecommendation.Priority.Value]],
+  priority: Option[Coding[Recommendation.Priority.Value]],
   code: Coding[OncoProcedure.Type.Value],
-  supportingVariants: Option[List[Reference[Variant]]]
-//  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+//  supportingVariants: Option[List[Reference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
 extends TherapyRecommendation
 
@@ -131,14 +131,21 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
-  supportingVariants: Option[List[Reference[Variant]]],
-//  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
-  studies: Option[List[ExternalId[Study]]]
+//  supportingVariants: Option[List[Reference[Variant]]],
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
+  study: NonEmptyList[Reference[Study]]
 )
 extends StudyEnrollmentRecommendation
 
 object MTBStudyEnrollmentRecommendation
 {
+
+  // For Reads/Writes of NonEmptyList
+  import de.dnpm.dip.util.json.{
+    readsNel,
+    writesNel
+  }
+
   implicit val format: OFormat[MTBStudyEnrollmentRecommendation] =
     Json.format[MTBStudyEnrollmentRecommendation]
 }

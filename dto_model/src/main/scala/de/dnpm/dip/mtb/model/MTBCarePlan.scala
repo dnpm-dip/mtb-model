@@ -23,14 +23,14 @@ final case class MTBCarePlan
 (
   id: Id[MTBCarePlan],
   patient: Reference[Patient],
-  indication: Option[Reference[MTBDiagnosis]],
+  reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
   medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
   studyEnrollmentRecommendations: Option[List[MTBStudyEnrollmentRecommendation]],
 //  studyEnrollmentRecommendation: Option[MTBStudyEnrollmentRecommendation],
-  notes: Option[String]
+  notes: Option[List[String]]
 )
 extends CarePlan
 {

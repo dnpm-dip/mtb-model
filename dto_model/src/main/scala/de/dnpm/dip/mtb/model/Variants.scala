@@ -7,7 +7,7 @@ import de.dnpm.dip.model.{
   ExternalId,
   Patient,
   Reference,
-//  GeneAlterationReference,
+  GeneAlterationReference,
   Quantity,
   UnitOfMeasure
 }
@@ -74,7 +74,7 @@ object Variant
 
     }
 
-/*
+
   implicit def displaysGeneAlteration(
     implicit res: Reference.Resolver[Variant]
   ): Displays[GeneAlterationReference[Variant]] =
@@ -90,7 +90,6 @@ object Variant
           }
         }"
     }
-*/
 
 
   // Type class to check equivalence of variants,

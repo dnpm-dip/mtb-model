@@ -5,6 +5,7 @@ import cats.{
   Applicative,
   Id
 }
+import cats.data.NonEmptyList
 import de.dnpm.dip.util.{
   Completer,
   DisplayLabel
@@ -96,8 +97,8 @@ trait Completers extends BaseCompleters
       )
 
 
-    implicit def indicationCompleter(
-      implicit diagnoses: Seq[MTBDiagnosis]
+    implicit def reasonCompleter(
+      implicit diagnoses: NonEmptyList[MTBDiagnosis]
     ): Completer[Reference[MTBDiagnosis]] =
       Completer.of(
         ref => ref.copy(
@@ -109,13 +110,13 @@ trait Completers extends BaseCompleters
       )
 
 
-    implicit def therapyCompleter(
-      implicit diagnoses: Seq[MTBDiagnosis]
-    ): Completer[MTBMedicationTherapy] =
+    implicit def systemicTherapyCompleter(
+      implicit diagnoses: NonEmptyList[MTBDiagnosis]
+    ): Completer[MTBSystemicTherapy] =
       Completer.of {
         therapy =>
           therapy.copy(
-            indication   = therapy.indication.complete,
+            reason       = therapy.reason.complete,
             status       = therapy.status.complete,
             statusReason = therapy.statusReason.complete,
             medication   = therapy.medication.complete
@@ -123,12 +124,12 @@ trait Completers extends BaseCompleters
       }
 
     implicit def procedureCompleter(
-      implicit diagnoses: Seq[MTBDiagnosis]
+      implicit diagnoses: NonEmptyList[MTBDiagnosis]
     ): Completer[OncoProcedure] =
       Completer.of {
         procedure => 
           procedure.copy(
-            indication   = procedure.indication.complete,
+            reason       = procedure.reason.complete,
             code         = procedure.code.complete,
             status       = procedure.status.complete,
             statusReason = procedure.statusReason.complete
@@ -185,8 +186,10 @@ trait Completers extends BaseCompleters
 
       Completer.of(
         report => report.copy(
-          proteinExpressionResults = report.proteinExpressionResults.complete,
-          msiMmrResults            = report.msiMmrResults.complete
+          results = report.results.copy(
+            proteinExpression = report.results.proteinExpression.complete,
+            msiMmr            = report.results.msiMmr.complete
+          )
         )
       )
 
@@ -231,13 +234,13 @@ trait Completers extends BaseCompleters
 
     implicit def medicationRecommendationCompleter(
       implicit
-      diagnoses: Seq[MTBDiagnosis],
+      diagnoses: NonEmptyList[MTBDiagnosis],
       variants: List[Variant]
     ): Completer[MTBMedicationRecommendation] =
       Completer.of(
         recommendation =>
           recommendation.copy(
-            indication      = recommendation.indication.complete,
+            reason       = recommendation.reason.complete,
             levelOfEvidence = recommendation.levelOfEvidence.map(
               loe => loe.copy(
                 grading   = loe.grading.complete,
@@ -246,17 +249,12 @@ trait Completers extends BaseCompleters
             ),
             priority        = recommendation.priority.complete,
             medication      = recommendation.medication.complete,
-/*              
             supportingVariants =
-              recommendation.supportingVariants.map(
-                _.map(
-                  _.complete
-                   .pipe(
-                     ref => ref.copy(display = Some(DisplayLabel.of(ref).value))
-                   )
+              recommendation.supportingVariants
+                .map(
+                  _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
                 )
-              )
-*/              
+/*              
             supportingVariants =
               recommendation.supportingVariants
                 .map(
@@ -269,18 +267,19 @@ trait Completers extends BaseCompleters
                      )
                   }
                 )
+*/              
           )
       )
 
 
     implicit def carePlanCompleter(
       implicit
-      diagnoses: Seq[MTBDiagnosis],
+      diagnoses: NonEmptyList[MTBDiagnosis],
       variants: List[Variant]
     ): Completer[MTBCarePlan] =
       Completer.of(
         carePlan => carePlan.copy(
-          indication                      = carePlan.indication.complete,
+          reason                          = carePlan.reason.complete,
           statusReason                    = carePlan.statusReason.complete,
           medicationRecommendations       = carePlan.medicationRecommendations.complete,
           geneticCounselingRecommendation = carePlan.geneticCounselingRecommendation.map(
@@ -291,8 +290,8 @@ trait Completers extends BaseCompleters
 
 
     implicit def therapyHistoryCompleter(
-      implicit diagnoses: Seq[MTBDiagnosis]
-    ): Completer[History[MTBMedicationTherapy]] =
+      implicit diagnoses: NonEmptyList[MTBDiagnosis]
+    ): Completer[History[MTBSystemicTherapy]] =
       Completer.of(
         th => th.copy(
           history = th.history.complete
@@ -316,23 +315,23 @@ trait Completers extends BaseCompleters
           record.getNgsReports.flatMap(_.variants)
   
         implicit val completedDiagnoses =
-          record.diagnoses.complete.getOrElse(List.empty)
+          record.diagnoses.complete//.getOrElse(List.empty)
 
 
         record.copy(
-        patient = record.patient.complete,
-        diagnoses = Option(completedDiagnoses),
-        guidelineTherapies = record.guidelineTherapies.complete,
-        guidelineProcedures = record.guidelineProcedures.complete,
-        performanceStatus = record.performanceStatus.complete,
-        specimens = record.specimens.complete,
-        histologyReports = record.histologyReports.complete,
-        ihcReports = record.ihcReports.complete,
-        ngsReports = record.ngsReports.complete,
-        carePlans = record.carePlans.complete, 
-        therapies = record.therapies.complete,
-        responses = record.responses.complete, 
-      )
+          patient = record.patient.complete,
+          diagnoses = completedDiagnoses,
+          guidelineTherapies = record.guidelineTherapies.complete,
+          guidelineProcedures = record.guidelineProcedures.complete,
+          performanceStatus = record.performanceStatus.complete,
+          specimens = record.specimens.complete,
+          histologyReports = record.histologyReports.complete,
+          ihcReports = record.ihcReports.complete,
+          ngsReports = record.ngsReports.complete,
+          carePlans = record.carePlans.complete, 
+          systemicTherapies = record.systemicTherapies.complete,
+          responses = record.responses.complete, 
+        )
 
     }
 

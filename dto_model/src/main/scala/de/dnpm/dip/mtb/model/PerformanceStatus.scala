@@ -31,16 +31,15 @@ with DefaultCodeSystem
   val Four  = Value("4")
   val Five  = Value("5")
 
-/*
   override val display =
     Map(
       Zero  -> "ECOG 0",
       One   -> "ECOG 1",
       Two   -> "ECOG 2",
       Three -> "ECOG 3",
-      Four  -> "ECOG 5"
+      Four  -> "ECOG 4",
+      Five  -> "ECOG 5"
     )
-*/
 }
 
 

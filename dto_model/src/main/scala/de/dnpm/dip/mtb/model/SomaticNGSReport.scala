@@ -196,7 +196,7 @@ final case class SomaticNGSReport
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
   issuedOn: LocalDate,
-  sequencingType: Coding[NGSReport.SequencingType.Value],
+  `type`: Coding[NGSReport.Type.Value],
   metadata: List[SomaticNGSReport.Metadata],
   results: SomaticNGSReport.Results
 )
@@ -207,6 +207,9 @@ extends NGSReport
     results.copyNumberVariants ++
     results.dnaFusions ++
     results.rnaFusions
+
+  override val notes =
+    None
 }
 
 object SomaticNGSReport

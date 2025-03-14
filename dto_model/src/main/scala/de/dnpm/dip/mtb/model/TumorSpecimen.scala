@@ -54,7 +54,7 @@ object TumorSpecimen
 
   final case class Collection
   (
-    date: LocalDate,
+    date: Option[LocalDate],
     method: Coding[Collection.Method.Value],
     localization: Coding[Collection.Localization.Value]
   )
@@ -86,15 +86,21 @@ object TumorSpecimen
     extends CodedEnum("dnpm-dip/mtb/tumor-specimen/collection/localization")
     with DefaultCodeSystem
     {
-      val PrimaryTumor = Value("primary-tumor")
-      val Metastatis   = Value("metastasis")
-      val Unknown      = Value("unknown")
+      val PrimaryTumor       = Value("primary-tumor")
+      val Metastatis         = Value("metastasis")
+      val LocalRecurrence    = Value("local-recurrence")
+      val RegionalLymphNodes = Value("regional-lymph-nodes")
+      val CellfreeDNA        = Value("cellfree-dna")
+      val Unknown            = Value("unknown")
 
       override val display =
         Map(
-          PrimaryTumor -> "Primärtumor",
-          Metastatis   -> "Metastase",
-          Unknown      -> "Unbekannt"
+          PrimaryTumor       -> "Primärtumor",
+          Metastatis         -> "Metastase",
+          LocalRecurrence    -> "Lokalrezidiv", 
+          RegionalLymphNodes -> "Regionäre Lymphknoten",
+          CellfreeDNA        -> "Zellfreie DNA",
+          Unknown            -> "Unbekannt"
         )
     }
 

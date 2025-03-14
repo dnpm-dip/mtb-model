@@ -2,6 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import shapeless.{:+:, CNil}
 import de.dnpm.dip.coding.{
   Coding,
@@ -17,7 +18,7 @@ import play.api.libs.json.{
 final case class TumorGrading
 (
   date: LocalDate,
-  value: Coding[TumorGrading.Systems]
+  codes: NonEmptyList[Coding[TumorGrading.Systems]]
 )
 
 
@@ -54,8 +55,16 @@ with DefaultCodeSystem
 
 object TumorGrading
 {
+
   type Systems = OBDSGrading.Value :+: WHOGrading :+: CNil
+
+    // For Reads/Writes of NonEmptyList
+  import de.dnpm.dip.util.json.{
+    readsNel,
+    writesNel
+  }
 
   implicit val format: OFormat[TumorGrading] =
     Json.format[TumorGrading]
 }
+

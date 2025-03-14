@@ -1,10 +1,12 @@
 package de.dnpm.dip.mtb.model
 
 
+import java.net.URI
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.dnpm.dip.model.{
   Id,
-  ExternalId,
+  DiagnosticReport,
   Patient,
   Reference,
   Observation,
@@ -121,15 +123,42 @@ final case class IHCReport
   id: Id[IHCReport],
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
-  date: LocalDate,
-  journalId: ExternalId[_],
-  blockId: ExternalId[_],
-  proteinExpressionResults: List[ProteinExpression],
-  msiMmrResults: List[ProteinExpression]
+  issuedOn: LocalDate,
+  journalId: Id[_],
+  blockIds: NonEmptyList[Id[_]],
+  results: IHCReport.Results,
 )
+extends DiagnosticReport
+{
+  override val `type` = 
+    Coding(
+      "ihc",
+      "Immun-Histo-Chemie",
+      URI.create("dnpm-dip/mtb/ihc")
+    )
+
+  override val notes =
+    None
+}
 
 object IHCReport
 {
+
+  final case class Results
+  (
+    proteinExpression: List[ProteinExpression],
+    msiMmr: List[ProteinExpression]
+  )
+
+
+  // For Reads/Writes of NonEmptyList
+  import de.dnpm.dip.util.json.{
+    readsNel,
+    writesNel
+  }
+
+  implicit val formatResults: OFormat[Results] =
+    Json.format[Results]
 
   implicit val format: OFormat[IHCReport] =
     Json.format[IHCReport]
