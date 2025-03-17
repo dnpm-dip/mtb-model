@@ -29,7 +29,6 @@ final case class MTBCarePlan
   medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
   studyEnrollmentRecommendations: Option[List[MTBStudyEnrollmentRecommendation]],
-//  studyEnrollmentRecommendation: Option[MTBStudyEnrollmentRecommendation],
   notes: Option[List[String]]
 )
 extends CarePlan
@@ -44,12 +43,16 @@ object MTBCarePlan
   object StatusReason
   extends CodedEnum("dnpm-dip/mtb/careplan/status-reason")
   with DefaultCodeSystem
+  with CarePlan.NonInclusionReason
   {
     val NoTarget = Value("no-target")
 
     override val display =
       Map(
         NoTarget -> "Keine Therapeutische Konsequenz"
+      )
+      .orElse(
+        defaultDisplay
       )
   }
 

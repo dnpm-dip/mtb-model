@@ -315,7 +315,7 @@ trait Completers extends BaseCompleters
           record.getNgsReports.flatMap(_.variants)
   
         implicit val completedDiagnoses =
-          record.diagnoses.complete//.getOrElse(List.empty)
+          record.diagnoses.complete
 
 
         record.copy(
@@ -329,7 +329,7 @@ trait Completers extends BaseCompleters
           ihcReports = record.ihcReports.complete,
           ngsReports = record.ngsReports.complete,
           carePlans = record.carePlans.complete, 
-          systemicTherapies = record.systemicTherapies.complete,
+          systemicTherapyHistories = record.systemicTherapyHistories.complete,
           responses = record.responses.complete, 
         )
 

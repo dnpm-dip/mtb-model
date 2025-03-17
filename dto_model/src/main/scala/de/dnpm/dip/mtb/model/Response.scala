@@ -61,12 +61,28 @@ final case class Response
   patient: Reference[Patient],
   therapy: Reference[MTBSystemicTherapy],
   effectiveDate: LocalDate,
+  method: Coding[Response.Method.Value],
   value: Coding[RECIST.Value]
 )
 extends Observation[Coding[RECIST.Value]]
 
 object Response
 {
+
+  object Method
+  extends CodedEnum("dnpm-dip/mtb/response/method")
+  with DefaultCodeSystem
+  {
+
+  val RECIST, RANO = Value
+
+  override val display = 
+    Map(
+      RECIST -> "Nach RECIST-Kriterien",
+      RANO   -> "Nach RANO-Kriterien"
+    )
+  }
+
   implicit val format: OFormat[Response] =
     Json.format[Response]
 }

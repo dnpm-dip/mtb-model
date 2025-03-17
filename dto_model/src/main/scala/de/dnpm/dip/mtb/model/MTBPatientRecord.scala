@@ -23,6 +23,7 @@ final case class MTBPatientRecord
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
   specimens: Option[List[TumorSpecimen]],
+  priorDiagnosticReports: Option[List[MolecularDiagnosticReport]],
   histologyReports: Option[List[HistologyReport]],
   ihcReports: Option[List[IHCReport]],
   ngsReports: Option[List[SomaticNGSReport]],
@@ -30,7 +31,7 @@ final case class MTBPatientRecord
   followUps: Option[List[FollowUp]],
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
-  systemicTherapies: Option[List[History[MTBSystemicTherapy]]],
+  systemicTherapyHistories: Option[List[History[MTBSystemicTherapy]]],
   responses: Option[List[Response]]
 )
 extends PatientRecord
@@ -66,8 +67,8 @@ extends PatientRecord
   def getClaimResponses =
     claimResponses.getOrElse(List.empty)
 
-  def getSystemicTherapies =
-    systemicTherapies.getOrElse(List.empty)
+  def getSystemicTherapyHistories =
+    systemicTherapyHistories.getOrElse(List.empty)
 
   def getResponses =
     responses.getOrElse(List.empty)

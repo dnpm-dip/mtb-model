@@ -26,27 +26,56 @@ import play.api.libs.json.{
 }
 
 
+trait MTBRecommendation
+{
+  this: Recommendation =>
+
+  val levelOfEvidence: Option[LevelOfEvidence]
+}
+
+
 final case class MTBMedicationRecommendation
 (
   id: Id[MTBMedicationRecommendation],
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  levelOfEvidence: Option[LevelOfEvidence],
   priority: Option[Coding[Recommendation.Priority.Value]],
+  levelOfEvidence: Option[LevelOfEvidence],
+  categories: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
   medication: Set[Coding[Medications]],
-//  useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]], //TODO
+  useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
-//  supportingVariants: Option[List[Reference[Variant]]]
 )
-extends MedicationRecommendation[Medications]
+extends MTBRecommendation
+with MedicationRecommendation[Medications]
 
 
 object MTBMedicationRecommendation
 {
 
+  object Category
+  extends CodedEnum("dnpm-dip/mtb/recommendation/systemic-therapy/category")
+  with DefaultCodeSystem
+  {
+
+    val CH, HO, IM, ZS, SZ, SO = Value
+
+    override val display =
+      Map(
+        CH -> "Chemotherapie",
+        HO -> "Hormontherapie",
+        IM -> "Immun-/Antikörpertherapie",
+        ZS -> "zielgerichtete Substanzen",
+        SZ -> "Stammzelltransplantation (inklusive Knochenmarktransplantation)",
+        SO -> "Sonstiges"
+      )
+
+  }
+
+
   object UseType
-  extends CodedEnum("dnpm-dip/mtb/recommendation/medication/use-type")
+  extends CodedEnum("dnpm-dip/mtb/recommendation/systemic-therapy/use-type")
   with DefaultCodeSystem
   {
     val InLabel       = Value("in-label")
@@ -66,6 +95,7 @@ object MTBMedicationRecommendation
 
   }
 
+
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]
 }
@@ -79,12 +109,36 @@ final case class MTBProcedureRecommendation
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   priority: Option[Coding[Recommendation.Priority.Value]],
-  code: Coding[OncoProcedure.Type.Value],
-//  supportingVariants: Option[List[Reference[Variant]]]
+  levelOfEvidence: Option[LevelOfEvidence],
+  code: Coding[MTBProcedureRecommendation.Category.Value],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
-extends TherapyRecommendation
+extends MTBRecommendation
+with TherapyRecommendation
 
+object MTBProcedureRecommendation
+{
+
+  object Category
+  extends CodedEnum("dnpm-dip/mtb/recommendation/procedure/category")
+  with DefaultCodeSystem
+  {
+
+    val WW, AS, WS, OP, ST, SO = Value
+
+    override val display =
+      Map(
+        WW -> "Watchful Waiting",
+        AS -> "Active Surveillance",
+        WS -> "Wait and see",
+        OP -> "Operation",
+        ST -> "Strahlentherapie",
+        SO -> "Sonstiges"
+      )
+
+  }
+
+}
 
 
 final case class GeneticCounselingRecommendation
@@ -131,9 +185,9 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
-//  supportingVariants: Option[List[Reference[Variant]]],
-  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
-  study: NonEmptyList[Reference[Study]]
+  study: NonEmptyList[Reference[Study]],
+  medication: Option[Set[Coding[Medications]]],
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
 extends StudyEnrollmentRecommendation
 
@@ -149,3 +203,4 @@ object MTBStudyEnrollmentRecommendation
   implicit val format: OFormat[MTBStudyEnrollmentRecommendation] =
     Json.format[MTBStudyEnrollmentRecommendation]
 }
+

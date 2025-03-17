@@ -9,7 +9,8 @@ import de.dnpm.dip.model.{
   Reference,
   GeneAlterationReference,
   Quantity,
-  UnitOfMeasure
+  UnitOfMeasure,
+  BaseVariant
 }
 import de.dnpm.dip.util.{
   Displays,
@@ -32,11 +33,8 @@ import play.api.libs.json.{
 
 
 
-sealed abstract class Variant
-{
-  val id: Id[Variant]
-  val patient: Reference[Patient]
-}
+sealed abstract class Variant extends BaseVariant
+
 
 object Variant
 {
@@ -63,10 +61,10 @@ object Variant
       case cnv: CNV =>
         s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
 
-      case DNAFusion(_,_,partner5pr,partner3pr,_) =>
+      case DNAFusion(_,_,_,_,partner5pr,partner3pr,_) =>
         s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
-      case RNAFusion(_,_,partner5pr,partner3pr,_,_,_) =>
+      case RNAFusion(_,_,_,_,partner5pr,partner3pr,_,_) =>
         s"RNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
       
       case rnaSeq: RNASeq =>
@@ -186,6 +184,9 @@ with DefaultCodeSystem
 }
 
 
+sealed trait Exon
+
+
 sealed trait dbSNP
 object dbSNP
 {
@@ -201,12 +202,11 @@ object COSMIC
 }
 
 
-sealed trait ClinVar
+//sealed trait ClinVar
 object ClinVar
 extends CodedEnum("https://www.ncbi.nlm.nih.gov/clinvar/")
 with DefaultCodeSystem
 {
-  val Zero  = Value("0")
   val One   = Value("1")
   val Two   = Value("2")
   val Three = Value("3")
@@ -215,7 +215,6 @@ with DefaultCodeSystem
 
   override val display =
     Map(
-      Zero  -> "Not Applicable",
       One   -> "Benign",
       Two   -> "Likely benign",
       Three -> "Uncertain significance",
@@ -230,10 +229,12 @@ final case class SNV
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Set[ExternalId[SNV]],    // dbSNPId or COSMIC ID to be listed here
+  externalIds: Option[List[ExternalId[SNV]]],    // dbSNPId or COSMIC ID to be listed here
   chromosome: Coding[Chromosome.Value],
   gene: Option[Coding[HGNC]],
-  transcriptId: Option[ExternalId[Transcript]],
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
+  transcriptId: ExternalId[Transcript],
+  exonId: Option[Id[Exon]],
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
@@ -270,7 +271,9 @@ final case class CNV
 (
   id: Id[Variant],
   patient: Reference[Patient],
+  externalIds: Option[List[ExternalId[CNV]]],
   chromosome: Coding[Chromosome.Value],
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startRange: Option[Variant.PositionRange],
   endRange: Option[Variant.PositionRange],
   totalCopyNumber: Option[Int],
@@ -319,6 +322,8 @@ final case class DNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
+  externalIds: Option[List[ExternalId[DNAFusion]]],  // COSMIC ID
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   fusionPartner5prime: DNAFusion.Partner,
   fusionPartner3prime: DNAFusion.Partner,
   reportedNumReads: Int
@@ -347,10 +352,11 @@ final case class RNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
+  externalIds: Option[List[ExternalId[RNAFusion]]],  // COSMIC ID
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   fusionPartner5prime: RNAFusion.Partner,
   fusionPartner3prime: RNAFusion.Partner,
   effect: Option[String],
-  externalIds: Set[ExternalId[RNAFusion]],  // COSMIC ID
   reportedNumReads: Int
 )
 extends Fusion[RNAFusion.Partner]
@@ -369,7 +375,8 @@ object RNAFusion
 
   final case class Partner
   (
-    ids: Set[ExternalId[_]],  // Transcript ID and Exon Id listed here
+    transcriptId: ExternalId[Transcript],
+    exonId: Id[Exon], 
     gene: Coding[HGNC],
     position: Long,
     strand: Strand.Value
@@ -383,24 +390,19 @@ object RNAFusion
 }
 
 
-sealed trait Entrez
-object Entrez
-{
-  implicit val codingSystem: Coding.System[Entrez] =
-    Coding.System[Entrez]("Entrez")
-}
-
 final case class RNASeq
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  ids: Set[ExternalId[_]],    // Entrez ID, Ensembl ID or Transcript ID to be listed here
+  externalIds: Option[List[ExternalId[RNASeq]]],    // Entrez ID, Ensembl ID to be listed here
+  localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   gene: Option[Coding[HGNC]],
-  fragments: RNASeq.Fragments,
-  fromNGS: Boolean,
-  tissueCorrectedExpression: Boolean,
+  transcriptId: ExternalId[Transcript],
+  transcriptsPerMillion: Double,
+  variant: Reference[SNV],
+  tissueCorrectedExpression: Option[Boolean],
   rawCounts: Int,
-  librarySize: Int,
+  librarySize: Option[Int],
   cohortRanking: Option[Int]
 )
 extends Variant

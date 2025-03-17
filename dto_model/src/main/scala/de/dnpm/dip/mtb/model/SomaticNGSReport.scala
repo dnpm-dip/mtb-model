@@ -4,6 +4,7 @@ package de.dnpm.dip.mtb.model
 import java.net.URI
 import java.time.LocalDate
 import cats.Applicative
+import cats.data.NonEmptyList
 import de.dnpm.dip.model.{
   Id,
   Patient,
@@ -197,7 +198,7 @@ final case class SomaticNGSReport
   specimen: Reference[TumorSpecimen],
   issuedOn: LocalDate,
   `type`: Coding[NGSReport.Type.Value],
-  metadata: List[SomaticNGSReport.Metadata],
+  metadata: NonEmptyList[SomaticNGSReport.Metadata],
   results: SomaticNGSReport.Results
 )
 extends NGSReport
@@ -215,7 +216,6 @@ extends NGSReport
 object SomaticNGSReport
 {
 
-
   final case class Metadata
   (
     kitType: String,
@@ -232,13 +232,19 @@ object SomaticNGSReport
     tmb: Option[TMB],
     brcaness: Option[BRCAness],
     hrdScore: Option[HRDScore],
-//    msi: Option[MSI],
     simpleVariants: List[SNV],
     copyNumberVariants: List[CNV],
     dnaFusions: List[DNAFusion],
     rnaFusions: List[RNAFusion],
     rnaSeqs: List[RNASeq],
   )
+
+
+  // For Reads/Writes of NonEmptyList
+  import de.dnpm.dip.util.json.{
+    readsNel,
+    writesNel
+  }
 
   implicit val formatMetaData: OFormat[Metadata] =
     Json.format[Metadata]

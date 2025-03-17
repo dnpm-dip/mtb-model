@@ -10,8 +10,9 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.model.{
   Id,
-  Reference,
+  Medications,
   Patient,
+  Reference
 }
 import play.api.libs.json.{
   Json,
@@ -25,9 +26,9 @@ final case class Claim
   id: Id[Claim],
   patient: Reference[Patient],
   recommendation: Reference[MTBMedicationRecommendation],
-//  requestedMedication: Option[Set[Coding[Medications]]],
+  requestedMedication: Option[Set[Coding[Medications]]],
   issuedOn: LocalDate,
-  stage: Coding[Claim.Stage.Value]
+  stage: Option[Coding[Claim.Stage.Value]]
 )
 
 object Claim
@@ -95,10 +96,6 @@ object ClaimResponse
   extends CodedEnum("dnpm-dip/mtb/claim-response/status-reason")
   with DefaultCodeSystem
   {
-
-    //TODO:
-    // Standardtherapie nicht ausgeschöpft (Neuantrag erforderlich)
-    // Standardtherapie nicht ausgeschöpft (kein Neuantrag erforderlich)
 
     val InsufficientEvidence        = Value("insufficient-evidence")
     val StandardTherapyNotExhausted = Value("standard-therapy-not-exhausted")
