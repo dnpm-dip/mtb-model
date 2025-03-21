@@ -33,7 +33,6 @@ with DefaultCodeSystem
   val SD  = Value("SD")
   val PD  = Value("PD")
   val NA  = Value("NA")
-  val NYA = Value("NYA")
 
   override val display = {
     case CR  => "Complete Response"
@@ -42,7 +41,6 @@ with DefaultCodeSystem
     case SD  => "Stable Disease"
     case PD  => "Progressive Disease"
     case NA  => "Not Assessable"
-    case NYA => "Not Yet Assessable"
   }
 
   final class ProviderSPI extends CodeSystemProviderSPI

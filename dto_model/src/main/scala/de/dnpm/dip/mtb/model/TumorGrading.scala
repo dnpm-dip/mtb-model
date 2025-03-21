@@ -32,7 +32,7 @@ with DefaultCodeSystem
   val Three = Value("3")
   val Four  = Value("4")
   val Five  = Value("5")
-  val X, L, M, H, B, U, T = Value
+  val X, L, M, H, B, T, U = Value
 
   override val display =
     Map(
@@ -47,8 +47,8 @@ with DefaultCodeSystem
       M     -> "M = intermediate grade (G2 oder G3)",
       H     -> "H = high grade (G3 oder G4)",
       B     -> "B = Borderline",
-      U     -> "U = unbekannt",
       T     -> "T = trifft nicht zu",
+      U     -> "U = unbekannt",
     )
 }
 
@@ -57,6 +57,7 @@ object TumorGrading
 {
 
   type Systems = OBDSGrading.Value :+: WHOGrading :+: CNil
+
 
     // For Reads/Writes of NonEmptyList
   import de.dnpm.dip.util.json.{

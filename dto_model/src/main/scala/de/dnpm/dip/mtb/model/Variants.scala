@@ -34,6 +34,9 @@ import play.api.libs.json.{
 
 
 sealed abstract class Variant extends BaseVariant
+{
+  val id: Id[Variant]
+}
 
 
 object Variant
@@ -230,7 +233,7 @@ final case class SNV
   id: Id[Variant],
   patient: Reference[Patient],
   externalIds: Option[List[ExternalId[SNV]]],    // dbSNPId or COSMIC ID to be listed here
-  chromosome: Coding[Chromosome.Value],
+  chromosome: Chromosome.Value,
   gene: Option[Coding[HGNC]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   transcriptId: ExternalId[Transcript],
@@ -272,7 +275,7 @@ final case class CNV
   id: Id[Variant],
   patient: Reference[Patient],
   externalIds: Option[List[ExternalId[CNV]]],
-  chromosome: Coding[Chromosome.Value],
+  chromosome: Chromosome.Value,
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startRange: Option[Variant.PositionRange],
   endRange: Option[Variant.PositionRange],
@@ -322,7 +325,7 @@ final case class DNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[DNAFusion]]],  // COSMIC ID
+  externalIds: Option[List[ExternalId[DNAFusion]]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   fusionPartner5prime: DNAFusion.Partner,
   fusionPartner3prime: DNAFusion.Partner,

@@ -19,6 +19,18 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
+  implicit val tumorGradingSchema: Schema[TumorGrading] =
+    Json.schema[TumorGrading]
+      .toSimpleNameDefinition
+
+  implicit val tumorStagingSchema: Schema[TumorStaging] =
+    Json.schema[TumorStaging]
+      .toSimpleNameDefinition
+
+  implicit val diagnosisTypeSchema: Schema[MTBDiagnosis.Type] =
+    Json.schema[MTBDiagnosis.Type]
+    
+
   implicit val diagnosisSchema: Schema[MTBDiagnosis] =
     Json.schema[MTBDiagnosis]
       .toSimpleNameDefinition
@@ -75,6 +87,10 @@ trait Schemas extends BaseSchemas
     Json.schema[HRDScore]
       .toSimpleNameDefinition
 
+  implicit val seqMetadataSchema: Schema[SomaticNGSReport.Metadata] =
+    Json.schema[SomaticNGSReport.Metadata]
+      .toSimpleNameDefinition
+
   implicit val snvSchema: Schema[SNV] =
     Json.schema[SNV]
       .toSimpleNameDefinition
@@ -97,7 +113,7 @@ trait Schemas extends BaseSchemas
 
   implicit val ngsReportSchema: Schema[SomaticNGSReport] =
     Json.schema[SomaticNGSReport]
-      .toSimpleNameDefinition
+      .toDefinition("SomaticNGSReport_Metadata")
 
 
   implicit val levelOfEvidenceSchema: Schema[LevelOfEvidence] =

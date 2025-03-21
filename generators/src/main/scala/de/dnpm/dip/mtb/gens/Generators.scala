@@ -14,11 +14,9 @@ import de.ekut.tbi.generators.DateTimeGens._
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
-}
-import de.dnpm.dip.coding.hgnc.{
-  HGNC,
   Ensembl
 }
+import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.atc.Kinds.Substance
@@ -31,10 +29,13 @@ import ClassKinds.Category
 import de.dnpm.dip.coding.icd.ICD.extensions._
 import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.model.{
+  Address,
+  BaseVariant,
   ClosedInterval,
   ExternalId,
+  FollowUp,
   Gender,
-  GuidelineTreatmentStatus,
+  GeneAlterationReference,
   HealthInsurance,
   Id,
   History,
@@ -45,17 +46,17 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Reference,
-//  GeneAlterationReference,
+  Recommendation,
   Study,
-  Therapy,
-  TherapyRecommendation
+  Therapy
 }
 import de.dnpm.dip.mtb.model._
-import Therapy.StatusReason.{
+import MTBTherapy.StatusReason.{
   PaymentRefused,
   Progression
 }
-
+import TumorStaging.TNM.UICC
+import Study.Registries.NCT
 
 
 trait Generators
@@ -194,9 +195,15 @@ trait Generators
           0.4
         )
 
+
       healthInsurance =
-        Reference.from(ExternalId[HealthInsurance]("IK of the AOK...","IK"))
-          .copy(display = Some("AOK"))
+        Patient.Insurance(
+          Coding(HealthInsurance.Type.GKV),
+          Some(
+            Reference.from(ExternalId[HealthInsurance]("1234567890","IK"))
+              .withDisplay("AOK")
+            )
+        )
 
     } yield
       Patient(
@@ -205,8 +212,8 @@ trait Generators
         birthDate,
         dateOfDeath,
         None,
-        Some(healthInsurance),
-        None
+        healthInsurance,
+        Some(Address("12345"))
       )
 
 
@@ -215,8 +222,6 @@ trait Generators
   ): Gen[MTBDiagnosis] =
     for {
       id <- Gen.of[Id[MTBDiagnosis]]
-
-      icd10 <- Gen.of[Coding[ICD10GM]]
 
       date <-
         patient.dateOfDeath match {
@@ -233,33 +238,65 @@ trait Generators
             } yield patient.birthDate.plusMonths(onsetAge)
         }
 
+      icd10 <- Gen.of[Coding[ICD10GM]]
+
       icdo3 =
         icdo3Topography
           .concepts
           .find(_.code.value == icd10.code.value)
           .map(_.toCoding)
 
-      grade <- Gen.of[Coding[TumorGrade.Value]]
+      typ =
+        MTBDiagnosis.Type(
+          Coding(MTBDiagnosis.Type.Main),
+          date
+        )
 
-      who <- Gen.of[Coding[WHOGrading]]
+      grading <-
+        for {
+          obds <- Gen.of[Coding[OBDSGrading.Value]].map(Coding[TumorGrading.Systems].from(_))
+          who <- Gen.of[Coding[WHOGrading]].map(Coding[TumorGrading.Systems].from(_))
+        } yield TumorGrading(
+          date,
+          NonEmptyList.of(
+            obds,
+            who
+          )
+        )
 
-      stageHistory <-
-        Gen.of[Coding[MTBDiagnosis.TumorSpread.Value]]
-          .map(MTBDiagnosis.TumorSpread(_,LocalDate.now))
-          .map(Seq(_))
+      staging <- for {
 
-      gl <- Gen.of[Coding[GuidelineTreatmentStatus.Value]]
+        tnm <- for {
+          t <- Gen.oneOf("Tx","T0","T1","T2","T3","T4").map(Coding[UICC](_))
+          n <- Gen.oneOf("Nx","N0","N1","N2","N3").map(Coding[UICC](_))
+          m <- Gen.oneOf("Mx","M0","M1").map(Coding[UICC](_))
+        } yield TumorStaging.TNM(t,n,m)
+
+        spread <- Gen.of[Coding[TumorStaging.KDSSpread.Value]]
+                    .map(Coding[TumorStaging.OtherSystems].from(_))
+
+      } yield TumorStaging(
+        date,
+        Coding(TumorStaging.Method.Clinical),
+        tnm,
+        Some(List(spread))
+      )
+
+      glts <- Gen.of[Coding[MTBDiagnosis.GuidelineTreatmentStatus.Value]]
 
     } yield MTBDiagnosis(
       id,
       Reference.to(patient),
       Some(date),
+      History(typ),
       icd10,
+      None,
       icdo3,
-      Some(grade),
-      Some(who),
-      Some(stageHistory),
-      Some(gl)
+      Some(History(grading)),
+      History(staging),
+      Some(glts),
+      None,
+      Some(List("Notes on the tumor diagnosis..."))
     )
 
 
@@ -299,13 +336,17 @@ trait Generators
   def genGuidelineTherapy(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-  ): Gen[MTBMedicationTherapy] =
+  ): Gen[MTBSystemicTherapy] =
     for {
       id <-
-        Gen.of[Id[MTBMedicationTherapy]]
+        Gen.of[Id[MTBSystemicTherapy]]
 
       therapyLine <-
         Gen.intsBetween(1,9)
+
+      intent <- Gen.of[Coding[MTBTherapy.Intent.Value]]
+
+      category <- Gen.of[Coding[MTBSystemicTherapy.Category.Value]]
 
       status =
         Coding(Stopped)
@@ -328,18 +369,21 @@ trait Generators
 
       note = "Notes on the therapy..."
 
-    } yield MTBMedicationTherapy(
+    } yield MTBSystemicTherapy(
       id,
       patient,
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       Some(therapyLine),
+      Some(intent),
+      Some(category),
       None,
       LocalDate.now,
       status,
       Some(statusReason),
+      None,
       Some(period),
       Some(medication),
-      Some(note)
+      Some(List(note))
     )
 
 
@@ -352,27 +396,30 @@ trait Generators
 
       code <- Gen.of[Coding[OncoProcedure.Type.Value]]
 
+      intent <- Gen.of[Coding[MTBTherapy.Intent.Value]]
+
       status <- Gen.of[Coding[Therapy.Status.Value]]
 
-      statusReason <- Gen.of[Coding[Therapy.StatusReason.Value]]
+      statusReason <- Gen.of[Coding[MTBTherapy.StatusReason.Value]]
 
       therapyLine <- Gen.intsBetween(1,9)
 
       period = Period(LocalDate.now.minusMonths(6))
 
-      note = "Notes on the therapy..."
+      note = "Notes on the therapeutic procedure..."
     } yield OncoProcedure(
       id,
       patient,
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(therapyLine),
+      Some(intent),
+      None,
       code,
       status,
       Some(statusReason),
-      Some(therapyLine),
-      None,
       LocalDate.now,
       Some(period),
-      Some(note)
+      Some(List(note))
     )
 
 
@@ -396,7 +443,7 @@ trait Generators
       typ,
       Some(
         TumorSpecimen.Collection(
-          LocalDate.now,
+          Some(LocalDate.now),
           method,
           localization
         )
@@ -418,6 +465,24 @@ trait Generators
       specimen,
       method,
       value
+    )
+
+
+  def genMolecularDiagnosticReport(
+    patient: Reference[Patient],
+    specimen: TumorSpecimen
+  ): Gen[MolecularDiagnosticReport] =
+    for { 
+      id <- Gen.of[Id[MolecularDiagnosticReport]]
+      typ <- Gen.of[Coding[MolecularDiagnosticReport.Type.Value]]
+    } yield MolecularDiagnosticReport(
+      id,
+      patient,
+      Some(Reference[Institute](None,None,None,None).withDisplay("Molekular-Pathologie UKx")),
+      LocalDate.now,
+      Reference.to(specimen),
+      typ,
+      Some(List("Result of diagnostics..."))
     )
 
 
@@ -482,9 +547,9 @@ trait Generators
     for {
       id <- Gen.of[Id[IHCReport]]
 
-      journalId <- Gen.of[ExternalId[Nothing]]
+      journalId <- Gen.of[Id[Nothing]]
 
-      blockId <- Gen.of[ExternalId[Nothing]]
+      blockId <- Gen.of[Id[Nothing]]
 
       proteinExpression <-
         Gen.list(
@@ -498,9 +563,11 @@ trait Generators
       specimen,
       LocalDate.now,
       journalId,
-      blockId,
-      proteinExpression,
-      List.empty,
+      NonEmptyList.of(blockId),
+      IHCReport.Results(
+        proteinExpression,
+        List.empty,
+      )
     )
 
 
@@ -543,15 +610,17 @@ trait Generators
         Gen.uuidStrings
           .map(ExternalId[SNV](_,Some(Coding.System[COSMIC].uri)))
       
-      chr <-
-        Gen.of[Coding[Chromosome.Value]]
+      chr <- Gen.of[Chromosome.Value]
 
-      gene <-
-        Gen.of[Coding[HGNC]]
+      gene <- Gen.of[Coding[HGNC]]
+
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
 
       transcriptId <-
         Gen.uuidStrings
           .map(ExternalId[Transcript,Ensembl](_))
+
+      exonId <- Gen.intsBetween(2,12).map(exon => Id[Exon](exon.toString))
 
       position <-
         Gen.longsBetween(24,600)
@@ -573,10 +642,12 @@ trait Generators
     } yield SNV(
       id,
       patient,
-      Set(dbSnpId,cosmicId),
+      Some(List(dbSnpId,cosmicId)),
       chr,
       Some(gene),
-      Some(transcriptId),
+      Some(Set(localization)),
+      transcriptId,
+      Some(exonId),
       Variant.PositionRange(position,None),
       SNV.Allele(alt),
       SNV.Allele(ref),
@@ -592,7 +663,9 @@ trait Generators
     for { 
       id <- Gen.of[Id[Variant]]
       
-      chr <- Gen.of[Coding[Chromosome.Value]]
+      chr <- Gen.of[Chromosome.Value]
+
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
 
       startRange <- Gen.longsBetween(42L,50000L).map(start => Variant.PositionRange(start,Some(start+42L)))
 
@@ -623,7 +696,9 @@ trait Generators
     } yield CNV(
       id,
       patient,
+      None,
       chr,
+      Some(Set(localization)),
       Some(startRange),
       Some(endRange),
       Some(copyNum),
@@ -639,7 +714,6 @@ trait Generators
   implicit val genDNAFusionPartner: Gen[DNAFusion.Partner] =
     for { 
       chr <- Gen.of[Chromosome.Value]
-//      chr <- Gen.of[Coding[Chromosome.Value]]
       gene <- Gen.of[Coding[HGNC]]
       position <- Gen.longsBetween(42L,1000L)
     } yield DNAFusion.Partner(
@@ -651,12 +725,15 @@ trait Generators
   def genDNAFusion(patient: Reference[Patient]): Gen[DNAFusion] =
     for {
       id <- Gen.of[Id[Variant]]
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
       partner5pr <- Gen.of[DNAFusion.Partner]
       partner3pr <- Gen.of[DNAFusion.Partner]
       reads <- Gen.intsBetween(3,10)
     } yield DNAFusion(
       id,
       patient,
+      None,
+      Some(Set(localization)),
       partner5pr,
       partner3pr,
       reads
@@ -665,12 +742,14 @@ trait Generators
 
   implicit val genRNAFusionPartner: Gen[RNAFusion.Partner] =
     for { 
-      id <- Gen.uuidStrings.map(ExternalId[Transcript,Ensembl](_))
+      trancriptId <- Gen.uuidStrings.map(ExternalId[Transcript,Ensembl](_))
       gene <- Gen.of[Coding[HGNC]]
+      exonId <- Gen.intsBetween(2,12).map(exon => Id[Exon](exon.toString))
       position <- Gen.longsBetween(42L,1000L)
       strand <- Gen.of[RNAFusion.Strand.Value]
     } yield RNAFusion.Partner(
-      Set(id),
+      trancriptId,
+      exonId,
       gene,
       position,
       strand
@@ -679,6 +758,7 @@ trait Generators
   def genRNAFusion(patient: Reference[Patient]): Gen[RNAFusion] =
     for {
       id <- Gen.of[Id[Variant]]
+      localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
       partner5pr <- Gen.of[RNAFusion.Partner]
       partner3pr <- Gen.of[RNAFusion.Partner]
       cosmicId <- Gen.uuidStrings.map(ExternalId[RNAFusion,COSMIC](_))
@@ -686,10 +766,11 @@ trait Generators
     } yield RNAFusion(
       id,
       patient,
+      Some(List(cosmicId)),
+      Some(Set(localization)),
       partner5pr,
       partner3pr,
-      Some("Effect..."),
-      Set(cosmicId),
+      Some("Effect"),
       reads
     )
 
@@ -702,7 +783,7 @@ trait Generators
       id <- Gen.of[Id[SomaticNGSReport]]
 
       seqType <-
-        Gen.of[Coding[NGSReport.SequencingType.Value]]
+        Gen.of[Coding[NGSReport.Type.Value]]
 
       metadata <-
         for {
@@ -793,7 +874,7 @@ trait Generators
       specimen,
       LocalDate.now,
       seqType,
-      List(metadata),
+      NonEmptyList.of(metadata),
       SomaticNGSReport.Results(
         Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Bioinformatic))),
         Some(tmb),
@@ -812,13 +893,12 @@ trait Generators
   def genTherapyRecommendation(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-//    variants: Seq[Reference[Variant]]
     variants: Seq[Variant]
   ): Gen[MTBMedicationRecommendation] =
     for {
       id <- Gen.of[Id[MTBMedicationRecommendation]]
 
-      priority <- Gen.of[Coding[TherapyRecommendation.Priority.Value]]
+      priority <- Gen.of[Coding[Recommendation.Priority.Value]]
 
       evidenceLevel <-
         for { 
@@ -838,32 +918,34 @@ trait Generators
 
       medication <- Gen.of[Coding[ATC]]
 
-      supportingVariant <- Gen.oneOf(variants).map(Reference.to(_))
+      category <- Gen.of[Coding[MTBMedicationRecommendation.Category.Value]]
 
-/*
+      useType <- Gen.of[Coding[MTBMedicationRecommendation.UseType.Value]]
+
       supportingVariant <- Gen.oneOf(variants).map {
         variant =>
           GeneAlterationReference(
+            variant,
             variant match {
               case snv: SNV          => snv.gene
               case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
               case fusion: DNAFusion => Some(fusion.fusionPartner5prime.gene)
               case fusion: RNAFusion => Some(fusion.fusionPartner5prime.gene)
               case rnaSeq: RNASeq    => rnaSeq.gene
-            },
-            variant
+            }
           )
       }
-*/
 
     } yield MTBMedicationRecommendation(
       id,
       patient,
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       LocalDate.now,
-      Some(evidenceLevel),
       Some(priority),
+      Some(evidenceLevel),
+      Some(Set(category)),
       Set(medication),
+      Some(useType),
       Some(List(supportingVariant))
     )
 
@@ -905,15 +987,16 @@ trait Generators
         for { 
           stId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
           nctId <- Gen.intsBetween(10000000,50000000)
-                     .map(s => ExternalId[Study](s"NCT:$s","NCT"))
+                     .map(s => ExternalId[Study,NCT](s"NCT:$s"))
         } yield MTBStudyEnrollmentRecommendation(
           stId,
           patient,
-          recommendations.head.indication.get,
+          recommendations.head.reason.get,
           LocalDate.now,
           recommendations.head.levelOfEvidence.map(_.grading),
+          NonEmptyList.of(Reference.from(nctId)),
+          None,
           recommendations.head.supportingVariants,
-          Some(List(nctId))
         )
 
     } yield MTBCarePlan(
@@ -925,7 +1008,7 @@ trait Generators
       Some(recommendations),
       Some(counselingRecommendation),
       Some(List(studyEnrollmentRecommendation)),
-      Some(protocol)
+      Some(List(protocol))
     )
 
 
@@ -935,13 +1018,14 @@ trait Generators
   ): Gen[Claim] =
     for { 
       id <- Gen.of[Id[Claim]]
-      status <- Gen.of[Coding[Claim.Stage.Value]]
+      stage <- Gen.of[Coding[Claim.Stage.Value]]
     } yield Claim(
       id,
       patient,
       Reference.to(recommendation),
+      None,
       LocalDate.now,
-      status
+      Some(stage)
     )
 
 
@@ -984,10 +1068,14 @@ trait Generators
     patient: Patient,
     diagnosis: MTBDiagnosis,
     recommendation: MTBMedicationRecommendation
-  ): Gen[MTBMedicationTherapy] =
+  ): Gen[MTBSystemicTherapy] =
     for {
 
-      id <- Gen.of[Id[MTBMedicationTherapy]]
+      id <- Gen.of[Id[MTBSystemicTherapy]]
+
+      intent <- Gen.of[Coding[MTBTherapy.Intent.Value]]
+
+      category <- Gen.of[Coding[MTBSystemicTherapy.Category.Value]]
 
       status <- Gen.of[Coding[Therapy.Status.Value]]
 
@@ -1016,20 +1104,25 @@ trait Generators
           case _                       => Some(recommendation.medication)
         }
 
+      fulfillmentStatus <- Gen.of[Coding[MTBSystemicTherapy.RecommendationFulfillmentStatus.Value]]  
+
       note = "Notes on the therapy..."
 
-    } yield MTBMedicationTherapy(
+    } yield MTBSystemicTherapy(
       id,
       Reference.to(patient),
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       None,
+      Some(intent),
+      Some(category),
       Some(Reference.to(recommendation)),
       LocalDate.now,
       status,
       statusReason,
+      Some(fulfillmentStatus),
       period,
       medication,
-      Some(note)
+      Some(List(note))
     )
 
 
@@ -1048,11 +1141,12 @@ trait Generators
 
   def genResponse(
     patient: Reference[Patient],
-    therapy: MTBMedicationTherapy
+    therapy: MTBSystemicTherapy
   ): Gen[Response] =
     for {
       id     <- Gen.of[Id[Response]]
       value  <- Gen.of[Coding[RECIST.Value]]
+      method <- Gen.of[Coding[Response.Method.Value]]
       followUpTime <- Gen.longsBetween(8,16) 
       date =
         therapy.period
@@ -1063,6 +1157,7 @@ trait Generators
       patient,
       Reference.to(therapy),
       date,
+      method,
       value
     )
 
@@ -1106,6 +1201,9 @@ trait Generators
       specimen <-
         genTumorSpecimen(Reference.to(patient),diagnosis)
 
+      priorDiagnostics <- 
+        genMolecularDiagnosticReport(Reference.to(patient),specimen)
+        
       histologyReport <-
         genHistologyReport(
           Reference.to(patient),
@@ -1171,19 +1269,27 @@ trait Generators
             )
         )
 
+      followUp = 
+        FollowUp(
+          responses.head.effectiveDate,
+          None
+        )
+        
 
     } yield MTBPatientRecord(
       patient,
       NonEmptyList.one(episode),
-      Some(List(diagnosis)),
+      NonEmptyList.one(diagnosis),
       Some(guidelineTherapies),
       Some(guidelineProcedures),
       Some(List(performanceStatus)),
       Some(List(specimen)),
+      Some(List(priorDiagnostics)),
       Some(List(histologyReport)),
       Some(List(ihcReport)),
       Some(List(ngsReport)),
       Some(List(carePlan)),
+      Some(List(followUp)),
       Some(claims),
       Some(claimResponses),
       Some(therapies.map(History(_))),

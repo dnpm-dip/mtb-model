@@ -200,7 +200,7 @@ trait Completers extends BaseCompleters
     implicit val snvCompleter: Completer[SNV] =
       Completer.of(
         snv => snv.copy(
-          chromosome     = snv.chromosome.complete,
+//          chromosome     = snv.chromosome.complete,
           gene           = snv.gene.complete,
           dnaChange      = snv.dnaChange.complete,
           proteinChange  = snv.proteinChange.complete,
@@ -211,7 +211,7 @@ trait Completers extends BaseCompleters
     implicit val cnvCompleter: Completer[CNV] =
       Completer.of(
         cnv => cnv.copy(
-          chromosome            = cnv.chromosome.complete,
+//          chromosome            = cnv.chromosome.complete,
           `type`                = cnv.`type`.complete,
           reportedAffectedGenes = cnv.reportedAffectedGenes.complete,
           copyNumberNeutralLoH  = cnv.copyNumberNeutralLoH.complete,
@@ -329,7 +329,7 @@ trait Completers extends BaseCompleters
           ihcReports = record.ihcReports.complete,
           ngsReports = record.ngsReports.complete,
           carePlans = record.carePlans.complete, 
-          systemicTherapyHistories = record.systemicTherapyHistories.complete,
+          systemicTherapies = record.systemicTherapies.complete,
           responses = record.responses.complete, 
         )
 

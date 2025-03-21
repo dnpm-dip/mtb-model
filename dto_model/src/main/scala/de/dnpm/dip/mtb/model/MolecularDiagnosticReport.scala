@@ -63,22 +63,6 @@ object MolecularDiagnosticReport
         defaultDisplay
       )
 
-/*
-      Map( 
-        Array           -> "Array",      
-        Single          -> "Einzelgenanalyse",    
-        Karyotyping     -> "Karyotyping",
-        Panel           -> "Panel",
-        Exome           -> "Exome",
-        GenomeShortRead -> "Genome short-read",
-        GenomeLongRead  -> "Genome long-read",
-        FISH            -> "FISH",
-        PCR             -> "PCR",
-        GenePanel       -> "Genpanel",
-        FusionPanel     -> "Fusionspanel",
-        Other           -> "Andere"
-      )
-*/
   }
 
 

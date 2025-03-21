@@ -31,7 +31,7 @@ final case class MTBPatientRecord
   followUps: Option[List[FollowUp]],
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
-  systemicTherapyHistories: Option[List[History[MTBSystemicTherapy]]],
+  systemicTherapies: Option[List[History[MTBSystemicTherapy]]],
   responses: Option[List[Response]]
 )
 extends PatientRecord
@@ -67,8 +67,8 @@ extends PatientRecord
   def getClaimResponses =
     claimResponses.getOrElse(List.empty)
 
-  def getSystemicTherapyHistories =
-    systemicTherapyHistories.getOrElse(List.empty)
+  def getSystemicTherapies =
+    systemicTherapies.getOrElse(List.empty)
 
   def getResponses =
     responses.getOrElse(List.empty)

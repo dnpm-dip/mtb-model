@@ -27,8 +27,8 @@ import play.api.libs.json.{
 object MTBTherapy
 {
 
-  object Intention
-  extends CodedEnum("dnpm-dip/therapy/intention")
+  object Intent
+  extends CodedEnum("dnpm-dip/therapy/intent")
   with DefaultCodeSystem
   {
     val K, P, S, X = Value
@@ -101,7 +101,7 @@ final case class MTBSystemicTherapy
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   therapyLine: Option[Int],
-  intention: Option[Coding[MTBTherapy.Intention.Value]],
+  intent: Option[Coding[MTBTherapy.Intent.Value]],
   category: Option[Coding[MTBSystemicTherapy.Category.Value]],
   basedOn: Option[Reference[MTBMedicationRecommendation]],
   recordedOn: LocalDate,
@@ -174,7 +174,7 @@ final case class OncoProcedure
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   therapyLine: Option[Int],
-  intention: Option[Coding[MTBTherapy.Intention.Value]],
+  intent: Option[Coding[MTBTherapy.Intent.Value]],
   basedOn: Option[Reference[TherapyRecommendation]],
   code: Coding[OncoProcedure.Type.Value],
   status: Coding[Therapy.Status.Value],

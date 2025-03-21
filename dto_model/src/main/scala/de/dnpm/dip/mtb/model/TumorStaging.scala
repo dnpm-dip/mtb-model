@@ -48,7 +48,7 @@ object TumorStaging
   (
     tumor: Coding[TNM.Systems],
     nodes: Coding[TNM.Systems],
-    metastases: Coding[TNM.Systems]
+    metastasis: Coding[TNM.Systems]
   )
 
   object TNM

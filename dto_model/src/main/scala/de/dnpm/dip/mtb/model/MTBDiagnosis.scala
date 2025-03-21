@@ -3,7 +3,6 @@ package de.dnpm.dip.mtb.model
 
 import java.time.LocalDate
 import cats.Applicative
-import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
@@ -13,6 +12,7 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.model.{
   Id,
+  History,
   Reference,
   Patient,
   Diagnosis,
@@ -33,12 +33,12 @@ final case class MTBDiagnosis
   id: Id[MTBDiagnosis],
   patient: Reference[Patient],
   recordedOn: Option[LocalDate],
-  `type`: NonEmptyList[MTBDiagnosis.Type],
+  `type`: History[MTBDiagnosis.Type],
   code: Coding[ICD10GM],
-  germlineCodes: Option[Coding[ICD10GM]],
+  germlineCodes: Option[Set[Coding[ICD10GM]]],
   topography: Option[Coding[ICDO3.T]],
-  grading: Option[List[TumorGrading]],
-  staging: NonEmptyList[TumorStaging],
+  grading: Option[History[TumorGrading]],
+  staging: History[TumorStaging],
   guidelineTreatmentStatus: Option[Coding[MTBDiagnosis.GuidelineTreatmentStatus.Value]],
   histology: Option[List[Reference[HistologyReport]]],
   notes: Option[List[String]]
@@ -100,13 +100,6 @@ object MTBDiagnosis
       override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
         new Provider.Facade[F]
     }
-  }
-
-
-  // For Reads/Writes of NonEmptyList
-  import de.dnpm.dip.util.json.{
-    readsNel,
-    writesNel
   }
 
   implicit val format: OFormat[MTBDiagnosis] =

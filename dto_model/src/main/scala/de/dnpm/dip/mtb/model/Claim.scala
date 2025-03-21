@@ -60,8 +60,6 @@ object Claim
 
 
 
-
-
 final case class ClaimResponse
 (
   id: Id[Claim],
@@ -118,8 +116,6 @@ object ClaimResponse
         Unknown                     -> "Unbekant"
       )
   }
-
-
 
   implicit val format: OFormat[ClaimResponse] =
     Json.format[ClaimResponse]
