@@ -138,6 +138,8 @@ object MTBProcedureRecommendation
 
   }
 
+  implicit val format: OFormat[MTBProcedureRecommendation] =
+    Json.format[MTBProcedureRecommendation]
 }
 
 

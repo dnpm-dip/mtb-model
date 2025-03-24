@@ -26,8 +26,9 @@ final case class MTBCarePlan
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
-  medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
+  medicationRecommendations: Option[List[MTBMedicationRecommendation]],
+  procedureRecommendations: Option[List[MTBProcedureRecommendation]],
   studyEnrollmentRecommendations: Option[List[MTBStudyEnrollmentRecommendation]],
   notes: Option[List[String]]
 )

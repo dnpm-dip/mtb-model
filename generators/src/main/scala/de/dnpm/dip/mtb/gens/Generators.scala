@@ -890,7 +890,7 @@ trait Generators
     )
 
 
-  def genTherapyRecommendation(
+  def genSystemicTherapyRecommendation(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
     variants: Seq[Variant]
@@ -949,6 +949,59 @@ trait Generators
       Some(List(supportingVariant))
     )
 
+  def genOtherTherapyRecommendation(
+    patient: Reference[Patient],
+    diagnosis: MTBDiagnosis,
+    variants: Seq[Variant]
+  ): Gen[MTBProcedureRecommendation] =
+    for {
+      id <- Gen.of[Id[MTBProcedureRecommendation]]
+
+      priority <- Gen.of[Coding[Recommendation.Priority.Value]]
+
+      evidenceLevel <-
+        for { 
+          grading  <- Gen.of[Coding[LevelOfEvidence.Grading.Value]]
+          addendum <- Gen.of[Coding[LevelOfEvidence.Addendum.Value]]
+          publication <-
+            Gen.positiveInts
+              .map(_.toString)
+              .map(ExternalId[Publication,PubMed](_))
+              .map(Reference.from(_))
+
+        } yield LevelOfEvidence(
+          grading,
+          Some(Set(addendum)),
+          Some(List(publication))
+        )
+
+      category <- Gen.of[Coding[MTBProcedureRecommendation.Category.Value]]
+
+      supportingVariant <- Gen.oneOf(variants).map {
+        variant =>
+          GeneAlterationReference(
+            variant,
+            variant match {
+              case snv: SNV          => snv.gene
+              case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
+              case fusion: DNAFusion => Some(fusion.fusionPartner5prime.gene)
+              case fusion: RNAFusion => Some(fusion.fusionPartner5prime.gene)
+              case rnaSeq: RNASeq    => rnaSeq.gene
+            }
+          )
+      }
+
+    } yield MTBProcedureRecommendation(
+      id,
+      patient,
+      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      LocalDate.now,
+      Some(priority),
+      Some(evidenceLevel),
+      category,
+      Some(List(supportingVariant))
+    )
+
 
   def genCarePlan(
     patient: Reference[Patient],
@@ -962,14 +1015,21 @@ trait Generators
 
       protocol = "Protocol of the MTB conference..."
 
-      recommendations <- 
+      medicationRecommendations <- 
         Gen.list(
           Gen.intsBetween(1,3),
-          genTherapyRecommendation(
+          genSystemicTherapyRecommendation(
             patient,
             diagnosis,
             variants
           )
+        )
+
+      procedureRecommendation <- 
+        genOtherTherapyRecommendation(
+          patient,
+          diagnosis,
+          variants
         )
 
       counselingRecommendation <-
@@ -991,12 +1051,12 @@ trait Generators
         } yield MTBStudyEnrollmentRecommendation(
           stId,
           patient,
-          recommendations.head.reason.get,
+          medicationRecommendations.head.reason.get,
           LocalDate.now,
-          recommendations.head.levelOfEvidence.map(_.grading),
+          medicationRecommendations.head.levelOfEvidence.map(_.grading),
           NonEmptyList.of(Reference.from(nctId)),
           None,
-          recommendations.head.supportingVariants,
+          medicationRecommendations.head.supportingVariants,
         )
 
     } yield MTBCarePlan(
@@ -1005,8 +1065,9 @@ trait Generators
       Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
       LocalDate.now,
       Some(statusReason),
-      Some(recommendations),
       Some(counselingRecommendation),
+      Some(medicationRecommendations),
+      Some(List(procedureRecommendation)),
       Some(List(studyEnrollmentRecommendation)),
       Some(List(protocol))
     )
