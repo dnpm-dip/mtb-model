@@ -20,7 +20,6 @@ class JsonSchemaTests extends AnyFlatSpec with Schemas
       Schema[MTBPatientRecord].asPlay(Draft12("MTBPatientRecord"))
         .pipe(prettyPrint(_))
 //        .tap(println(_))
-/*
         .tap { 
           sch =>
             import java.io.FileWriter
@@ -29,9 +28,7 @@ class JsonSchemaTests extends AnyFlatSpec with Schemas
             Using(new FileWriter("/home/lucien/mtb_patient_record_schema.json")){
               _.write(sch)
             }
-
         }
-*/
 
     schema must not include ("Coding[")
     schema must not include ("head")

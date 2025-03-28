@@ -6,17 +6,19 @@ import json.{
   Schema
 }
 import com.github.andyglow.jsonschema.CatsSupport._ // For correct handling of NonEmptyList in Schema derivation
-import de.dnpm.dip.model.Patient
-import de.dnpm.dip.mtb.model._
+import de.dnpm.dip.model.{
+  ExternalId
+}
 import de.dnpm.dip.model.json.BaseSchemas
+import de.dnpm.dip.mtb.model._
 
 
 trait Schemas extends BaseSchemas
 {
 
-  implicit val patientSchema: Schema[Patient] =
-    Json.schema[Patient]
-      .toSimpleNameDefinition
+//  implicit val patientSchema: Schema[Patient] =
+//    Json.schema[Patient]
+//      .toSimpleNameDefinition
 
 
   implicit val tumorGradingSchema: Schema[TumorGrading] =
@@ -74,6 +76,10 @@ trait Schemas extends BaseSchemas
     Json.schema[IHCReport]
       .toSimpleNameDefinition
 
+  implicit val TMBResultSchema: Schema[TMB.Result] =
+    Json.schema[TMB.Result]
+      .addOptField("unit",Schema.`string`)
+      .toSimpleNameDefinition
 
   implicit val TMBSchema: Schema[TMB] =
     Json.schema[TMB]
@@ -90,6 +96,13 @@ trait Schemas extends BaseSchemas
   implicit val seqMetadataSchema: Schema[SomaticNGSReport.Metadata] =
     Json.schema[SomaticNGSReport.Metadata]
       .toSimpleNameDefinition
+
+  implicit def extVariantIdSchema[T <: Variant]: Schema[ExternalId[T,Variant.Systems]] =
+    externalIdSchemaOf[T,Variant.Systems]("Variant_ExternalId")
+
+  implicit val extTranscriptIdSchema: Schema[ExternalId[Transcript,Transcript.Systems]] =
+    externalIdSchemaOf[Transcript,Transcript.Systems]("TranscriptId")
+
 
   implicit val snvSchema: Schema[SNV] =
     Json.schema[SNV]

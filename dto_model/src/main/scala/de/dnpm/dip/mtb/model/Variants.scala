@@ -2,6 +2,10 @@ package de.dnpm.dip.mtb.model
 
 
 import cats.Applicative
+import shapeless.{
+  :+:,
+  CNil
+}
 import de.dnpm.dip.model.{
   Id,
   ExternalId,
@@ -24,6 +28,11 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
+import de.dnpm.dip.coding.{
+  Ensembl,
+  Entrez,
+  RefSeq
+}
 import play.api.libs.json.{
   Json,
   Format,
@@ -41,6 +50,9 @@ sealed abstract class Variant extends BaseVariant
 
 object Variant
 {
+
+  type Systems = COSMIC :+: dbSNP :+: Ensembl :+: Entrez :+: CNil
+
 
   final case class PositionRange
   (
@@ -80,7 +92,7 @@ object Variant
     implicit res: Reference.Resolver[Variant]
   ): Displays[GeneAlterationReference[Variant]] =
     Displays[GeneAlterationReference[Variant]]{
-      case GeneAlterationReference(gene,variant,_) =>
+      case GeneAlterationReference(variant,gene,_) =>
         s"${gene.flatMap(_.display).orElse(gene.map(_.code.value)).getOrElse("[Gene N/A]")} ${
           variant.resolve.map { 
             case snv: SNV => snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("SNV")
@@ -194,7 +206,7 @@ sealed trait dbSNP
 object dbSNP
 {
   implicit val codingSystem: Coding.System[dbSNP] =
-    Coding.System[dbSNP]("https://www.ncbi.nlm.nih.gov/snp/")
+    Coding.System[dbSNP]("https://www.ncbi.nlm.nih.gov/snp")
 }
 
 sealed trait COSMIC
@@ -207,7 +219,7 @@ object COSMIC
 
 //sealed trait ClinVar
 object ClinVar
-extends CodedEnum("https://www.ncbi.nlm.nih.gov/clinvar/")
+extends CodedEnum("https://www.ncbi.nlm.nih.gov/clinvar")
 with DefaultCodeSystem
 {
   val One   = Value("1")
@@ -227,16 +239,20 @@ with DefaultCodeSystem
 }
 
 sealed trait Transcript
+object Transcript
+{
+  type Systems = Ensembl :+: RefSeq :+: CNil
+}
 
 final case class SNV
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[SNV]]],    // dbSNPId or COSMIC ID to be listed here
+  externalIds: Option[List[ExternalId[SNV,Variant.Systems]]],    // dbSNPId or COSMIC ID to be listed here
   chromosome: Chromosome.Value,
   gene: Option[Coding[HGNC]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
-  transcriptId: ExternalId[Transcript],
+  transcriptId: ExternalId[Transcript,Transcript.Systems],
   exonId: Option[Id[Exon]],
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
@@ -274,7 +290,7 @@ final case class CNV
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[CNV]]],
+  externalIds: Option[List[ExternalId[CNV,Variant.Systems]]],
   chromosome: Chromosome.Value,
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startRange: Option[Variant.PositionRange],
@@ -325,7 +341,7 @@ final case class DNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[DNAFusion]]],
+  externalIds: Option[List[ExternalId[DNAFusion,Variant.Systems]]],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   fusionPartner5prime: DNAFusion.Partner,
   fusionPartner3prime: DNAFusion.Partner,
@@ -355,7 +371,7 @@ final case class RNAFusion
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[RNAFusion]]],  // COSMIC ID
+  externalIds: Option[List[ExternalId[RNAFusion,Variant.Systems]]],  // COSMIC ID
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   fusionPartner5prime: RNAFusion.Partner,
   fusionPartner3prime: RNAFusion.Partner,
@@ -378,7 +394,7 @@ object RNAFusion
 
   final case class Partner
   (
-    transcriptId: ExternalId[Transcript],
+    transcriptId: ExternalId[Transcript,Transcript.Systems],
     exonId: Id[Exon], 
     gene: Coding[HGNC],
     position: Long,
@@ -397,10 +413,10 @@ final case class RNASeq
 (
   id: Id[Variant],
   patient: Reference[Patient],
-  externalIds: Option[List[ExternalId[RNASeq]]],    // Entrez ID, Ensembl ID to be listed here
+  externalIds: Option[List[ExternalId[RNASeq,Variant.Systems]]],    // Entrez ID, Ensembl ID to be listed here
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   gene: Option[Coding[HGNC]],
-  transcriptId: ExternalId[Transcript],
+  transcriptId: Option[ExternalId[Transcript,Transcript.Systems]],
   transcriptsPerMillion: Double,
   variant: Reference[SNV],
   tissueCorrectedExpression: Option[Boolean],

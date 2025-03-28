@@ -9,12 +9,13 @@ import java.time.temporal.ChronoUnit.{
   YEARS
 }
 import cats.data.NonEmptyList
+import shapeless.Coproduct
+import shapeless.ops.coproduct.Selector
 import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
 import de.dnpm.dip.coding.{
   Coding,
-  CodeSystem,
-  Ensembl
+  CodeSystem
 }
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.coding.hgvs.HGVS
@@ -37,6 +38,7 @@ import de.dnpm.dip.model.{
   Gender,
   GeneAlterationReference,
   HealthInsurance,
+  IK,
   Id,
   History,
   Medications,
@@ -56,7 +58,6 @@ import MTBTherapy.StatusReason.{
   Progression
 }
 import TumorStaging.TNM.UICC
-import Study.Registries.NCT
 
 
 trait Generators
@@ -151,11 +152,20 @@ trait Generators
 
   implicit def genReference[T]: Gen[Reference[T]] =
     Gen.of[Id[T]]
-      .map(Reference.from(_))
+      .map(Reference(_))
 
-  implicit def genExternalId[T]: Gen[ExternalId[T]] =
+
+  implicit def genExternalId[T,S: Coding.System]: Gen[ExternalId[T,S]] =
     Gen.uuidStrings
-      .map(ExternalId(_,None))
+      .map(ExternalId[T,S](_))
+
+  implicit def genExternalIdSysUnion[T,S <: Coproduct](
+    implicit uris: Coding.System.UriSet[S]
+  ): Gen[ExternalId[T,S]] =
+    for {
+      sys <- Gen.oneOf(uris.values.toSeq)
+      id  <- Gen.uuidStrings
+    } yield ExternalId[T,S](id,sys)
 
 
   implicit def genCodingfromCodeSystem[S: Coding.System: CodeSystem]: Gen[Coding[S]] =
@@ -174,8 +184,7 @@ trait Generators
 
   implicit val genPatient: Gen[Patient] =
     for {
-      id <-
-        Gen.of[Id[Patient]]
+      id <- Gen.of[Id[Patient]]
 
       gender <- genGender
 
@@ -185,8 +194,7 @@ trait Generators
           LocalDate.now.minusYears(30)
         )
 
-      age =
-        YEARS.between(birthDate,LocalDate.now)
+      age = YEARS.between(birthDate,LocalDate.now)
 
       dateOfDeath <-
         Gen.option(
@@ -195,26 +203,24 @@ trait Generators
           0.4
         )
 
-
       healthInsurance =
         Patient.Insurance(
           Coding(HealthInsurance.Type.GKV),
           Some(
-            Reference.from(ExternalId[HealthInsurance]("1234567890","IK"))
+            Reference(ExternalId[HealthInsurance,IK]("1234567890"))
               .withDisplay("AOK")
             )
         )
 
-    } yield
-      Patient(
-        id,
-        gender,
-        birthDate,
-        dateOfDeath,
-        None,
-        healthInsurance,
-        Some(Address("12345"))
-      )
+    } yield Patient(
+      id,
+      gender,
+      birthDate,
+      dateOfDeath,
+      None,
+      healthInsurance,
+      Some(Address("12345"))
+    )
 
 
   def genDiagnosis(
@@ -372,7 +378,12 @@ trait Generators
     } yield MTBSystemicTherapy(
       id,
       patient,
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(
+        Reference.to(
+          diagnosis,
+          Some(DisplayLabel.of(diagnosis.code).value)
+        )
+      ),
       Some(therapyLine),
       Some(intent),
       Some(category),
@@ -410,7 +421,12 @@ trait Generators
     } yield OncoProcedure(
       id,
       patient,
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(
+        Reference.to(
+          diagnosis,
+          Some(DisplayLabel.of(diagnosis.code).value)
+        )
+      ),
       Some(therapyLine),
       Some(intent),
       None,
@@ -478,7 +494,9 @@ trait Generators
     } yield MolecularDiagnosticReport(
       id,
       patient,
-      Some(Reference[Institute](None,None,None,None).withDisplay("Molekular-Pathologie UKx")),
+      Some(
+        Reference(Id[Institute]("xyz")).withDisplay("Molekular-Pathologie UKx")
+      ),
       LocalDate.now,
       Reference.to(specimen),
       typ,
@@ -597,18 +615,26 @@ trait Generators
     )
 
 
+  protected def genVariantId[
+    T <: Variant,
+    S: Coding.System
+  ](
+    implicit sel: Selector[Variant.Systems,S]
+  ): Gen[ExternalId[T,Variant.Systems]] =
+    Gen.uuidStrings
+      .map(ExternalId[T,S](_))
+      .map(_.asInstanceOf[ExternalId[T,Variant.Systems]])
+
+
+
   def genSNV(patient: Reference[Patient]): Gen[SNV] =
     for { 
       id <-
         Gen.of[Id[Variant]]
 
-      dbSnpId <-
-        Gen.uuidStrings
-          .map(ExternalId[SNV](_,Some(Coding.System[dbSNP].uri)))
+      dbSnpId <- genVariantId[SNV,dbSNP]
 
-      cosmicId <-
-        Gen.uuidStrings
-          .map(ExternalId[SNV](_,Some(Coding.System[COSMIC].uri)))
+      cosmicId <- genVariantId[SNV,COSMIC]
       
       chr <- Gen.of[Chromosome.Value]
 
@@ -616,14 +642,11 @@ trait Generators
 
       localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
 
-      transcriptId <-
-        Gen.uuidStrings
-          .map(ExternalId[Transcript,Ensembl](_))
+      transcriptId <- Gen.of[ExternalId[Transcript,Transcript.Systems]]
 
       exonId <- Gen.intsBetween(2,12).map(exon => Id[Exon](exon.toString))
 
-      position <-
-        Gen.longsBetween(24,600)
+      position <- Gen.longsBetween(24,600)
 
       ref <- Gen.oneOf(bases)    
 
@@ -742,7 +765,7 @@ trait Generators
 
   implicit val genRNAFusionPartner: Gen[RNAFusion.Partner] =
     for { 
-      trancriptId <- Gen.uuidStrings.map(ExternalId[Transcript,Ensembl](_))
+      trancriptId <- Gen.of[ExternalId[Transcript,Transcript.Systems]]
       gene <- Gen.of[Coding[HGNC]]
       exonId <- Gen.intsBetween(2,12).map(exon => Id[Exon](exon.toString))
       position <- Gen.longsBetween(42L,1000L)
@@ -761,7 +784,7 @@ trait Generators
       localization <- Gen.of[Coding[BaseVariant.Localization.Value]]
       partner5pr <- Gen.of[RNAFusion.Partner]
       partner3pr <- Gen.of[RNAFusion.Partner]
-      cosmicId <- Gen.uuidStrings.map(ExternalId[RNAFusion,COSMIC](_))
+      cosmicId <- genVariantId[RNAFusion,COSMIC]
       reads <- Gen.intsBetween(3,10)
     } yield RNAFusion(
       id,
@@ -908,7 +931,7 @@ trait Generators
             Gen.positiveInts
               .map(_.toString)
               .map(ExternalId[Publication,PubMed](_))
-              .map(Reference.from(_))
+              .map(Reference(_))
 
         } yield LevelOfEvidence(
           grading,
@@ -925,7 +948,7 @@ trait Generators
       supportingVariant <- Gen.oneOf(variants).map {
         variant =>
           GeneAlterationReference(
-            variant,
+            Reference.to(variant),
             variant match {
               case snv: SNV          => snv.gene
               case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
@@ -939,7 +962,7 @@ trait Generators
     } yield MTBMedicationRecommendation(
       id,
       patient,
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
       Some(priority),
       Some(evidenceLevel),
@@ -967,7 +990,7 @@ trait Generators
             Gen.positiveInts
               .map(_.toString)
               .map(ExternalId[Publication,PubMed](_))
-              .map(Reference.from(_))
+              .map(Reference(_))
 
         } yield LevelOfEvidence(
           grading,
@@ -980,7 +1003,7 @@ trait Generators
       supportingVariant <- Gen.oneOf(variants).map {
         variant =>
           GeneAlterationReference(
-            variant,
+            Reference.to(variant),
             variant match {
               case snv: SNV          => snv.gene
               case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
@@ -994,7 +1017,7 @@ trait Generators
     } yield MTBProcedureRecommendation(
       id,
       patient,
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
       Some(priority),
       Some(evidenceLevel),
@@ -1045,16 +1068,15 @@ trait Generators
 
       studyEnrollmentRecommendation <-
         for { 
-          stId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
-          nctId <- Gen.intsBetween(10000000,50000000)
-                     .map(s => ExternalId[Study,NCT](s"NCT:$s"))
+          recId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
+          studyRef <- Gen.of[ExternalId[Study,Study.Registries]].map(Reference(_))
         } yield MTBStudyEnrollmentRecommendation(
-          stId,
+          recId,
           patient,
           medicationRecommendations.head.reason.get,
           LocalDate.now,
           medicationRecommendations.head.levelOfEvidence.map(_.grading),
-          NonEmptyList.of(Reference.from(nctId)),
+          NonEmptyList.of(studyRef),
           None,
           medicationRecommendations.head.supportingVariants,
         )
@@ -1062,7 +1084,7 @@ trait Generators
     } yield MTBCarePlan(
       id,
       patient,
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
       Some(statusReason),
       Some(counselingRecommendation),
@@ -1172,7 +1194,7 @@ trait Generators
     } yield MTBSystemicTherapy(
       id,
       Reference.to(patient),
-      Some(Reference.to(diagnosis,DisplayLabel.of(diagnosis.code).value)),
+      Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       None,
       Some(intent),
       Some(category),

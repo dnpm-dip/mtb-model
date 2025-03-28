@@ -12,6 +12,7 @@ import de.dnpm.dip.model.{
   Id,
   GeneAlterationReference,
   Reference,
+  ExternalReference,
   Patient,
   Recommendation,
   TherapyRecommendation,
@@ -187,7 +188,8 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
-  study: NonEmptyList[Reference[Study]],
+  study: NonEmptyList[ExternalReference[Study,Study.Registries]],
+//  study: NonEmptyList[Reference[Study]],
   medication: Option[Set[Coding[Medications]]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )

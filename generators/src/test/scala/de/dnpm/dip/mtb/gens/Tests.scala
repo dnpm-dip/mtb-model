@@ -47,17 +47,6 @@ with Schemas
 
   }
 
-  /*
-   * NOTE: This is not a real automated test, given that the generated JSON contains
-   * some attributes (currently) not strictly conformant to the Schema,
-   * e.g. the dynamic Patient properties "age" and "vitalStatus", which
-   * are added to the Patient JSON object upon serialization, so that some
-   * errors are always reported upon strict schema validation, even though
-   * they are "conceptually" false negatives.
-   *  
-   * This is thus only an "indicator" that prints the returned validation errors to
-   * stdout, but still requires a manual assessment that no true negatives ("real" structural errors) occur
-   */
 
   it must "conform to the JSON schema" in {
 
@@ -77,9 +66,12 @@ with Schemas
           .pipe(stringify)
       )
 
-    schema.validate(jsonRecord)
-      .asScala
-      .foreach(msg => println(msg.getMessage))
+    val errors =
+      schema.validate(jsonRecord)
+        .asScala
+        .tap(_.foreach(msg => println(msg.getMessage)))
+
+    errors must be (empty)
 
   }
 

@@ -101,12 +101,12 @@ trait Completers extends BaseCompleters
       implicit diagnoses: NonEmptyList[MTBDiagnosis]
     ): Completer[Reference[MTBDiagnosis]] =
       Completer.of(
-        ref => ref.copy(
-          display =
-            ref.resolve 
-              .map(_.code)
-              .map(DisplayLabel.of(_).value)
-        )
+        ref => 
+          ref.resolve 
+            .map(_.code)
+            .map(DisplayLabel.of(_).value)
+            .map(ref.withDisplay)
+            .getOrElse(ref)
       )
 
 
