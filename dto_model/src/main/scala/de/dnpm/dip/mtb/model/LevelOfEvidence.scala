@@ -30,8 +30,8 @@ object LevelOfEvidence
   extends CodedEnum("dnpm-dip/mtb/level-of-evidence/grading")
   with DefaultCodeSystem
   {
-    val Undefined = Value("undefined")
     val m1A,m1B,m1C,m2A,m2B,m2C,m3,m4 = Value
+    val Undefined = Value("undefined")
 
     override val display = {
       case Undefined => "Nicht definiert"

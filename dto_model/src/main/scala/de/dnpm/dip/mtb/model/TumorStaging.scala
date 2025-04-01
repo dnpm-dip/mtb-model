@@ -21,8 +21,8 @@ final case class TumorStaging
 (
   date: LocalDate,
   method: Coding[TumorStaging.Method.Value],
-  tnm: TumorStaging.TNM, 
-  others: Option[List[Coding[TumorStaging.OtherSystems]]]
+  tnmClassification: TumorStaging.TNM, 
+  otherClassifications: Option[List[Coding[TumorStaging.OtherSystems]]]
 )
 
 
@@ -34,7 +34,7 @@ object TumorStaging
   with DefaultCodeSystem
   {
     val Clinical   = Value("clinical")
-    val Pathologic = Value("cathologic")
+    val Pathologic = Value("pathologic")
 
     override val display =
       Map(

@@ -41,7 +41,8 @@ final case class MTBMedicationRecommendation
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  priority: Option[Coding[Recommendation.Priority.Value]],
+  priority: Coding[Recommendation.Priority.Value],
+//  priority: Option[Coding[Recommendation.Priority.Value]],
   levelOfEvidence: Option[LevelOfEvidence],
   categories: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
   medication: Set[Coding[Medications]],
@@ -96,6 +97,11 @@ object MTBMedicationRecommendation
 
   }
 
+  import play.api.libs.json.{
+    JsonValidationError,
+    Reads,
+    Writes
+  }
 
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]
@@ -109,7 +115,8 @@ final case class MTBProcedureRecommendation
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  priority: Option[Coding[Recommendation.Priority.Value]],
+//  priority: Option[Coding[Recommendation.Priority.Value]],
+  priority: Coding[Recommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
   code: Coding[MTBProcedureRecommendation.Category.Value],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
@@ -188,8 +195,8 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
   levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
+  priority: Coding[Recommendation.Priority.Value],
   study: NonEmptyList[ExternalReference[Study,Study.Registries]],
-//  study: NonEmptyList[Reference[Study]],
   medication: Option[Set[Coding[Medications]]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )

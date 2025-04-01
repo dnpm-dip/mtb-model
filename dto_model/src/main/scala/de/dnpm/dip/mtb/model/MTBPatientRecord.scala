@@ -24,6 +24,7 @@ final case class MTBPatientRecord
   performanceStatus: Option[List[PerformanceStatus]],
   specimens: Option[List[TumorSpecimen]],
   priorDiagnosticReports: Option[List[MolecularDiagnosticReport]],
+//  histologyReports: NonEmptyList[HistologyReport],  //TODO: Make NonEmptyList ?
   histologyReports: Option[List[HistologyReport]],
   ihcReports: Option[List[IHCReport]],
   ngsReports: Option[List[SomaticNGSReport]],

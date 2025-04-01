@@ -23,7 +23,7 @@ lazy val global = project
   .aggregate(
      dto_model,
      generators,
-     dto_model_v1,
+//     dto_model_v1,
   )
 
 

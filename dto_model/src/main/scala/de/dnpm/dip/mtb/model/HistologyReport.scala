@@ -61,7 +61,7 @@ object HistologyReport
 
   final case class Results
   (
-    tumorMorphology: Option[TumorMorphology],
+    tumorMorphology: TumorMorphology,
     tumorCellContent: Option[TumorCellContent]
   )
 

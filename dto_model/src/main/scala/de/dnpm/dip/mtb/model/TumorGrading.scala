@@ -59,7 +59,7 @@ object TumorGrading
   type Systems = OBDSGrading.Value :+: WHOGrading :+: CNil
 
 
-    // For Reads/Writes of NonEmptyList
+  // For Reads/Writes of NonEmptyList
   import de.dnpm.dip.util.json.{
     readsNel,
     writesNel

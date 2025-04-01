@@ -532,7 +532,7 @@ trait Generators
       specimen,
       LocalDate.now,
       HistologyReport.Results(
-        Some(morphology),
+        morphology,
         Some(tumorCellContent.copy(method = Coding(TumorCellContent.Method.Histologic)))
       )
     )
@@ -964,7 +964,7 @@ trait Generators
       patient,
       Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
-      Some(priority),
+      priority,
       Some(evidenceLevel),
       Some(Set(category)),
       Set(medication),
@@ -1019,7 +1019,7 @@ trait Generators
       patient,
       Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
-      Some(priority),
+      priority,
       Some(evidenceLevel),
       category,
       Some(List(supportingVariant))
@@ -1069,6 +1069,7 @@ trait Generators
       studyEnrollmentRecommendation <-
         for { 
           recId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
+          priority <- Gen.of[Coding[Recommendation.Priority.Value]]
           studyRef <- Gen.of[ExternalId[Study,Study.Registries]].map(Reference(_))
         } yield MTBStudyEnrollmentRecommendation(
           recId,
@@ -1076,6 +1077,7 @@ trait Generators
           medicationRecommendations.head.reason.get,
           LocalDate.now,
           medicationRecommendations.head.levelOfEvidence.map(_.grading),
+          priority,
           NonEmptyList.of(studyRef),
           None,
           medicationRecommendations.head.supportingVariants,
