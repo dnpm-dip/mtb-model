@@ -21,7 +21,7 @@ final case class TumorStaging
 (
   date: LocalDate,
   method: Coding[TumorStaging.Method.Value],
-  tnmClassification: TumorStaging.TNM, 
+  tnmClassification: Option[TumorStaging.TNM],
   otherClassifications: Option[List[Coding[TumorStaging.OtherSystems]]]
 )
 

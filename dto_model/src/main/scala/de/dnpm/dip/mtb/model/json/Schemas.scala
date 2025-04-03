@@ -79,7 +79,7 @@ trait Schemas extends BaseSchemas
   implicit val TMBResultSchema: Schema[TMB.Result] =
     Json.schema[TMB.Result]
       .addOptField("unit",Schema.`string`)
-      .toSimpleNameDefinition
+      .toDefinition("TMB-Result")
 
   implicit val TMBSchema: Schema[TMB] =
     Json.schema[TMB]

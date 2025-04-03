@@ -10,6 +10,7 @@ import de.dnpm.dip.mtb.model.MTBPatientRecord
 import de.dnpm.dip.mtb.model.json.Schemas
 import play.api.libs.json.Json.{
   toJson,
+  prettyPrint,
   stringify
 }
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -37,6 +38,15 @@ with Schemas
 
     val record =
       Gen.of[MTBPatientRecord].next
+        .tap {
+           record =>
+            import java.io.FileWriter
+            import scala.util.Using
+
+            Using(new FileWriter("/home/lucien/mtb_patient_record.json")){
+              _.write(prettyPrint(toJson(record)))
+            }
+        }
 
 
     record.getNgsReports.flatMap(_.variants) must not be empty

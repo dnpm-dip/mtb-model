@@ -44,7 +44,7 @@ final case class MTBMedicationRecommendation
   priority: Coding[Recommendation.Priority.Value],
 //  priority: Option[Coding[Recommendation.Priority.Value]],
   levelOfEvidence: Option[LevelOfEvidence],
-  categories: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
+  category: Option[Coding[MTBMedicationRecommendation.Category.Value]],
   medication: Set[Coding[Medications]],
   useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
@@ -88,19 +88,13 @@ object MTBMedicationRecommendation
 
     override val display =
       Map(
-        InLabel       -> "In-Label Use",
-        OffLabel      -> "Off-Label Use",
+        InLabel       -> "In-label Use",
+        OffLabel      -> "Off-bel Use",
         Compassionate -> "Compassionate Use",
         SecPreventive -> "Sec-preventive",
         Unknown       -> "Unknown"
       )
 
-  }
-
-  import play.api.libs.json.{
-    JsonValidationError,
-    Reads,
-    Writes
   }
 
   implicit val format: OFormat[MTBMedicationRecommendation] =
@@ -215,3 +209,32 @@ object MTBStudyEnrollmentRecommendation
     Json.format[MTBStudyEnrollmentRecommendation]
 }
 
+
+final case class HistologyReevaluationRequest
+(
+  id: Id[HistologyReevaluationRequest],
+  patient: Reference[Patient],
+  specimen: Reference[TumorSpecimen],
+  issuedOn: LocalDate
+)
+
+object HistologyReevaluationRequest
+{
+  implicit val format: OFormat[HistologyReevaluationRequest] =
+    Json.format[HistologyReevaluationRequest]
+}
+
+
+final case class RebiopsyRequest
+(
+  id: Id[RebiopsyRequest],
+  patient: Reference[Patient],
+  tumorEntity: Reference[MTBDiagnosis],
+  issuedOn: LocalDate
+)
+
+object RebiopsyRequest
+{
+  implicit val format: OFormat[RebiopsyRequest] =
+    Json.format[RebiopsyRequest]
+}

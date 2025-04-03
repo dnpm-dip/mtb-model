@@ -219,7 +219,7 @@ trait Generators
       dateOfDeath,
       None,
       healthInsurance,
-      Some(Address("12345"))
+      Address("12345")
     )
 
 
@@ -284,7 +284,7 @@ trait Generators
       } yield TumorStaging(
         date,
         Coding(TumorStaging.Method.Clinical),
-        tnm,
+        Some(tnm),
         Some(List(spread))
       )
 
@@ -299,7 +299,7 @@ trait Generators
       None,
       icdo3,
       Some(History(grading)),
-      History(staging),
+      Some(History(staging)),
       Some(glts),
       None,
       Some(List("Notes on the tumor diagnosis..."))
@@ -696,7 +696,7 @@ trait Generators
 
       endRange = Variant.PositionRange(startRange.start + length,Some(startRange.start + length + 50L))
 
-      copyNum <- Gen.intsBetween(1,8)
+      copyNum <- Gen.intsBetween(1,8).map(_.toDouble)
 
       relCopyNum <- Gen.doubles
 
@@ -966,7 +966,7 @@ trait Generators
       LocalDate.now,
       priority,
       Some(evidenceLevel),
-      Some(Set(category)),
+      Some(category),
       Set(medication),
       Some(useType),
       Some(List(supportingVariant))
@@ -1029,6 +1029,7 @@ trait Generators
   def genCarePlan(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
+    specimen: TumorSpecimen,
     variants: Seq[Variant]
   ): Gen[MTBCarePlan] = 
     for { 
@@ -1083,6 +1084,26 @@ trait Generators
           medicationRecommendations.head.supportingVariants,
         )
 
+      rebiopyRequest <-
+        for { 
+          id <- Gen.of[Id[RebiopsyRequest]]
+        } yield RebiopsyRequest(
+          id,
+          patient,
+          Reference.to(diagnosis),
+          LocalDate.now,
+        )
+
+      reevaluationRequest <-
+        for { 
+          id <- Gen.of[Id[HistologyReevaluationRequest]]
+        } yield HistologyReevaluationRequest(
+          id,
+          patient,
+          Reference.to(specimen),
+          LocalDate.now
+        )
+
     } yield MTBCarePlan(
       id,
       patient,
@@ -1093,6 +1114,8 @@ trait Generators
       Some(medicationRecommendations),
       Some(List(procedureRecommendation)),
       Some(List(studyEnrollmentRecommendation)),
+      Some(List(reevaluationRequest)),
+      Some(List(rebiopyRequest)),
       Some(List(protocol))
     )
 
@@ -1311,6 +1334,7 @@ trait Generators
         genCarePlan(
           Reference.to(patient),
           diagnosis,
+          specimen,
           ngsReport.variants
         )
 

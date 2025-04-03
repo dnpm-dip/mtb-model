@@ -103,7 +103,7 @@ trait Completers extends BaseCompleters
 
         staging => staging.copy(
           method = staging.method.complete,
-          tnmClassification = staging.tnmClassification.pipe {
+          tnmClassification = staging.tnmClassification.map {
             case tnm @ TumorStaging.TNM(t,n,m) =>
               tnm.copy(
                 tumor      = t.complete,
@@ -295,10 +295,10 @@ trait Completers extends BaseCompleters
 
       implicit val medicationRecommendationCompleter: Completer[MTBMedicationRecommendation] =
         recommendation => recommendation.copy(
-          reason       = recommendation.reason.complete,
+          reason          = recommendation.reason.complete,
           priority        = recommendation.priority.complete,
           levelOfEvidence = recommendation.levelOfEvidence.complete,
-          categories      = recommendation.categories.complete,
+          category        = recommendation.category.complete,
           medication      = recommendation.medication.complete,
           useType         = recommendation.useType.complete,
           supportingVariants =

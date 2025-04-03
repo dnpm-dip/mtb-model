@@ -38,7 +38,7 @@ final case class MTBDiagnosis
   germlineCodes: Option[Set[Coding[ICD10GM]]],
   topography: Option[Coding[ICDO3.T]],
   grading: Option[History[TumorGrading]],
-  staging: History[TumorStaging], // TODO: Make Optional again?
+  staging: Option[History[TumorStaging]],
   guidelineTreatmentStatus: Option[Coding[MTBDiagnosis.GuidelineTreatmentStatus.Value]],
   histology: Option[List[Reference[HistologyReport]]],
   notes: Option[List[String]]

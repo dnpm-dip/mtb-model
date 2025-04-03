@@ -295,7 +295,7 @@ final case class CNV
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startRange: Option[Variant.PositionRange],
   endRange: Option[Variant.PositionRange],
-  totalCopyNumber: Option[Int],
+  totalCopyNumber: Option[Double],
   relativeCopyNumber: Option[Double],
   cnA: Option[Double],
   cnB: Option[Double],

@@ -30,10 +30,14 @@ final case class MTBCarePlan
   medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   procedureRecommendations: Option[List[MTBProcedureRecommendation]],
   studyEnrollmentRecommendations: Option[List[MTBStudyEnrollmentRecommendation]],
+  histologyReevaluationRequests: Option[List[HistologyReevaluationRequest]],
+  rebiopsyRequests: Option[List[RebiopsyRequest]],
   notes: Option[List[String]]
 )
 extends CarePlan
 {
+  type StatusReason = MTBCarePlan.StatusReason.type
+
   val therapyRecommendations = None
 }
 
