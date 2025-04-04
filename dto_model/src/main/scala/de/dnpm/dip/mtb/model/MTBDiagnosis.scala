@@ -32,11 +32,11 @@ final case class MTBDiagnosis
 (
   id: Id[MTBDiagnosis],
   patient: Reference[Patient],
-  recordedOn: Option[LocalDate],
+  recordedOn: LocalDate,
   `type`: History[MTBDiagnosis.Type],
   code: Coding[ICD10GM],
   germlineCodes: Option[Set[Coding[ICD10GM]]],
-  topography: Option[Coding[ICDO3.T]],
+  topography: Coding[ICDO3.T],
   grading: Option[History[TumorGrading]],
   staging: Option[History[TumorStaging]],
   guidelineTreatmentStatus: Option[Coding[MTBDiagnosis.GuidelineTreatmentStatus.Value]],

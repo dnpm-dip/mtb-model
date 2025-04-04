@@ -251,6 +251,13 @@ trait Generators
           .concepts
           .find(_.code.value == icd10.code.value)
           .map(_.toCoding)
+          .getOrElse(
+            Coding[ICDO3.Topography](
+              "T",
+              "Topographie",
+              icdo3Topography.version.get
+            )
+          )
 
       typ =
         MTBDiagnosis.Type(
@@ -293,7 +300,7 @@ trait Generators
     } yield MTBDiagnosis(
       id,
       Reference.to(patient),
-      Some(date),
+      date,
       History(typ),
       icd10,
       None,
