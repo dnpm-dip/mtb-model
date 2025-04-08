@@ -42,7 +42,6 @@ final case class MTBMedicationRecommendation
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   priority: Coding[Recommendation.Priority.Value],
-//  priority: Option[Coding[Recommendation.Priority.Value]],
   levelOfEvidence: Option[LevelOfEvidence],
   category: Option[Coding[MTBMedicationRecommendation.Category.Value]],
   medication: Set[Coding[Medications]],
@@ -188,13 +187,14 @@ final case class MTBStudyEnrollmentRecommendation
   patient: Reference[Patient],
   reason: Reference[MTBDiagnosis],
   issuedOn: LocalDate,
-  levelOfEvidence: Option[Coding[LevelOfEvidence.Grading.Value]],
+  levelOfEvidence: Option[LevelOfEvidence],
   priority: Coding[Recommendation.Priority.Value],
   study: NonEmptyList[ExternalReference[Study,Study.Registries]],
   medication: Option[Set[Coding[Medications]]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
 )
 extends StudyEnrollmentRecommendation
+with MTBRecommendation
 
 object MTBStudyEnrollmentRecommendation
 {

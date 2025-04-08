@@ -674,14 +674,14 @@ trait Generators
       patient,
       Some(List(dbSnpId,cosmicId)),
       chr,
-      Some(gene),
+      gene,
       Some(Set(localization)),
       transcriptId,
       Some(exonId),
       Variant.PositionRange(position,None),
       SNV.Allele(alt),
       SNV.Allele(ref),
-      Some(dnaChg),
+      dnaChg,
       Some(proteinChg),
       readDepth,
       allelicFreq,
@@ -957,7 +957,7 @@ trait Generators
           GeneAlterationReference(
             Reference.to(variant),
             variant match {
-              case snv: SNV          => snv.gene
+              case snv: SNV          => Some(snv.gene)
               case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
               case fusion: DNAFusion => Some(fusion.fusionPartner5prime.gene)
               case fusion: RNAFusion => Some(fusion.fusionPartner5prime.gene)
@@ -1012,7 +1012,7 @@ trait Generators
           GeneAlterationReference(
             Reference.to(variant),
             variant match {
-              case snv: SNV          => snv.gene
+              case snv: SNV          => Some(snv.gene)
               case cnv: CNV          => cnv.reportedAffectedGenes.flatMap(_.headOption)
               case fusion: DNAFusion => Some(fusion.fusionPartner5prime.gene)
               case fusion: RNAFusion => Some(fusion.fusionPartner5prime.gene)
@@ -1084,7 +1084,7 @@ trait Generators
           patient,
           medicationRecommendations.head.reason.get,
           LocalDate.now,
-          medicationRecommendations.head.levelOfEvidence.map(_.grading),
+          medicationRecommendations.head.levelOfEvidence,
           priority,
           NonEmptyList.of(studyRef),
           None,

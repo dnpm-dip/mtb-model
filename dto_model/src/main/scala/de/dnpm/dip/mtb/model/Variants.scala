@@ -71,7 +71,7 @@ object Variant
     Displays[Variant] {
 
       case snv: SNV =>
-        s"SNV ${snv.gene.flatMap(_.display).getOrElse("")} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
+        s"SNV ${snv.gene.display} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
 
       case cnv: CNV =>
         s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
@@ -250,14 +250,14 @@ final case class SNV
   patient: Reference[Patient],
   externalIds: Option[List[ExternalId[SNV,Variant.Systems]]],    // dbSNPId or COSMIC ID to be listed here
   chromosome: Chromosome.Value,
-  gene: Option[Coding[HGNC]],
+  gene: Coding[HGNC],
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   transcriptId: ExternalId[Transcript,Transcript.Systems],
   exonId: Option[Id[Exon]],
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
-  dnaChange: Option[Coding[HGVS.DNA]],
+  dnaChange: Coding[HGVS.DNA],
   proteinChange: Option[Coding[HGVS.Protein]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
