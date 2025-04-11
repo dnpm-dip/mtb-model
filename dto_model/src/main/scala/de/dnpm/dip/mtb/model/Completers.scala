@@ -223,8 +223,6 @@ trait Completers extends BaseCompleters
         snv => snv.copy(
           gene           = snv.gene.complete,
           localization   = snv.localization.complete,
-          dnaChange      = snv.dnaChange.complete,
-          proteinChange  = snv.proteinChange.complete,
           interpretation = snv.interpretation.complete
         )
       

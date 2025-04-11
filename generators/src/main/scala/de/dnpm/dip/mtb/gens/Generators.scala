@@ -14,6 +14,7 @@ import shapeless.ops.coproduct.Selector
 import de.ekut.tbi.generators.Gen
 import de.ekut.tbi.generators.DateTimeGens._
 import de.dnpm.dip.coding.{
+  Code,
   Coding,
   CodeSystem
 }
@@ -659,9 +660,9 @@ trait Generators
 
       alt <- Gen.oneOf(bases filter (_ != ref))
 
-      dnaChg = Coding[HGVS.DNA](s"c.$position$ref>$alt")
+      dnaChg = Code[HGVS.DNA](s"c.$position$ref>$alt")
 
-      proteinChg <- Gen.oneOf(proteinChanges).map(Coding[HGVS.Protein](_))
+      proteinChg <- Gen.oneOf(proteinChanges).map(Code[HGVS.Protein](_))
 
       readDepth <- Gen.intsBetween(5,25).map(SNV.ReadDepth(_))
 
@@ -703,7 +704,7 @@ trait Generators
 
       endRange = Variant.PositionRange(startRange.start + length,Some(startRange.start + length + 50L))
 
-      copyNum <- Gen.intsBetween(1,8).map(_.toDouble)
+      copyNum <- Gen.intsBetween(1,8)
 
       relCopyNum <- Gen.doubles
 
@@ -1282,24 +1283,26 @@ trait Generators
 
       patient <- Gen.of[Patient]
 
+      patRef = Reference.to(patient)
+
       diagnosis <-
         genDiagnosis(patient)    
 
       episode <-
          genEpisode(
-           Reference.to(patient),
+           patRef,
            List(Reference.to(diagnosis))
          )
 
       performanceStatus <-
-        genPerformanceStatus(Reference.to(patient)) 
+        genPerformanceStatus(patRef) 
 
 
       guidelineTherapies <-
         Gen.list(
           Gen.intsBetween(1,3),
           genGuidelineTherapy(
-            Reference.to(patient),
+            patRef,
             diagnosis
           )
         )
@@ -1308,38 +1311,38 @@ trait Generators
         Gen.list(
           Gen.intsBetween(1,3),
           genProcedure(
-            Reference.to(patient),
+            patRef,
             diagnosis
           )
         )
 
       specimen <-
-        genTumorSpecimen(Reference.to(patient),diagnosis)
+        genTumorSpecimen(patRef,diagnosis)
 
       priorDiagnostics <- 
-        genMolecularDiagnosticReport(Reference.to(patient),specimen)
+        genMolecularDiagnosticReport(patRef,specimen)
         
       histologyReport <-
         genHistologyReport(
-          Reference.to(patient),
+          patRef,
           Reference.to(specimen)
         )
 
       ihcReport <-
         genIHCReport(
-          Reference.to(patient),
+          patRef,
           Reference.to(specimen)
         )
 
       ngsReport <-
         genNGSReport(
-          Reference.to(patient),
+          patRef,
           Reference.to(specimen)
         )
 
       carePlan <- 
         genCarePlan(
-          Reference.to(patient),
+          patRef,
           diagnosis,
           specimen,
           ngsReport.variants
@@ -1352,14 +1355,14 @@ trait Generators
       claims <-
         Gen.oneOfEach(
           recommendations
-            .map(genClaim(Reference.to(patient),_))
+            .map(genClaim(patRef,_))
         )
 
       claimResponses <-
         Gen.oneOfEach(
           claims
             .map(Reference.to(_))
-            .map(genClaimResponse(Reference.to(patient),_))
+            .map(genClaimResponse(patRef,_))
         )
 
       therapies <-
@@ -1378,16 +1381,15 @@ trait Generators
         Gen.oneOfEach(
           therapies
             .map(
-              genResponse(
-                Reference.to(patient),
-                _
-              )
+              genResponse(patRef,_)
             )
         )
 
       followUp = 
         FollowUp(
           responses.head.effectiveDate,
+          patRef,
+          Some(responses.head.effectiveDate),
           None
         )
         

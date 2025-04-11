@@ -38,7 +38,7 @@ extends CarePlan
 {
   type StatusReason = MTBCarePlan.StatusReason.type
 
-  val therapyRecommendations = None
+  override val therapyRecommendations = None
 }
 
 

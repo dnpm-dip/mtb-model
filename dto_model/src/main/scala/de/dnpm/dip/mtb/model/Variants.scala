@@ -7,6 +7,7 @@ import shapeless.{
   CNil
 }
 import de.dnpm.dip.model.{
+  Chromosome,
   Id,
   ExternalId,
   Patient,
@@ -20,6 +21,7 @@ import de.dnpm.dip.util.{
   Displays,
 }
 import de.dnpm.dip.coding.{
+  Code,
   Coding,
   CodedEnum,
   DefaultCodeSystem,
@@ -71,7 +73,7 @@ object Variant
     Displays[Variant] {
 
       case snv: SNV =>
-        s"SNV ${snv.gene.display} ${snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("")}"
+        s"SNV ${snv.gene.display} ${snv.proteinChange.map(_.value).getOrElse("")}"
 
       case cnv: CNV =>
         s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
@@ -95,7 +97,7 @@ object Variant
       case GeneAlterationReference(variant,gene,_) =>
         s"${gene.flatMap(_.display).orElse(gene.map(_.code.value)).getOrElse("[Gene N/A]")} ${
           variant.resolve.map { 
-            case snv: SNV => snv.proteinChange.map(c => c.display.getOrElse(c.code.value)).getOrElse("SNV")
+            case snv: SNV => snv.proteinChange.map(_.value).getOrElse("SNV")
             case cnv: CNV => cnv.`type`.display.getOrElse("CNV")
             case _: DNAFusion => "Fusion"
             case _: RNAFusion => "Fusion"
@@ -159,42 +161,9 @@ object Variant
 
 }
 
-
-object Chromosome
-extends CodedEnum("chromosome")
-with DefaultCodeSystem
+object Chromosome extends Enumeration with Chromosome
 {
-  val chr1,
-      chr2,
-      chr3,
-      chr4,
-      chr5,
-      chr6,
-      chr7,
-      chr8,
-      chr9,
-      chr10,
-      chr11,
-      chr12,
-      chr13,
-      chr14,
-      chr15,
-      chr16,
-      chr17,
-      chr18,
-      chr19,
-      chr20,
-      chr21,
-      chr22,
-      chrX,
-      chrY = Value
-
-  override val display = {
-    case chr => chr.toString
-  }
-
-
-  implicit val format: Format[Chromosome.Value] =
+  implicit val format: Format[Value] =
     Json.formatEnum(this)
 }
 
@@ -257,8 +226,8 @@ final case class SNV
   position: Variant.PositionRange,
   altAllele: SNV.Allele,
   refAllele: SNV.Allele,
-  dnaChange: Coding[HGVS.DNA],
-  proteinChange: Option[Coding[HGVS.Protein]],
+  dnaChange: Code[HGVS.DNA],
+  proteinChange: Option[Code[HGVS.Protein]],
   readDepth: SNV.ReadDepth,
   allelicFrequency: SNV.AllelicFrequency,
   interpretation: Option[Coding[ClinVar.Value]]
@@ -295,7 +264,7 @@ final case class CNV
   localization: Option[Set[Coding[BaseVariant.Localization.Value]]],
   startRange: Option[Variant.PositionRange],
   endRange: Option[Variant.PositionRange],
-  totalCopyNumber: Option[Double],
+  totalCopyNumber: Option[Int],
   relativeCopyNumber: Option[Double],
   cnA: Option[Double],
   cnB: Option[Double],
