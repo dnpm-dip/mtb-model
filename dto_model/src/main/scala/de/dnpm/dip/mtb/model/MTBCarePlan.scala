@@ -47,8 +47,8 @@ object MTBCarePlan
 
   object StatusReason
   extends CodedEnum("dnpm-dip/mtb/careplan/status-reason")
+  with CarePlan.NoSequencingPerformedReason
   with DefaultCodeSystem
-  with CarePlan.NonInclusionReason
   {
     val NoTarget = Value("no-target")
 
