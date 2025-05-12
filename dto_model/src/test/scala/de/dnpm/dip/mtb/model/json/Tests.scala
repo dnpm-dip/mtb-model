@@ -19,15 +19,6 @@ class JsonSchemaTests extends AnyFlatSpec with Schemas
     val schema =
       Schema[MTBPatientRecord].asPlay(Draft12("MTBPatientRecord"))
         .pipe(prettyPrint(_))
-        .tap { 
-          sch =>
-            import java.io.FileWriter
-            import scala.util.Using
-
-            Using(new FileWriter("/home/lucien/mtb_patient_record_schema.json")){
-              _.write(sch)
-            }
-        }
 
     schema must not include ("Coding[")
     schema must not include ("head")
