@@ -911,12 +911,11 @@ trait Generators
         Some(tmb),
         Some(brcaness),
         Some(hrdScore),
-        snvs,
-        cnvs,
-        dnaFusions,
-        rnaFusions,
-        //TODO: RNASeq
-        List.empty,
+        Some(snvs),
+        Some(cnvs),
+        Some(dnaFusions),
+        Some(rnaFusions),
+        Some(List.empty)  //TODO: RNASeq
       )
     )
 

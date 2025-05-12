@@ -204,13 +204,12 @@ final case class SomaticNGSReport
 extends NGSReport
 {
   def variants: List[Variant] =
-    results.simpleVariants ++
-    results.copyNumberVariants ++
-    results.dnaFusions ++
-    results.rnaFusions
+    results.simpleVariants.getOrElse(List.empty) ++
+    results.copyNumberVariants.getOrElse(List.empty) ++
+    results.dnaFusions.getOrElse(List.empty) ++
+    results.rnaFusions.getOrElse(List.empty)
 
-  override val notes =
-    None
+  override val notes = None
 }
 
 object SomaticNGSReport
@@ -232,11 +231,11 @@ object SomaticNGSReport
     tmb: Option[TMB],
     brcaness: Option[BRCAness],
     hrdScore: Option[HRDScore],
-    simpleVariants: List[SNV],
-    copyNumberVariants: List[CNV],
-    dnaFusions: List[DNAFusion],
-    rnaFusions: List[RNAFusion],
-    rnaSeqs: List[RNASeq],
+    simpleVariants: Option[List[SNV]],
+    copyNumberVariants: Option[List[CNV]],
+    dnaFusions: Option[List[DNAFusion]],
+    rnaFusions: Option[List[RNAFusion]],
+    rnaSeqs: Option[List[RNASeq]]
   )
 
 
