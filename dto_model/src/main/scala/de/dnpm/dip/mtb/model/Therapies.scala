@@ -108,6 +108,7 @@ final case class MTBSystemicTherapy
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[MTBTherapy.StatusReason.Value]],
   recommendationFulfillmentStatus: Option[Coding[MTBSystemicTherapy.RecommendationFulfillmentStatus.Value]],
+  dosage: Option[Coding[MTBSystemicTherapy.DosageDensity.Value]],
   period: Option[Period[LocalDate]],
   medication: Option[Set[Coding[Medications]]],
   notes: Option[List[String]]

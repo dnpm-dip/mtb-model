@@ -400,6 +400,7 @@ trait Generators
       status,
       Some(statusReason),
       None,
+      None,
       Some(period),
       Some(medication),
       Some(List(note))
@@ -1221,6 +1222,8 @@ trait Generators
 
       fulfillmentStatus <- Gen.of[Coding[MTBSystemicTherapy.RecommendationFulfillmentStatus.Value]]  
 
+      dosage <- Gen.of[Coding[MTBSystemicTherapy.DosageDensity.Value]]
+
       note = "Notes on the therapy..."
 
     } yield MTBSystemicTherapy(
@@ -1235,6 +1238,7 @@ trait Generators
       status,
       statusReason,
       Some(fulfillmentStatus),
+      Some(dosage),
       period,
       medication,
       Some(List(note))
