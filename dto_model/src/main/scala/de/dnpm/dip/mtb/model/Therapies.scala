@@ -138,7 +138,7 @@ object MTBSystemicTherapy
   extends CodedEnum("dnpm-dip/therapy/dosage-density")
   with DefaultCodeSystem
   {
-    val Under50 = Value("unter-50%")
+    val Under50 = Value("under-50%")
     val Over50  = Value("over-50%")
 
     override val display =
