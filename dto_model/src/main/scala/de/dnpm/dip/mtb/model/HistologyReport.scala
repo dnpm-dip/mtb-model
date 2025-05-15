@@ -24,7 +24,7 @@ final case class TumorMorphology
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
   value: Coding[ICDO3.M],
-  notes: Option[String]
+  note: Option[String]
 )
 extends Observation[Coding[ICDO3.M]]
 

@@ -16,11 +16,6 @@ import de.dnpm.dip.mtb.model._
 trait Schemas extends BaseSchemas
 {
 
-//  implicit val patientSchema: Schema[Patient] =
-//    Json.schema[Patient]
-//      .toSimpleNameDefinition
-
-
   implicit val tumorGradingSchema: Schema[TumorGrading] =
     Json.schema[TumorGrading]
       .toSimpleNameDefinition
@@ -95,7 +90,7 @@ trait Schemas extends BaseSchemas
 
   implicit val seqMetadataSchema: Schema[SomaticNGSReport.Metadata] =
     Json.schema[SomaticNGSReport.Metadata]
-      .toSimpleNameDefinition
+      .toDefinition("NGSReport_Metadata")
 
   implicit def extVariantIdSchema[T <: Variant]: Schema[ExternalId[T,Variant.Systems]] =
     externalIdSchemaOf[T,Variant.Systems]("Variant_ExternalId")
@@ -126,7 +121,7 @@ trait Schemas extends BaseSchemas
 
   implicit val ngsReportSchema: Schema[SomaticNGSReport] =
     Json.schema[SomaticNGSReport]
-      .toDefinition("SomaticNGSReport_Metadata")
+      .toSimpleNameDefinition
 
 
   implicit val levelOfEvidenceSchema: Schema[LevelOfEvidence] =
