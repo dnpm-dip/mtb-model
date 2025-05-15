@@ -25,7 +25,8 @@ final case class MTBCarePlan
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  statusReason: Option[Coding[MTBCarePlan.StatusReason.Value]],
+  noSequencingPerformedReason: Option[Coding[CarePlan.NoSequencingPerformedReason.Value]],
+  recommendationsMissingReason: Option[Coding[MTBCarePlan.RecommendationsMissingReason.Value]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],
   medicationRecommendations: Option[List[MTBMedicationRecommendation]],
   procedureRecommendations: Option[List[MTBProcedureRecommendation]],
@@ -36,8 +37,6 @@ final case class MTBCarePlan
 )
 extends CarePlan
 {
-  type StatusReason = MTBCarePlan.StatusReason.type
-
   override val therapyRecommendations = None
 }
 
@@ -45,9 +44,8 @@ extends CarePlan
 object MTBCarePlan
 {
 
-  object StatusReason
-  extends CodedEnum("dnpm-dip/mtb/careplan/status-reason")
-  with CarePlan.NoSequencingPerformedReason
+  object RecommendationsMissingReason
+  extends CodedEnum("dnpm-dip/mtb/careplan/recommendations-missing-reason")
   with DefaultCodeSystem
   {
     val NoTarget = Value("no-target")
@@ -55,9 +53,6 @@ object MTBCarePlan
     override val display =
       Map(
         NoTarget -> "Keine Therapeutische Konsequenz"
-      )
-      .orElse(
-        defaultDisplay
       )
   }
 

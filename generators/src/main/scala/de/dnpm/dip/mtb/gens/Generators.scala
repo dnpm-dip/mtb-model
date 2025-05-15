@@ -1043,7 +1043,7 @@ trait Generators
     for { 
       id <- Gen.of[Id[MTBCarePlan]]
 
-      statusReason <- Gen.of[Coding[MTBCarePlan.StatusReason.Value]]
+//      statusReason <- Gen.of[Coding[MTBCarePlan.StatusReason.Value]]
 
       protocol = "Protocol of the MTB conference..."
 
@@ -1117,7 +1117,9 @@ trait Generators
       patient,
       Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
-      Some(statusReason),
+//      Some(statusReason),
+      None,
+      None,
       Some(counselingRecommendation),
       Some(medicationRecommendations),
       Some(List(procedureRecommendation)),
