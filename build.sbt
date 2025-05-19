@@ -33,10 +33,7 @@ lazy val dto_model = project
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
-      dependencies.core,
-      dependencies.scala_jsonschema % Test,
-      dependencies.scala_jsonschema_cats % Test, 
-      dependencies.scala_jsonschema_play % Test, 
+      dependencies.core
     )
   )
 
@@ -84,7 +81,7 @@ lazy val dto_model_v1 = project
 
 lazy val dependencies =
   new {
-    val scalatest             = "org.scalatest"       %% "scalatest"                  % "3.1.1"        % Test
+    val scalatest             = "org.scalatest"       %% "scalatest"                  % "3.2.19"       % Test
     val generators            = "de.ekut.tbi"         %% "generators"                 % "1.0-SNAPSHOT"
     val core                  = "de.dnpm.dip"         %% "core"                       % "1.0-SNAPSHOT"
     val icd10gm               = "de.dnpm.dip"         %% "icd10gm-impl"               % "1.0-SNAPSHOT" % Test
@@ -95,10 +92,7 @@ lazy val dependencies =
     val hgnc_geneset          = "de.dnpm.dip"         %% "hgnc-gene-set-impl"         % "1.0-SNAPSHOT" % Test
     val bwhc_mtb_dtos         = "de.bwhc"             %% "mtb-dtos"                   % "1.0"          % Test
     val bwhc_dto_gens         = "de.bwhc"             %% "mtb-dto-generators"         % "1.0"          % Test
-    val scala_jsonschema      = "com.github.andyglow" %% "scala-jsonschema"           % "0.7.11"
-    val scala_jsonschema_cats = "com.github.andyglow" %% "scala-jsonschema-cats"      % "0.7.11"
-    val scala_jsonschema_play = "com.github.andyglow" %% "scala-jsonschema-play-json" % "0.7.11"
-    val json_schema_validator = "com.networknt"       %  "json-schema-validator"      % "1.5.5"        % Test
+    val json_schema_validator = "com.networknt"       %  "json-schema-validator"      % "1.5.6"        % Test
   }
 
 
