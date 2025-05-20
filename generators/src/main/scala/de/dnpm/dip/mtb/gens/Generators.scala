@@ -35,6 +35,7 @@ import de.dnpm.dip.model.{
   BaseVariant,
   ClosedInterval,
   ExternalId,
+  ExternalReference,
   FollowUp,
   Gender,
   GeneAlterationReference,
@@ -1034,6 +1035,38 @@ trait Generators
     )
 
 
+  implicit val genStudyRef: Gen[ExternalReference[Study,Study.Registries]] = {
+
+    import Study.Registries._
+
+    val nctIdGen =
+      for { id <- Gen.numeric(8) } yield s"NCT$id"
+
+    val drksIdGen =
+      for { id <- Gen.numeric(5) } yield s"DRKS000$id"
+
+    val eudraIdGen =
+      for { 
+        part1 <- Gen.numeric(4)
+        part2 <- Gen.numeric(6)
+        part3 <- Gen.numeric(2)
+        part4 <- Gen.numeric(2)
+      } yield s"$part1-$part2-$part3-$part4"
+
+    val studyIdGens =
+      Map(
+        Coding.System[NCT].uri     -> nctIdGen,
+        Coding.System[DRKS].uri    -> drksIdGen,
+        Coding.System[EudraCT].uri -> eudraIdGen
+      ) 
+
+    for {
+      sys <- Gen.oneOf(studyIdGens.keys.toSeq)
+      id  <- studyIdGens(sys)
+    } yield Reference(ExternalId(id,sys))
+  }
+
+
   def genCarePlan(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
@@ -1042,8 +1075,6 @@ trait Generators
   ): Gen[MTBCarePlan] = 
     for { 
       id <- Gen.of[Id[MTBCarePlan]]
-
-//      statusReason <- Gen.of[Coding[MTBCarePlan.StatusReason.Value]]
 
       protocol = "Protocol of the MTB conference..."
 
@@ -1079,7 +1110,7 @@ trait Generators
         for { 
           recId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
           priority <- Gen.of[Coding[Recommendation.Priority.Value]]
-          studyRef <- Gen.of[ExternalId[Study,Study.Registries]].map(Reference(_))
+          studyRef <- Gen.of[ExternalReference[Study,Study.Registries]]
         } yield MTBStudyEnrollmentRecommendation(
           recId,
           patient,
@@ -1117,7 +1148,6 @@ trait Generators
       patient,
       Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
-//      Some(statusReason),
       None,
       None,
       Some(counselingRecommendation),
