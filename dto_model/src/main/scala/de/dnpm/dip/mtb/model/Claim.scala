@@ -66,8 +66,8 @@ final case class ClaimResponse
   patient: Reference[Patient],
   claim: Reference[Claim],
   issuedOn: LocalDate,
-  status: Coding[ClaimResponse.Status.Value],
-  statusReason: Option[Coding[ClaimResponse.StatusReason.Value]]
+  status: Option[Coding[ClaimResponse.Status.Value]],
+  statusReason: Option[Set[Coding[ClaimResponse.StatusReason.Value]]]
 )
 
 object ClaimResponse

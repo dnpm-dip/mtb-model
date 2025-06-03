@@ -355,7 +355,7 @@ trait Completers extends BaseCompleters
 
     implicit val claimResponseCompleter: Completer[ClaimResponse] =
       cr => cr.copy(
-        status       = cr.status.complete,
+        status       = cr.status.orElse(Some(Coding(ClaimResponse.Status.Unknown))).complete,
         statusReason = cr.statusReason.complete,
       )
 

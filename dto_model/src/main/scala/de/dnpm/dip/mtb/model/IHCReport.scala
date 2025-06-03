@@ -124,8 +124,6 @@ final case class IHCReport
   patient: Reference[Patient],
   specimen: Reference[TumorSpecimen],
   issuedOn: LocalDate,
-  journalId: Id[_],
-  blockIds: NonEmptyList[Id[_]],
   results: IHCReport.Results,
 )
 extends DiagnosticReport
@@ -146,7 +144,7 @@ object IHCReport
 
   final case class Results
   (
-    proteinExpression: List[ProteinExpression],
+    proteinExpression: NonEmptyList[ProteinExpression],
     msiMmr: List[ProteinExpression]
   )
 

@@ -575,10 +575,6 @@ trait Generators
     for {
       id <- Gen.of[Id[IHCReport]]
 
-      journalId <- Gen.of[Id[Nothing]]
-
-      blockId <- Gen.of[Id[Nothing]]
-
       proteinExpression <-
         Gen.list(
           Gen.intsBetween(3,10),
@@ -590,10 +586,8 @@ trait Generators
       patient,
       specimen,
       LocalDate.now,
-      journalId,
-      NonEmptyList.of(blockId),
       IHCReport.Results(
-        proteinExpression,
+        NonEmptyList.fromListUnsafe(proteinExpression),
         List.empty,
       )
     )
@@ -1187,7 +1181,9 @@ trait Generators
       statusReason <-
         status match {
           case ClaimResponse.Status(ClaimResponse.Status.Rejected) =>
-            Gen.of[Coding[ClaimResponse.StatusReason.Value]].map(Some(_))
+            Gen.of[Coding[ClaimResponse.StatusReason.Value]]
+              .map(Set(_))
+              .map(Some(_))
           case _ =>
             Gen.const(None)
         }
@@ -1197,7 +1193,7 @@ trait Generators
       patient,
       claim,
       LocalDate.now,
-      status,
+      Some(status),
       statusReason
     )
 

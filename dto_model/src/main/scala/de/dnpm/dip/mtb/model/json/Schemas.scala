@@ -67,6 +67,10 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
+  implicit val proteinExpressionSchema: Schema[ProteinExpression] =
+    Json.schema[ProteinExpression]
+      .toSimpleNameDefinition
+
   implicit val ihcReportSchema: Schema[IHCReport] =
     Json.schema[IHCReport]
       .toSimpleNameDefinition
