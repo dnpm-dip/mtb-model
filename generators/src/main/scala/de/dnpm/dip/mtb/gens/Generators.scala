@@ -1309,6 +1309,17 @@ trait Generators
     )
 
 
+  def familyMemberHistory(patient: Patient): Gen[FamilyMemberHistory] =
+    for {
+      id <- Gen.of[Id[FamilyMemberHistory]]
+      rel <- Gen.of[Coding[FamilyMemberHistory.RelationshipType.Value]]
+    } yield FamilyMemberHistory(
+      id,
+      Reference.to(patient),
+      rel
+    )
+
+
   implicit val genPatientRecord: Gen[MTBPatientRecord] =
     for {
 
@@ -1316,8 +1327,9 @@ trait Generators
 
       patRef = Reference.to(patient)
 
-      diagnosis <-
-        genDiagnosis(patient)    
+      diagnosis <- genDiagnosis(patient)    
+
+      famMemHistory <- familyMemberHistory(patient)
 
       episode <-
          genEpisode(
@@ -1429,6 +1441,7 @@ trait Generators
       patient,
       NonEmptyList.one(episode),
       NonEmptyList.one(diagnosis),
+      Some(List(famMemHistory)),
       Some(guidelineTherapies),
       Some(guidelineProcedures),
       Some(List(performanceStatus)),

@@ -19,6 +19,7 @@ final case class MTBPatientRecord
   patient: Patient,
   episodesOfCare: NonEmptyList[MTBEpisodeOfCare],
   diagnoses: NonEmptyList[MTBDiagnosis],
+  familyMemberHistories: Option[List[FamilyMemberHistory]],
   guidelineTherapies: Option[List[MTBSystemicTherapy]],
   guidelineProcedures: Option[List[OncoProcedure]],
   performanceStatus: Option[List[PerformanceStatus]],
