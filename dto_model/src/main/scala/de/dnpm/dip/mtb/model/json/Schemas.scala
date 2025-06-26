@@ -33,6 +33,11 @@ trait Schemas extends BaseSchemas
       .toSimpleNameDefinition
 
 
+  implicit val familyMemberHistorySchema: Schema[FamilyMemberHistory] =
+    Json.schema[FamilyMemberHistory]
+      .toSimpleNameDefinition
+
+
   implicit val episodeSchema: Schema[MTBEpisodeOfCare] =
     Json.schema[MTBEpisodeOfCare]
       .toSimpleNameDefinition
@@ -64,6 +69,11 @@ trait Schemas extends BaseSchemas
 
   implicit val histologyReportSchema: Schema[HistologyReport] =
     Json.schema[HistologyReport]
+      .toSimpleNameDefinition
+
+
+  implicit val molecularDiagnosticReportSchema: Schema[MolecularDiagnosticReport] =
+    Json.schema[MolecularDiagnosticReport]
       .toSimpleNameDefinition
 
 
