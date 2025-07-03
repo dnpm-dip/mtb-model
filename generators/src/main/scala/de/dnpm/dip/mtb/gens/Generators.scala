@@ -33,6 +33,7 @@ import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.model.{
   Address,
   BaseVariant,
+  Chromosome,
   ClosedInterval,
   ExternalId,
   ExternalReference,
@@ -969,7 +970,7 @@ trait Generators
       LocalDate.now,
       priority,
       Some(evidenceLevel),
-      Some(category),
+      Some(Set(category)),
       Set(medication),
       Some(useType),
       Some(List(supportingVariant))

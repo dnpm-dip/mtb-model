@@ -161,15 +161,16 @@ object Variant
 
 }
 
+/*
 object Chromosome extends Enumeration with Chromosome
 {
   implicit val format: Format[Value] =
     Json.formatEnum(this)
 }
+*/
 
 
 sealed trait Exon
-
 
 sealed trait dbSNP
 object dbSNP

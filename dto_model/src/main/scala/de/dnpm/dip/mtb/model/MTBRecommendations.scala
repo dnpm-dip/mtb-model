@@ -43,7 +43,7 @@ final case class MTBMedicationRecommendation
   issuedOn: LocalDate,
   priority: Coding[Recommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
-  category: Option[Coding[MTBMedicationRecommendation.Category.Value]],
+  category: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
   medication: Set[Coding[Medications]],
   useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]]
@@ -108,7 +108,6 @@ final case class MTBProcedureRecommendation
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-//  priority: Option[Coding[Recommendation.Priority.Value]],
   priority: Coding[Recommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
   code: Coding[MTBProcedureRecommendation.Category.Value],
