@@ -477,6 +477,23 @@ trait Generators
       )
     )
 
+  def genMSI(
+    patient: Reference[Patient],
+    specimen: Reference[TumorSpecimen]
+  ): Gen[MSI] =
+    for { 
+      id <- Gen.of[Id[MSI]]
+      method <- Gen.of[Coding[MSI.Method.Value]]
+      value  <- Gen.doublesBetween(0.1,2.0)
+      interpretation <- Gen.of[Coding[MSI.Interpretation.Value]]
+    } yield MSI(
+      id,
+      patient,
+      specimen,
+      method,
+      MSI.Result(value),
+      interpretation
+    ) 
 
   def genTumorCellContent(
     patient: Reference[Patient],
@@ -1372,6 +1389,12 @@ trait Generators
           Reference.to(specimen)
         )
 
+      msi <-
+        genMSI(
+          patRef,
+          Reference.to(specimen)
+        )
+
       ihcReport <-
         genIHCReport(
           patRef,
@@ -1450,6 +1473,7 @@ trait Generators
       Some(List(priorDiagnostics)),
       Some(List(histologyReport)),
       Some(List(ihcReport)),
+      Some(List(msi)),
       Some(List(ngsReport)),
       Some(List(carePlan)),
       Some(List(followUp)),

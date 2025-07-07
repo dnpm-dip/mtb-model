@@ -27,6 +27,7 @@ final case class MTBPatientRecord
   priorDiagnosticReports: Option[List[MolecularDiagnosticReport]],
   histologyReports: Option[List[HistologyReport]],
   ihcReports: Option[List[IHCReport]],
+  msiFindings: Option[List[MSI]],
   ngsReports: Option[List[SomaticNGSReport]],
   carePlans: Option[List[MTBCarePlan]],
   followUps: Option[List[FollowUp]],

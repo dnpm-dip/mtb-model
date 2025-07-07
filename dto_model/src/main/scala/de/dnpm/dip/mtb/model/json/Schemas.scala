@@ -85,6 +85,10 @@ trait Schemas extends BaseSchemas
     Json.schema[IHCReport]
       .toSimpleNameDefinition
 
+  implicit val MSISchema: Schema[MSI] =
+    Json.schema[MSI]
+      .toSimpleNameDefinition
+
   implicit val TMBResultSchema: Schema[TMB.Result] =
     Json.schema[TMB.Result]
       .addOptField("unit",Schema.`string`)
