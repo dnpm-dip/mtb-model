@@ -357,18 +357,15 @@ trait Generators
       id <-
         Gen.of[Id[MTBSystemicTherapy]]
 
-      therapyLine <-
-        Gen.intsBetween(1,9)
+      therapyLine <- Gen.intsBetween(1,9)
 
       intent <- Gen.of[Coding[MTBTherapy.Intent.Value]]
 
       category <- Gen.of[Coding[MTBSystemicTherapy.Category.Value]]
 
-      status =
-        Coding(Stopped)
+      status = Coding(Stopped)
 
-      statusReason =
-        Coding(Progression)
+      statusReason = Coding(Progression)
 
       period <- 
         for {
@@ -380,8 +377,7 @@ trait Generators
 
       medication <-
         Gen.of[Coding[ATC]]
-          .map(_.asInstanceOf[Coding[Medications]])
-          .map(Set(_))
+          .map(Coding[Medications].from(_))
 
       note = "Notes on the therapy..."
 
@@ -404,7 +400,7 @@ trait Generators
       None,
       None,
       Some(period),
-      Some(medication),
+      Some(Set(medication)),
       Some(List(note))
     )
 
