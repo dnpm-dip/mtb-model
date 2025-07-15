@@ -235,16 +235,11 @@ trait Generators
       date <-
         patient.dateOfDeath match {
           case Some(dod) =>
-            for {
-              os <- Gen.longsBetween(24,48)
-            } yield dod.minusMonths(os)
+            for { os <- Gen.longsBetween(24,48) } yield dod minusMonths os
 
           case _ => 
-            val age =
-              patient.ageIn(MONTHS).value.toLong
-            for {
-              onsetAge <- Gen.longsBetween(age - 48L, age - 24L)
-            } yield patient.birthDate.plusMonths(onsetAge)
+            val age = patient.ageIn(MONTHS).value.toLong
+            for { onsetAge <- Gen.longsBetween(age - 48L, age - 24L) } yield patient.birthDate plusMonths onsetAge
         }
 
       icd10 <- Gen.of[Coding[ICD10GM]]
@@ -283,9 +278,9 @@ trait Generators
       staging <- for {
 
         tnm <- for {
-          t <- Gen.oneOf("Tx","T0","T1","T2","T3","T4").map(Coding[UICC](_))
-          n <- Gen.oneOf("Nx","N0","N1","N2","N3").map(Coding[UICC](_))
-          m <- Gen.oneOf("Mx","M0","M1").map(Coding[UICC](_))
+          t <- Gen.oneOf("TX","T0","T1","T2","T3","T4","Tis").map(Coding[UICC](_))
+          n <- Gen.oneOf("NX","N0","N1","N2","N3").map(Coding[UICC](_))
+          m <- Gen.oneOf("MX","M0","M1").map(Coding[UICC](_))
         } yield TumorStaging.TNM(t,n,m)
 
         spread <- Gen.of[Coding[TumorStaging.KDSSpread.Value]]
@@ -816,15 +811,26 @@ trait Generators
     )
 
 
+
+
   def genNGSReport(
     patient: Reference[Patient],
     specimen: Reference[TumorSpecimen]
-  ): Gen[SomaticNGSReport] =
+  ): Gen[SomaticNGSReport] = {
+    import NGSReport.Type._
+
     for {
       id <- Gen.of[Id[SomaticNGSReport]]
 
       seqType <-
-        Gen.of[Coding[NGSReport.Type.Value]]
+        Gen.oneOf(
+          Array,
+          Panel,
+          Exome,
+          GenomeShortRead,
+          GenomeLongRead
+        )
+        .map(Coding(_))
 
       metadata <-
         for {
@@ -929,6 +935,7 @@ trait Generators
       )
     )
 
+  }
 
   def genSystemicTherapyRecommendation(
     patient: Reference[Patient],
@@ -1403,6 +1410,15 @@ trait Generators
           Reference.to(specimen)
         )
 
+      mvhCarePlan <- 
+        for { id <- Gen.of[Id[MTBCarePlan]] } yield MTBCarePlan(
+          id,
+          patRef,
+          Some(Reference to diagnosis),
+          ngsReport.issuedOn minusWeeks 2,
+          None, None, None, None, None, None, None, None, None
+        )
+
       carePlan <- 
         genCarePlan(
           patRef,
@@ -1471,7 +1487,7 @@ trait Generators
       Some(List(ihcReport)),
       Some(List(msi)),
       Some(List(ngsReport)),
-      Some(List(carePlan)),
+      Some(List(mvhCarePlan,carePlan)),
       Some(List(followUp)),
       Some(claims),
       Some(claimResponses),

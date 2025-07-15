@@ -14,7 +14,7 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Therapy,
-  TherapyRecommendation,
+//  TherapyRecommendation,
   Procedure,
   SystemicTherapy
 }
@@ -176,7 +176,7 @@ final case class OncoProcedure
   reason: Option[Reference[MTBDiagnosis]],
   therapyLine: Option[Int],
   intent: Option[Coding[MTBTherapy.Intent.Value]],
-  basedOn: Option[Reference[TherapyRecommendation]],
+  basedOn: Option[Reference[MTBProcedureRecommendation]],
   code: Coding[OncoProcedure.Type.Value],
   status: Coding[Therapy.Status.Value],
   statusReason: Option[Coding[MTBTherapy.StatusReason.Value]],
