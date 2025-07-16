@@ -824,7 +824,6 @@ trait Generators
 
       seqType <-
         Gen.oneOf(
-          Array,
           Panel,
           Exome,
           GenomeShortRead,
