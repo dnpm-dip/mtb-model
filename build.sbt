@@ -1,14 +1,17 @@
 
-/*
- build.sbt adapted from https://github.com/pbassiner/sbt-multi-project-example/blob/master/build.sbt
-*/
+// build.sbt adapted from https://github.com/pbassiner/sbt-multi-project-example/blob/master/build.sbt
+
+import scala.util.Properties.envOrElse
 
 
 name := "mtb-model"
 ThisBuild / organization := "de.dnpm.dip"
 ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / version      := "1.0-SNAPSHOT"
+ThisBuild / version      := envOrElse("VERSION","1.0.0")
 
+val ownerRepo  = envOrElse("REPOSITORY","dnpm-dip/mtb-model").split("/")
+ThisBuild / githubOwner      := ownerRepo(0)
+ThisBuild / githubRepository := ownerRepo(1)
 
 //-----------------------------------------------------------------------------
 // PROJECTS
@@ -23,7 +26,6 @@ lazy val global = project
   .aggregate(
      dto_model,
      generators,
-//     dto_model_v1,
   )
 
 
@@ -58,10 +60,11 @@ lazy val generators = project
     dto_model
   )
 
-
+/*
 lazy val dto_model_v1 = project
   .settings(
     name := "mtb-dto-model-v1",
+    publish / skip := true,
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -73,7 +76,7 @@ lazy val dto_model_v1 = project
   .dependsOn(
     dto_model
   )
-
+*/
 
 //-----------------------------------------------------------------------------
 // DEPENDENCIES
@@ -81,18 +84,18 @@ lazy val dto_model_v1 = project
 
 lazy val dependencies =
   new {
-    val scalatest             = "org.scalatest"       %% "scalatest"                  % "3.2.19"       % Test
-    val generators            = "de.ekut.tbi"         %% "generators"                 % "1.0-SNAPSHOT"
-    val core                  = "de.dnpm.dip"         %% "core"                       % "1.0-SNAPSHOT"
-    val icd10gm               = "de.dnpm.dip"         %% "icd10gm-impl"               % "1.0-SNAPSHOT" % Test
-    val icdo3                 = "de.dnpm.dip"         %% "icdo3-impl"                 % "1.0-SNAPSHOT" % Test
-    val icd_catalogs          = "de.dnpm.dip"         %% "icd-claml-packaged"         % "1.0-SNAPSHOT" % Test
-    val atc_impl              = "de.dnpm.dip"         %% "atc-impl"                   % "1.0-SNAPSHOT" % Test
-    val atc_catalogs          = "de.dnpm.dip"         %% "atc-catalogs-packaged"      % "1.0-SNAPSHOT" % Test
-    val hgnc_geneset          = "de.dnpm.dip"         %% "hgnc-gene-set-impl"         % "1.0-SNAPSHOT" % Test
-    val bwhc_mtb_dtos         = "de.bwhc"             %% "mtb-dtos"                   % "1.0"          % Test
-    val bwhc_dto_gens         = "de.bwhc"             %% "mtb-dto-generators"         % "1.0"          % Test
-    val json_schema_validator = "com.networknt"       %  "json-schema-validator"      % "1.5.6"        % Test
+    val scalatest             = "org.scalatest" %% "scalatest"             % "3.2.19" % Test
+    val generators            = "de.ekut.tbi"   %% "generators"            % "1.0.0"
+    val core                  = "de.dnpm.dip"   %% "core"                  % "1.0.0"
+    val icd10gm               = "de.dnpm.dip"   %% "icd10gm-impl"          % "1.0.0" % Test
+    val icdo3                 = "de.dnpm.dip"   %% "icdo3-impl"            % "1.0.0" % Test
+    val icd_catalogs          = "de.dnpm.dip"   %% "icd-claml-packaged"    % "1.0.0" % Test
+    val atc_impl              = "de.dnpm.dip"   %% "atc-impl"              % "1.0.0" % Test
+    val atc_catalogs          = "de.dnpm.dip"   %% "atc-catalogs-packaged" % "1.0.0" % Test
+    val hgnc_geneset          = "de.dnpm.dip"   %% "hgnc-gene-set-impl"    % "1.0.0" % Test
+    val json_schema_validator = "com.networknt" %  "json-schema-validator" % "1.5.6" % Test
+//    val bwhc_mtb_dtos         = "de.bwhc"       %% "mtb-dtos"              % "1.0"          % Test
+//    val bwhc_dto_gens         = "de.bwhc"       %% "mtb-dto-generators"    % "1.0"          % Test
   }
 
 
@@ -145,17 +148,16 @@ lazy val compilerOptions = Seq(
   "-Wunused:patvars",
   "-Wunused:privates",
   "-Wvalue-discard",
-
-  // Deactivated to avoid many false positives from 'evidence' parameters in context bounds
-//  "-Wunused:implicits",
-//  "-Wunused:params",
 )
 
 
 lazy val commonSettings = Seq(
   scalacOptions ++= compilerOptions,
-  resolvers ++= Seq("Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository") ++
-    Resolver.sonatypeOssRepos("releases") ++
-    Resolver.sonatypeOssRepos("snapshots")
+  resolvers ++= Seq(
+    "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
+    Resolver.githubPackages("dnpm-dip"),
+    Resolver.githubPackages("KohlbacherLab"),
+    Resolver.sonatypeCentralSnapshots
+  )
 )
 
