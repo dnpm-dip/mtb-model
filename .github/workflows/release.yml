@@ -51,7 +51,7 @@ jobs:
           DTO_MODEL_VERSION: ${{ steps.release.outputs['dto_model--major'] }}.${{ steps.release.outputs['dto_model--minor'] }}.${{ steps.release.outputs['dto_model--patch'] }}    
         run: sbt dto_model/publish
 
-      - name: Publish DTOs
+      - name: Publish Generators
         if: steps.release.outputs['generators--release_created'] == 'true'
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
