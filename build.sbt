@@ -7,7 +7,6 @@ import scala.util.Properties.envOrElse
 name := "mtb-model"
 ThisBuild / organization := "de.dnpm.dip"
 ThisBuild / scalaVersion := "2.13.16"
-ThisBuild / version      := envOrElse("VERSION","1.0.0")
 
 val ownerRepo  = envOrElse("REPOSITORY","dnpm-dip/mtb-model").split("/")
 ThisBuild / githubOwner      := ownerRepo(0)
@@ -32,6 +31,7 @@ lazy val global = project
 lazy val dto_model = project
   .settings(
     name := "mtb-dto-model",
+    version := envOrElse("DTO_MODEL_VERSION","1.0.0"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -43,6 +43,7 @@ lazy val dto_model = project
 lazy val generators = project
   .settings(
     name := "mtb-dto-generators",
+    version := envOrElse("GENERATORS_VERSION","1.0.1"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.generators,
@@ -85,6 +86,7 @@ lazy val dto_model_v1 = project
 lazy val dependencies =
   new {
     val scalatest             = "org.scalatest" %% "scalatest"             % "3.2.19" % Test
+//    val gens                  = "de.ekut.tbi"   %% "generators"            % "1.0.0"
     val generators            = "de.ekut.tbi"   %% "generators"            % "1.0.0"
     val core                  = "de.dnpm.dip"   %% "core"                  % "1.0.0"
     val icd10gm               = "de.dnpm.dip"   %% "icd10gm-impl"          % "1.0.0" % Test
@@ -94,8 +96,6 @@ lazy val dependencies =
     val atc_catalogs          = "de.dnpm.dip"   %% "atc-catalogs-packaged" % "1.0.0" % Test
     val hgnc_geneset          = "de.dnpm.dip"   %% "hgnc-gene-set-impl"    % "1.0.0" % Test
     val json_schema_validator = "com.networknt" %  "json-schema-validator" % "1.5.6" % Test
-//    val bwhc_mtb_dtos         = "de.bwhc"       %% "mtb-dtos"              % "1.0"          % Test
-//    val bwhc_dto_gens         = "de.bwhc"       %% "mtb-dto-generators"    % "1.0"          % Test
   }
 
 

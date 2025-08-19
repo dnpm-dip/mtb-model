@@ -1347,18 +1347,17 @@ trait Generators
 
       patRef = Reference.to(patient)
 
-      diagnosis <- genDiagnosis(patient)    
+      rawDiagnosis <- genDiagnosis(patient) // Diagnosis object without HistologyReport references yet
 
       famMemHistory <- familyMemberHistory(patient)
 
       episode <-
          genEpisode(
            patRef,
-           List(Reference.to(diagnosis))
+           List(Reference.to(rawDiagnosis))
          )
 
-      performanceStatus <-
-        genPerformanceStatus(patRef) 
+      performanceStatus <- genPerformanceStatus(patRef) 
 
 
       guidelineTherapies <-
@@ -1366,7 +1365,7 @@ trait Generators
           Gen.intsBetween(1,3),
           genGuidelineTherapy(
             patRef,
-            diagnosis
+            rawDiagnosis
           )
         )
 
@@ -1375,21 +1374,23 @@ trait Generators
           Gen.intsBetween(1,3),
           genProcedure(
             patRef,
-            diagnosis
+            rawDiagnosis
           )
         )
 
-      specimen <-
-        genTumorSpecimen(patRef,diagnosis)
+      specimen <- genTumorSpecimen(patRef,rawDiagnosis)
 
-      priorDiagnostics <- 
-        genMolecularDiagnosticReport(patRef,specimen)
+      priorDiagnostics <- genMolecularDiagnosticReport(patRef,specimen)
         
       histologyReport <-
         genHistologyReport(
           patRef,
           Reference.to(specimen)
         )
+
+      diagnosis = rawDiagnosis.copy(
+        histology = Some(List(Reference.to(histologyReport)))
+      )  
 
       msi <-
         genMSI(
