@@ -35,8 +35,7 @@ final case class MolecularDiagnosticReport
 )
 extends DiagnosticReport
 {
-  override val notes =
-    None
+  override val notes = None
 }
 
 object MolecularDiagnosticReport

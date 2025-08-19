@@ -45,15 +45,14 @@ final case class HistologyReport
 )
 extends DiagnosticReport 
 {
-   override val `type` =
-    Coding(
-      "histology",
-      "Histologie",
-      URI.create("dnpm-dip/mtb/histology")
-    )
+  override val `type` =
+   Coding(
+     "histology",
+     "Histologie",
+     URI.create("dnpm-dip/mtb/histology")
+   )
 
-   override val notes =
-     None
+  override val notes = None
 }
 
 object HistologyReport
