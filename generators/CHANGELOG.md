@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.1.0...mtb-dto-generators-v1.1.1) (2025-10-07)
+
+
+### Bug Fixes
+
+* Added missing CPS-score in ProteinExpression for IHC-Report ([d282f86](https://github.com/dnpm-dip/mtb-model/commit/d282f868e9d5981b40a8e6c6697919e3d6834568))
+
 ## [1.1.0](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.0.0...mtb-dto-generators-v1.1.0) (2025-08-19)
 
 
