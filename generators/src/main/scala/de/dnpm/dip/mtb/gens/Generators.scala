@@ -565,6 +565,7 @@ trait Generators
       protein <- Gen.of[Coding[HGNC]]
       value   <- Gen.of[Coding[ProteinExpression.Result.Value]]
       tpsScore <- Gen.intsBetween(0,100)
+      cpsScore <- Gen.intsBetween(0,100)
       icScore <- Gen.of[Coding[ProteinExpression.ICScore.Value]]
       tcScore <- Gen.of[Coding[ProteinExpression.TCScore.Value]]
     } yield ProteinExpression(
@@ -573,6 +574,7 @@ trait Generators
       protein,
       value,
       Some(tpsScore),
+      Some(cpsScore),
       Some(icScore),
       Some(tcScore),
     )

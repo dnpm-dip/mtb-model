@@ -30,6 +30,7 @@ final case class ProteinExpression
   protein: Coding[HGNC],
   value: Coding[ProteinExpression.Result.Value],
   tpsScore: Option[Int],
+  cpsScore: Option[Int],
   icScore: Option[Coding[ProteinExpression.ICScore.Value]],
   tcScore: Option[Coding[ProteinExpression.TCScore.Value]],
 )

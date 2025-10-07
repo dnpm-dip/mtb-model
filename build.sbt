@@ -31,7 +31,7 @@ lazy val global = project
 lazy val dto_model = project
   .settings(
     name := "mtb-dto-model",
-    version := envOrElse("DTO_MODEL_VERSION","1.0.0"),
+    version := envOrElse("DTO_MODEL_VERSION","1.1.0"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -86,7 +86,6 @@ lazy val dto_model_v1 = project
 lazy val dependencies =
   new {
     val scalatest             = "org.scalatest" %% "scalatest"             % "3.2.19" % Test
-//    val gens                  = "de.ekut.tbi"   %% "generators"            % "1.0.0"
     val generators            = "de.ekut.tbi"   %% "generators"            % "1.0.0"
     val core                  = "de.dnpm.dip"   %% "core"                  % "1.0.0"
     val icd10gm               = "de.dnpm.dip"   %% "icd10gm-impl"          % "1.0.0" % Test

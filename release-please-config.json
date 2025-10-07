@@ -4,7 +4,11 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "packages": { 
-    "dto_model": { "component": "mtb-dto-model" },
-    "generators": { "component": "mtb-dto-generators" }
+    "./dto_model": {
+      "component": "mtb-dto-model"
+    },
+    "./generators": {
+      "component": "mtb-dto-generators"
+    }
   }
 }
