@@ -88,7 +88,7 @@ object MTBMedicationRecommendation
     override val display =
       Map(
         InLabel       -> "In-label Use",
-        OffLabel      -> "Off-bel Use",
+        OffLabel      -> "Off-label Use",
         Compassionate -> "Compassionate Use",
         SecPreventive -> "Sec-preventive",
         Unknown       -> "Unknown"
