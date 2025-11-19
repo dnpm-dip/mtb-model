@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.1.1...mtb-dto-generators-v1.1.2) (2025-11-19)
+
+
+### Bug Fixes
+
+* Adapted generators to changes in Patient.birthDate and .dateOfDeath ([43adff6](https://github.com/dnpm-dip/mtb-model/commit/43adff6b7ef0747513f213b27939b0972d53e796))
+* bump core to 1.1.4, icd* to 1.1.2 ([43adff6](https://github.com/dnpm-dip/mtb-model/commit/43adff6b7ef0747513f213b27939b0972d53e796))
+
 ## [1.1.1](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.1.0...mtb-dto-generators-v1.1.1) (2025-10-07)
 
 
