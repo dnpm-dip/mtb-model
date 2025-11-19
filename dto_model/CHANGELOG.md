@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.1.1...mtb-dto-model-v1.1.2) (2025-11-19)
+
+
+### Bug Fixes
+
+* Corrected typo in display value for medication use type in Recommendation ([c517b10](https://github.com/dnpm-dip/mtb-model/commit/c517b105e2af327f88b3cdf71b11064af8309e13))
+
 ## [1.1.1](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.1.0...mtb-dto-model-v1.1.1) (2025-10-07)
 
 
