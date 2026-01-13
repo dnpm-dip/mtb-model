@@ -103,6 +103,7 @@ object Variant
             case _: RNAFusion => "Fusion"
             case _: RNASeq    => "RNASeq"
           }
+          .getOrElse("")
         }"
     }
 
