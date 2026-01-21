@@ -9,7 +9,10 @@ import de.dnpm.dip.model.{
 import de.dnpm.dip.coding.Coding
 import play.api.libs.json.{
   Json,
-  OFormat
+  JsObject,
+  JsString,
+  OFormat,
+  Reads
 }
 import de.dnpm.dip.mtb.model.RECIST
 
@@ -25,6 +28,19 @@ final case class Response
 
 object Response
 {
+
+  // Required to translate former RECIST values
+  implicit def readsTherapyStatusReason(
+    implicit reads: Reads[Coding[RECIST.Value]]
+  ): Reads[Coding[RECIST.Value]] =
+    reads.preprocess {
+      case js: JsObject =>
+        (js \ "code").as[String] match {
+          case "NYA" => js + ("code" -> JsString("NA"))
+          case _ => js
+        }
+    }
+
   implicit val format: OFormat[Response] =
     Json.format[Response]
 }

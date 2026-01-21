@@ -15,7 +15,7 @@ import de.dnpm.dip.model.json.BaseSchemas
 trait Schemas extends BaseSchemas
 {
 
-  implicit val patientSchema: Schema[Patient] =
+  override implicit val patientSchema: Schema[Patient] =
     Json.schema[Patient]
       .toSimpleNameDefinition
 

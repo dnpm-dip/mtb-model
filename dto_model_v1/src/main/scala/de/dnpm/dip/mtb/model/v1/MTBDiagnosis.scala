@@ -5,9 +5,9 @@ import java.time.LocalDate
 import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Id,
-  Patient,
-  GuidelineTreatmentStatus
+  Patient
 }
+import de.dnpm.dip.mtb.model.MTBDiagnosis.GuidelineTreatmentStatus
 import de.dnpm.dip.coding.icd.{
   ICD10GM,
   ICDO3
@@ -37,17 +37,20 @@ final case class MTBDiagnosis
 object MTBDiagnosis
 {
 
-  import de.dnpm.dip.mtb.model.MTBDiagnosis.TumorSpread
+  import de.dnpm.dip.mtb.model.TumorStaging.KDSSpread
 
   final case class StatusOnDate
   (
-    status: TumorSpread.Value,
+    status: KDSSpread.Value,
     date: LocalDate
   )
 
 
   implicit val formatGuidelineTreatmentStatus: Format[GuidelineTreatmentStatus.Value] =
     Json.formatEnum(GuidelineTreatmentStatus)
+
+  implicit val formatSpreadStatus: Format[KDSSpread.Value] =
+    Json.formatEnum(KDSSpread)
 
   implicit val formatStatus: OFormat[StatusOnDate] =
     Json.format[StatusOnDate]

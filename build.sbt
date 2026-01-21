@@ -31,7 +31,7 @@ lazy val global = project
 lazy val dto_model = project
   .settings(
     name := "mtb-dto-model",
-    version := envOrElse("DTO_MODEL_VERSION","1.1.0"),
+    version := envOrElse("DTO_MODEL_VERSION","1.1.2"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -43,7 +43,7 @@ lazy val dto_model = project
 lazy val generators = project
   .settings(
     name := "mtb-dto-generators",
-    version := envOrElse("GENERATORS_VERSION","1.0.1"),
+    version := envOrElse("GENERATORS_VERSION","1.1.2"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.generators,
@@ -61,23 +61,24 @@ lazy val generators = project
     dto_model
   )
 
-/*
+
 lazy val dto_model_v1 = project
   .settings(
     name := "mtb-dto-model-v1",
+    version := envOrElse("DTO_MODEL_VERSION","1.1.2"),
     publish / skip := true,
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
-      dependencies.bwhc_mtb_dtos,
-      dependencies.bwhc_dto_gens,
+      "de.bwhc" %% "mtb-dtos" % "1.0",
+      "de.bwhc" %% "mtb-dto-generators" % "1.0" % Test,
       dependencies.hgnc_geneset
     )
   )
   .dependsOn(
     dto_model
   )
-*/
+
 
 //-----------------------------------------------------------------------------
 // DEPENDENCIES
@@ -93,7 +94,7 @@ lazy val dependencies =
     val icd_catalogs          = "de.dnpm.dip"   %% "icd-claml-packaged"    % "1.1.2" % Test
     val atc_impl              = "de.dnpm.dip"   %% "atc-impl"              % "1.1.0" % Test
     val atc_catalogs          = "de.dnpm.dip"   %% "atc-catalogs-packaged" % "1.1.0" % Test
-    val hgnc_geneset          = "de.dnpm.dip"   %% "hgnc-gene-set-impl"    % "1.1.0" % Test
+    val hgnc_geneset          = "de.dnpm.dip"   %% "hgnc-gene-set-impl"    % "1.1.1" % Test
     val json_schema_validator = "com.networknt" %  "json-schema-validator" % "1.5.6" % Test
   }
 

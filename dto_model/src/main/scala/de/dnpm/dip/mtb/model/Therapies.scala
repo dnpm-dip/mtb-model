@@ -14,7 +14,6 @@ import de.dnpm.dip.model.{
   Reference,
   Patient,
   Therapy,
-//  TherapyRecommendation,
   Procedure,
   SystemicTherapy
 }

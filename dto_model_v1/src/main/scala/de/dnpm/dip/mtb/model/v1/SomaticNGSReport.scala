@@ -2,19 +2,15 @@ package de.dnpm.dip.mtb.model.v1
 
 
 import java.time.LocalDate
-import de.dnpm.dip.util.json
 import de.dnpm.dip.model.{
   Id,
-  Patient,
-  NGSReport,
+  Patient
 }
 import play.api.libs.json.{
   Json,
-  Format,
   OFormat
 }
 import de.dnpm.dip.mtb.model.SomaticNGSReport.Metadata
-
 
 
 final case class SomaticNGSReport
@@ -39,9 +35,6 @@ final case class SomaticNGSReport
 object SomaticNGSReport
 {
   
-  implicit val formatSequencingType: Format[NGSReport.SequencingType.Value] =
-    json.enumFormat(NGSReport.SequencingType)
-
   implicit val format: OFormat[SomaticNGSReport] =
     Json.format[SomaticNGSReport]
 

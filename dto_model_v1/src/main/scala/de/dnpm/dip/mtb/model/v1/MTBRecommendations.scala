@@ -6,7 +6,7 @@ import de.dnpm.dip.coding.Coding
 import de.dnpm.dip.model.{
   Id,
   Patient,
-  TherapyRecommendation,
+  Recommendation,
 }
 import play.api.libs.json.{
   Json,
@@ -23,7 +23,7 @@ final case class MTBMedicationRecommendation
   patient: Id[Patient],
   diagnosis: Id[MTBDiagnosis],
   levelOfEvidence: Option[LevelOfEvidence],
-  priority: Option[TherapyRecommendation.Priority.Value],
+  priority: Option[Recommendation.Priority.Value],
   issuedOn: Option[LocalDate],
   medication: Option[Set[Coding[Any]]],
   ngsReport: Option[Id[SomaticNGSReport]],
@@ -33,8 +33,8 @@ final case class MTBMedicationRecommendation
 
 object MTBMedicationRecommendation
 {
-  implicit val formatPriority: Format[TherapyRecommendation.Priority.Value] =
-    Json.formatEnum(TherapyRecommendation.Priority)
+  implicit val formatPriority: Format[Recommendation.Priority.Value] =
+    Json.formatEnum(Recommendation.Priority)
 
   implicit val format: OFormat[MTBMedicationRecommendation] =
     Json.format[MTBMedicationRecommendation]

@@ -7,21 +7,18 @@ import de.dnpm.dip.coding.{
   Coding
 }
 import de.dnpm.dip.coding.hgnc.{
-  Ensembl,
   HGNC
 }
-import de.dnpm.dip.coding.hgvs.HGVS
-import play.api.libs.json.{
-  Json,
-  Format,
-  OFormat
+import de.dnpm.dip.coding.{
+  Ensembl,
+  Entrez
 }
+import de.dnpm.dip.coding.hgvs.HGVS
 import de.dnpm.dip.mtb.model.{
-  Chromosome,
   COSMIC,
-  Entrez,
   Transcript,
 }
+import de.dnpm.dip.model.Chromosome
 import de.dnpm.dip.mtb.model.Variant.PositionRange
 import de.dnpm.dip.mtb.model.SNV.{
   Allele,
@@ -29,6 +26,11 @@ import de.dnpm.dip.mtb.model.SNV.{
   ReadDepth
 }
 import de.dnpm.dip.mtb.model.CNV.{Type => CNVType}
+import play.api.libs.json.{
+  Json,
+  Format,
+  OFormat
+}
 
 
 sealed trait Exon
@@ -185,7 +187,6 @@ final case class RNASeq
   rawCounts: Int,
   librarySize: Int,
   cohortRanking: Option[Int]
-
 )
 extends Variant
 
