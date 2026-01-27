@@ -185,10 +185,7 @@ package object mappings
   }
 
 
-  implicit def medicationTherapyMapping(
-    implicit
-    @annotation.unused recommendations: List[v1.MTBMedicationRecommendation]
-  ): v1.MTBMedicationTherapy => model.MTBSystemicTherapy =
+  implicit def medicationTherapyMapping: v1.MTBMedicationTherapy => model.MTBSystemicTherapy =
     th =>
       model.MTBSystemicTherapy(
         th.id,
