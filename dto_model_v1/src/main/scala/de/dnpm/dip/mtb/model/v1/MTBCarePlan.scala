@@ -22,7 +22,7 @@ final case class MTBCarePlan
   description: Option[String],
   recommendations: Option[List[Id[MTBMedicationRecommendation]]],
   geneticCounsellingRequest: Option[Id[GeneticCounselingRecommendation]],
-//  rebiopsyRequests: Option[List[RebiopsyRequest.Id]]
+  rebiopsyRequests: Option[List[Id[RebiopsyRequest]]],
   studyInclusionRequests: Option[List[Id[StudyEnrollmentRecommendation]]]
 )
 

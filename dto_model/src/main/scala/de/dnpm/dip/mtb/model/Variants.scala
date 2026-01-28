@@ -389,7 +389,7 @@ final case class RNASeq
   gene: Option[Coding[HGNC]],
   transcriptId: Option[ExternalId[Transcript,Transcript.Systems]],
   transcriptsPerMillion: Double,
-  variant: Reference[SNV],
+  variant: Option[Reference[SNV]],
   tissueCorrectedExpression: Option[Boolean],
   rawCounts: Int,
   librarySize: Option[Int],

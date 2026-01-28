@@ -8,12 +8,29 @@ import play.api.libs.json.{
 import de.dnpm.dip.model.History
 
 
+/*
+final case class FamilyMemberHistory
+(
+  id: Id[FamilyMemberHistory],
+  patient: Id[Patient],
+  relationship: Coding[FamilyMemberHistory.RelationshipType.Value]
+)
+
+object FamilyMemberHistory
+{
+  implicit val format: OFormat[FamilyMemberHistory] =
+    Json.format[FamilyMemberHistory]
+}
+*/
+
+
 final case class MTBPatientRecord
 (
   patient: Patient,
   consent: Consent,
   episode: MTBEpisode,
   diagnoses: Option[List[MTBDiagnosis]],
+  familyMemberDiagnoses: Option[List[FamilyMemberHistory]],
   previousGuidelineTherapies: Option[List[MTBMedicationTherapy]],
   lastGuidelineTherapies: Option[List[MTBMedicationTherapy]],
   ecogStatus: Option[List[PerformanceStatus]],
@@ -24,7 +41,7 @@ final case class MTBPatientRecord
   carePlans: Option[List[MTBCarePlan]],
   recommendations: Option[List[MTBMedicationRecommendation]],
   geneticCounsellingRequests: Option[List[GeneticCounselingRecommendation]],
-//  rebiopsyRequests: Option[List[RebiopsyRequest]]
+  rebiopsyRequests: Option[List[RebiopsyRequest]],
 //  histologyReevaluationRequests: Option[List[HistologyReevaluationRequest]],
   studyInclusionRequests: Option[List[StudyEnrollmentRecommendation]],
   claims: Option[List[Claim]],
@@ -62,6 +79,9 @@ final case class MTBPatientRecord
 
   def getStudyInclusionRequests =
     studyInclusionRequests.getOrElse(List.empty)
+
+  def getRebiopsyRequests =
+    rebiopsyRequests.getOrElse(List.empty)
 
   def getCarePlans =
     carePlans.getOrElse(List.empty)

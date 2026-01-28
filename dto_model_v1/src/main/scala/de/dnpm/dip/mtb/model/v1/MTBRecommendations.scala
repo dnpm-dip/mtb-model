@@ -75,3 +75,18 @@ object StudyEnrollmentRecommendation
   implicit val format: OFormat[StudyEnrollmentRecommendation] =
     Json.format[StudyEnrollmentRecommendation]
 }
+
+
+final case class RebiopsyRequest
+(
+  id: Id[RebiopsyRequest],
+  patient: Id[Patient],
+  specimen: Id[TumorSpecimen],
+  issuedOn: Option[LocalDate]
+)
+
+object RebiopsyRequest
+{
+  implicit val format: OFormat[RebiopsyRequest] =
+    Json.format[RebiopsyRequest]
+}

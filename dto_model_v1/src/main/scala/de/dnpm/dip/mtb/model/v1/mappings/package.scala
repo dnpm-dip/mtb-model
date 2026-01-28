@@ -2,12 +2,15 @@ package de.dnpm.dip.mtb.model.v1
 
 
 import java.time.LocalDate
+import java.time.Month.JANUARY
 import java.util.UUID.randomUUID
+import scala.util.chaining._
 import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodeSystem,
   Ensembl,
+  Entrez
 }
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.UnregisteredMedication
@@ -106,6 +109,9 @@ package object mappings
   }
 
 
+  private val dummyDate = LocalDate.of(1900,JANUARY,1)
+
+
   implicit val patientMapping: v1.Patient => Patient =
     patient =>
       Patient(
@@ -132,21 +138,22 @@ package object mappings
       )
 
 
-  implicit val diagnosisMapping: v1.MTBDiagnosis => model.MTBDiagnosis = {
+//  implicit val diagnosisMapping: v1.MTBDiagnosis => model.MTBDiagnosis = {
+  implicit def diagnosisMapping(
+    implicit icdo3: CodeSystem[ICDO3.T]
+  ): v1.MTBDiagnosis => model.MTBDiagnosis = {
     import model.MTBDiagnosis.Type._
 
     diag =>
 
-      val date = 
-        diag.recordedOn.getOrElse(LocalDate.now)  //TODO: re-consider default value
+      val date = diag.recordedOn.getOrElse(dummyDate) 
 
-      val (diagType,histologyRefs) = //TODO: discuss mapping main/secondary diagnosis
+      val (diagType,histologyRefs) = 
         diag.histologyResults match {
           case Some(ids) if ids.nonEmpty =>
             Coding(Main) -> Some(ids.map(identity[Id[model.HistologyReport]](_)).map(Reference(_)))
           
-          case _ =>
-            Coding(Secondary) -> None
+          case _ => Coding(Secondary) -> None
         }
 
       model.MTBDiagnosis(
@@ -156,7 +163,17 @@ package object mappings
         History(model.MTBDiagnosis.Type(diagType,date)),
         diag.icd10,
         None,
-        diag.icdO3T.getOrElse(Coding[ICDO3.T]("T")),  //TODO: Which default value for required ICD-O-3-T
+        diag.icdO3T match {
+          case Some(code) => Coding[ICDO3.T](code.value)
+          case None =>
+            icdo3.conceptWithCode(diag.icd10.code.value) // Try resolving ICD-O-3-T with same code as ICD-10...
+              .orElse(icdo3.conceptWithCode(diag.icd10.code.value.substring(0,3))) // ..else try resolving by category (e.g. for "C22.*" -> "C22")
+              .map(_.toCoding)
+              .getOrElse {
+                System.out.println(s"Patient ${diag.patient}, Diagnosis ${diag.icd10.code}: unresolvable ICD-O-3-T code, falling back to default value")
+                Coding[ICDO3.T]("T")
+              }
+        },
         diag.whoGrade.map(
           coding => History(
             model.TumorGrading(
@@ -170,7 +187,7 @@ package object mappings
             h.map(
               st => model.TumorStaging(
                 st.date,
-                Coding(model.TumorStaging.Method.Clinical), // TODO: Discuss default value for "method"
+                Coding(model.TumorStaging.Method.Clinical), //TODO: Document that this field contains only a default value
                 None,
                 Some(List(Coding[model.TumorStaging.OtherSystems].from(Coding(st.status))))
               )
@@ -197,7 +214,7 @@ package object mappings
         th.basedOn.map(Reference(_)),
         th.recordedOn
           .orElse(th.period.flatMap(_.endOption))
-          .getOrElse(LocalDate.now),  // TODO: seriously reconsider this fallback option to 'today'
+          .getOrElse(dummyDate),
         Coding(th.status.getOrElse(Therapy.Status.Unknown)),
         th.notDoneReason.orElse(th.reasonStopped),
         None,
@@ -240,7 +257,7 @@ package object mappings
         // to a diagnosis by picking the most similar one
         diagnoses
           .minBy(
-            diag => levenshtein(diag.code.code.value,specimen.icd10.code.value)
+            diag => levenshtein(diag.icd10.code.value,specimen.icd10.code.value)
           )
           .id
           .asInstanceOf[Id[model.MTBDiagnosis]],
@@ -286,7 +303,16 @@ package object mappings
                 obs.note
               )
           )
-          .getOrElse(???),  // Which default value for ICD-O-3-M?
+          .getOrElse {
+            System.out.println(s"Patient ${report.patient}, HistologyReport ${report.id}: Undefined ICD-O-3-M code, falling back to default value")
+            model.TumorMorphology(
+              Id[TumorMorphology]("DUMMY"),
+              report.patient,
+              report.specimen,
+              Coding[ICDO3.M]("M"),
+              None
+            )
+          },
           report.tumorCellContent.map(_.mapTo[model.TumorCellContent])
         )
       )
@@ -351,9 +377,11 @@ package object mappings
             )
           )
           .map(_.toCoding)
-          .getOrElse(Coding[HGNC]("DUMMY")) // TODO: Handle case when unresolvable?
-//          .get
-//          .toCoding
+          .tap {
+            case None => System.out.println(s"Unresolvable ${coding}")
+            case Some(_) => ()
+          }
+          .get
 
 
     implicit def snvMapping(
@@ -361,7 +389,7 @@ package object mappings
     ): v1.SNV => model.SNV =
       snv =>
         model.SNV(
-          snv.id ,
+          snv.id,
           patient,
           Option(
             snv.cosmicId.map(id => ExternalId[model.SNV,dbSNP](id.value).asInstanceOf[ExternalId[model.SNV,model.Variant.Systems]]).toList ++
@@ -369,14 +397,27 @@ package object mappings
           )
           .filter(_.nonEmpty),
           snv.chromosome,
-          snv.gene.map(_.mapTo[Coding[HGNC]]).get, // TODO: What if undefined?
+          // Report when gene not defined
+          snv.gene.map(_.mapTo[Coding[HGNC]])
+            .tap {
+              case None => System.out.println(s"Patient ${patient.id}: Unresolvable gene on SNV ${snv.id}")
+              case Some(_) => ()
+            }
+            .get,
           None,
-          ExternalId[Transcript,Ensembl]("UNDEFINED").asInstanceOf[ExternalId[Transcript,Transcript.Systems]], // TODO: Transcript ID?
+          ExternalId[Transcript,Ensembl]("DUMMY").asInstanceOf[ExternalId[Transcript,Transcript.Systems]],
           None,
           snv.startEnd,
           snv.altAllele,
           snv.refAllele,
-          snv.dnaChange.get.code, // TODO: What if undefined?
+          //  Report when DNA change not defined
+          snv.dnaChange
+            .tap {
+              case None => System.out.println(s"Patient ${patient.id}: Undefined DNA change on SNV ${snv.id}")
+              case Some(_) => ()
+            }
+            .get
+            .code, 
           snv.aminoAcidChange.map(_.code),
           snv.readDepth,
           snv.allelicFrequency,
@@ -454,7 +495,6 @@ package object mappings
         )
 
 
-/*
     implicit def rnaSeqMapping(
       implicit patient: Reference[Patient]
     ): v1.RNASeq => model.RNASeq =
@@ -473,13 +513,13 @@ package object mappings
           Some(rnaSeq.gene.mapTo[Coding[HGNC]]),
           Some(ExternalId[Transcript,Ensembl](rnaSeq.transcriptId.value).asInstanceOf[ExternalId[Transcript,Transcript.Systems]]),
           rnaSeq.fragmentsPerKilobaseMillion,  // TODO: Correct mapping? fragmentsPerKilobaseMillion => transcriptsPerMillion
-          ???,  // TODO: SNV Reference?
+          None,  // SNV Reference not defined model v1.0 
           Some(rnaSeq.tissueCorrectedExpression),
           rnaSeq.rawCounts,
           Some(rnaSeq.librarySize),
           rnaSeq.cohortRanking
         )
-*/
+
 
     implicit def tmbMapping(
       implicit
@@ -507,17 +547,15 @@ package object mappings
           patient,
           specimen,
           value,
-          model.BRCAness.referenceRange  //TODO: reconsider how to handle
+          model.BRCAness.referenceRange 
         )
 
 
     report =>
 
-      implicit val patient: Reference[Patient] =
-        report.patient
+      implicit val patient: Reference[Patient] = report.patient
 
-      implicit val specimen: Reference[model.TumorSpecimen] =
-        report.specimen
+      implicit val specimen: Reference[model.TumorSpecimen] = report.specimen
 
       model.SomaticNGSReport(
         report.id,
@@ -525,18 +563,22 @@ package object mappings
         specimen,
         report.issueDate,
         report.sequencingType.mapTo[Coding[NGSReport.Type.Value]],
-        NonEmptyList.fromListUnsafe(report.metadata),  //TODO: Ensure unsafe operation OK
+        NonEmptyList.fromList(report.metadata)
+          .tap {
+            case None => System.out.println(s"Patient ${patient.id}, NGS-Report ${report.id}: Empty Metadata")
+            case Some(_) => ()
+          }
+          .get,
         model.SomaticNGSReport.Results(
           report.tumorCellContent.map(_.mapTo[model.TumorCellContent]),
           report.tmb.map(_.mapTo[model.TMB]),
           report.brcaness.map(_.mapTo[model.BRCAness]),
-          None,
+          None,  // Undefined in model v1.0
           report.simpleVariants.map(_.mapAllTo[model.SNV]),
           report.copyNumberVariants.map(_.mapAllTo[model.CNV]),
           report.dnaFusions.map(_.mapAllTo[model.DNAFusion]),
           report.rnaFusions.map(_.mapAllTo[model.RNAFusion]),
-          None
-//          report.rnaSeqs.map(_.mapAllTo[model.RNASeq])  // TODO: Ok to ignore RNASeq, given mapping problem above?
+          report.rnaSeqs.map(_.mapAllTo[model.RNASeq])
         )
       )
      
@@ -552,7 +594,13 @@ package object mappings
         Reference(rec.patient),
         Some(Reference(rec.diagnosis)),
         rec.issuedOn.getOrElse(date),
-        Coding(rec.priority.getOrElse(Recommendation.Priority.Four)),  //TODO: Default value OK?
+        Coding(
+          rec.priority
+            .getOrElse {
+              System.out.println(s"Patient ${rec.patient}, Recommendation ${rec.id}: Undefined priority, using default value ${Recommendation.Priority.Four}")
+              Recommendation.Priority.Four
+            }
+        ),
         rec.levelOfEvidence,
         None,
         rec.medication.getOrElse(Set.empty).mapAllTo[Coding[Medications]],
@@ -585,7 +633,7 @@ package object mappings
         rec.reason,
         rec.issuedOn.getOrElse(date),
         None,
-        Coding(Recommendation.Priority.Four),  //TODO: Default value OK?
+        Coding(Recommendation.Priority.Four),
         NonEmptyList.of(
           Reference(
             ExternalId[Study,Study.Registries.NCT](rec.nctNumber).asInstanceOf[ExternalId[Study,Study.Registries]]
@@ -600,12 +648,14 @@ package object mappings
     implicit 
     therapyRecommendations: List[v1.MTBMedicationRecommendation],
     geneticCounselingRecommendations: List[v1.GeneticCounselingRecommendation],
-    studyInclusionRequests: List[v1.StudyEnrollmentRecommendation]
+    studyInclusionRequests: List[v1.StudyEnrollmentRecommendation],
+    rebiopsyRequests: List[v1.RebiopsyRequest],
+    specimens: List[v1.TumorSpecimen],
+    diagnoses: List[v1.MTBDiagnosis]
   ): v1.MTBCarePlan => model.MTBCarePlan = {
     cp =>
 
-      implicit val issueDate =
-        cp.issuedOn.getOrElse(LocalDate.now)
+      implicit val issueDate = cp.issuedOn.getOrElse(dummyDate)
 
       model.MTBCarePlan(
         cp.id,
@@ -617,19 +667,38 @@ package object mappings
         cp.geneticCounsellingRequest
           .flatMap(_.resolveOn(geneticCounselingRecommendations))
           .map(_.mapTo[model.GeneticCounselingRecommendation]),
-        cp.recommendations
-          .map(
-            _.flatMap(_.resolveOn(therapyRecommendations))
-             .mapAllTo[model.MTBMedicationRecommendation]
-          ),
-        None, //TODO
-        cp.studyInclusionRequests
-          .map(
-            _.flatMap(_.resolveOn(studyInclusionRequests))
-             .mapAllTo[model.MTBStudyEnrollmentRecommendation]
-           ),
-        None, //TODO
-        None, //TODO
+        cp.recommendations.map(
+          _.flatMap(_.resolveOn(therapyRecommendations))
+           .mapAllTo[model.MTBMedicationRecommendation]
+        ),
+        None, // Procedure Recommendations not defined in model v1.0
+        cp.studyInclusionRequests.map(
+          _.flatMap(_.resolveOn(studyInclusionRequests))
+           .mapAllTo[model.MTBStudyEnrollmentRecommendation]
+        ),
+        None, // HistologyReevaluationRequest not defined in model v1.0
+        cp.rebiopsyRequests.map(
+          _.flatMap(_.resolveOn(rebiopsyRequests))
+           .map(
+             req => model.RebiopsyRequest(
+               req.id,
+               req.patient,
+               req.specimen.resolveOn(specimens)
+                 .map(specimen =>
+                   // Levenshtein between ICD-10 codes of tumor specimen and diagnoses used here
+                   // because the code on tumor specimen (determined histologically) may be different
+                   // from the one documented on diagnosis, so resolve the code as a "reference"
+                   // to a diagnosis by picking the most similar one
+                   diagnoses
+                     .minBy(diag => levenshtein(diag.icd10.code.value,specimen.icd10.code.value))
+                     .id
+                 )
+                 .getOrElse(cp.diagnosis)
+                 .asInstanceOf[Id[model.MTBDiagnosis]],
+               req.issuedOn.getOrElse(issueDate)
+             )
+           )
+        ),
         cp.description.map(List(_))
       )
   }
@@ -673,45 +742,54 @@ package object mappings
         response.patient,
         response.therapy,
         response.effectiveDate,
-        Coding(model.Response.Method.RECIST), //TODO: Default value OK?
+        Coding(model.Response.Method.RECIST), //TODO: ICD-10 code mapping: RANO or else RECIST 
         response.value,
       )
 
 
   implicit def mtbPatientRecordMapping(
-    implicit hgnc: CodeSystem[HGNC]
+    implicit
+    hgnc: CodeSystem[HGNC],
+    icdo3: CodeSystem[ICDO3.T]
   ): v1.MTBPatientRecord => model.MTBPatientRecord = {
     record =>
 
-    implicit val diagnoses =
-      record.getDiagnoses
+    implicit val diagnoses = record.getDiagnoses
 
-    implicit val therapyRecommendations =
-      record.getRecommendations
+    implicit val therapyRecommendations = record.getRecommendations
 
-    implicit val geneticCounselingRecommendations =
-      record.getGeneticCounsellingRequests
+    implicit val geneticCounselingRecommendations = record.getGeneticCounsellingRequests
 
-    implicit val studyInclusionRequests =
-      record.getStudyInclusionRequests
+    implicit val studyInclusionRequests = record.getStudyInclusionRequests
+
+    implicit val rebiopsyRequests = record.getRebiopsyRequests
+
+    implicit val specimens = record.getSpecimens
 
 
     model.MTBPatientRecord(
       record.patient.mapTo[Patient],
       NonEmptyList.one(record.episode.mapTo[model.MTBEpisodeOfCare]),
       NonEmptyList.fromListUnsafe(diagnoses.mapAllTo[model.MTBDiagnosis]),
-      None, // TODO: FamilyMemberHistory
-      Some(
-        (record.getPreviousGuidelineTherapies ++ record.getLastGuidelineTherapies)
-          .mapAllTo[model.MTBSystemicTherapy]
+      record.familyMemberDiagnoses.map(
+        _.map(
+          fmh => model.FamilyMemberHistory(
+            fmh.id,
+            fmh.patient,
+            fmh.relationship
+          )
+        )
       ),
-      None,   // No OncoProcedures in V1 model
+      Some(
+        (record.getPreviousGuidelineTherapies ++ record.getLastGuidelineTherapies).mapAllTo[model.MTBSystemicTherapy]
+      ),
+      None,   // No OncoProcedures in model v1.0
       record.ecogStatus.map(_.mapAllTo[model.PerformanceStatus]),
       record.specimens.map(_.mapAllTo[model.TumorSpecimen]),
-      None,  // No prior diagnostics in V1 model
+      None,  // No prior diagnostics in model v1.0
       record.histologyReports.map(_.mapAllTo[model.HistologyReport]),
-      None,   // No IHC-Reports in V1 model
-      None,
+      None,   // No IHC-Reports in model v1.0
+      None,   // No MSI findings in model v1.0
       record.ngsReports.map(_.mapAllTo[model.SomaticNGSReport]),
       record.carePlans.map(_.mapAllTo[model.MTBCarePlan]),
       None,

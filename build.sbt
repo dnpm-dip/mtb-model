@@ -72,7 +72,9 @@ lazy val dto_model_v1 = project
       dependencies.scalatest,
       "de.bwhc" %% "mtb-dtos" % "1.0",
       "de.bwhc" %% "mtb-dto-generators" % "1.0" % Test,
-      dependencies.hgnc_geneset
+      dependencies.hgnc_geneset,
+      dependencies.icdo3,
+      dependencies.icd_catalogs
     )
   )
   .dependsOn(
