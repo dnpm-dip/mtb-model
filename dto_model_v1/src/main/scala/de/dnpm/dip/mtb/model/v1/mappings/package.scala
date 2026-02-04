@@ -164,13 +164,13 @@ package object mappings
         diag.icd10,
         None,
         diag.icdO3T match {
-          case Some(code) => Coding[ICDO3.T](code.value)
+          case Some(coding) => Coding[ICDO3.T](coding.code.value)
           case None =>
             icdo3.conceptWithCode(diag.icd10.code.value) // Try resolving ICD-O-3-T with same code as ICD-10...
               .orElse(icdo3.conceptWithCode(diag.icd10.code.value.substring(0,3))) // ..else try resolving by category (e.g. for "C22.*" -> "C22")
               .map(_.toCoding)
               .getOrElse {
-                System.out.println(s"Patient ${diag.patient}, Diagnosis ${diag.icd10.code}: unresolvable ICD-O-3-T code, falling back to default value")
+                println(s"Patient ${diag.patient}, Diagnosis ${diag.icd10.code}: unresolvable ICD-O-3-T code, falling back to default value")
                 Coding[ICDO3.T]("T")
               }
         },
@@ -304,7 +304,7 @@ package object mappings
               )
           )
           .getOrElse {
-            System.out.println(s"Patient ${report.patient}, HistologyReport ${report.id}: Undefined ICD-O-3-M code, falling back to default value")
+            println(s"Patient ${report.patient}, HistologyReport ${report.id}: Undefined ICD-O-3-M code, falling back to default value")
             model.TumorMorphology(
               Id[TumorMorphology]("DUMMY"),
               report.patient,
@@ -378,7 +378,7 @@ package object mappings
           )
           .map(_.toCoding)
           .tap {
-            case None => System.out.println(s"Unresolvable ${coding}")
+            case None => println(s"Unresolvable ${coding}")
             case Some(_) => ()
           }
           .get
@@ -400,7 +400,7 @@ package object mappings
           // Report when gene not defined
           snv.gene.map(_.mapTo[Coding[HGNC]])
             .tap {
-              case None => System.out.println(s"Patient ${patient.id}: Unresolvable gene on SNV ${snv.id}")
+              case None => println(s"Patient ${patient.id}: Unresolvable gene on SNV ${snv.id}")
               case Some(_) => ()
             }
             .get,
@@ -413,7 +413,7 @@ package object mappings
           //  Report when DNA change not defined
           snv.dnaChange
             .tap {
-              case None => System.out.println(s"Patient ${patient.id}: Undefined DNA change on SNV ${snv.id}")
+              case None => println(s"Patient ${patient.id}: Undefined DNA change on SNV ${snv.id}")
               case Some(_) => ()
             }
             .get
@@ -565,7 +565,7 @@ package object mappings
         report.sequencingType.mapTo[Coding[NGSReport.Type.Value]],
         NonEmptyList.fromList(report.metadata)
           .tap {
-            case None => System.out.println(s"Patient ${patient.id}, NGS-Report ${report.id}: Empty Metadata")
+            case None => println(s"Patient ${patient.id}, NGS-Report ${report.id}: Empty Metadata")
             case Some(_) => ()
           }
           .get,
@@ -597,7 +597,7 @@ package object mappings
         Coding(
           rec.priority
             .getOrElse {
-              System.out.println(s"Patient ${rec.patient}, Recommendation ${rec.id}: Undefined priority, using default value ${Recommendation.Priority.Four}")
+              println(s"Patient ${rec.patient}, Recommendation ${rec.id}: Undefined priority, using default value ${Recommendation.Priority.Four}")
               Recommendation.Priority.Four
             }
         ),

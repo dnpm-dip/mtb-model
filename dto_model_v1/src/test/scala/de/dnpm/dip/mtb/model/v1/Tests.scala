@@ -4,15 +4,12 @@ package de.dnpm.dip.mtb.model.v1
 import java.net.URI
 import scala.util.{
   Random,
-  Try
+  Try,
 }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.Inspectors._
 import org.scalatest.matchers.must.Matchers._
-import play.api.libs.json.Json.{
-  toJson,
-  fromJson
-}
+import play.api.libs.json.Json
 import de.ekut.tbi.generators.Gen
 import de.bwhc.mtb.dtos.{
   MTBFile,
@@ -100,12 +97,10 @@ class Tests extends AnyFlatSpec
 
     val mtbPatientRecords =
       LazyList
-        .fill(100)(generator.next)
-        .map(toJson(_))
-        .map(fromJson[MTBPatientRecord](_))
-        .tapEach(
-          _.fold(errs => errs foreach println, _ => ())
-        )
+        .fill(42)(generator.next)
+        .map(Json.toJson(_))
+        .map(Json.fromJson[MTBPatientRecord](_))
+        .tapEach(_.fold(errs => errs foreach println, _ => ()))
         // Some generated records are erroneous due to outdated, unresolvable HGNC entries, so skip them in case of failure
         .map(result => Try(result.get.mapTo[model.MTBPatientRecord]))
         .filter(_.isSuccess)

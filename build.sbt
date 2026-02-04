@@ -25,13 +25,14 @@ lazy val global = project
   .aggregate(
      dto_model,
      generators,
+     dto_model_v1
   )
 
 
 lazy val dto_model = project
   .settings(
     name := "mtb-dto-model",
-    version := envOrElse("DTO_MODEL_VERSION","1.1.2"),
+    version := envOrElse("DTO_MODEL_VERSION","1.1.3-SNAPSHOT"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -43,7 +44,7 @@ lazy val dto_model = project
 lazy val generators = project
   .settings(
     name := "mtb-dto-generators",
-    version := envOrElse("GENERATORS_VERSION","1.1.2"),
+    version := envOrElse("GENERATORS_VERSION","1.1.3-SNAPSHOT"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.generators,
@@ -65,8 +66,8 @@ lazy val generators = project
 lazy val dto_model_v1 = project
   .settings(
     name := "mtb-dto-model-v1",
-    version := envOrElse("DTO_MODEL_VERSION","1.1.2"),
-    publish / skip := true,
+    version := envOrElse("DTO_MODEL_VERSION","1.1.3-SNAPSHOT"),
+//    publish / skip := true,
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
