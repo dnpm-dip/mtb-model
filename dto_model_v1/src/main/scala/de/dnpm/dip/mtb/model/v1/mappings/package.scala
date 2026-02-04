@@ -15,6 +15,7 @@ import de.dnpm.dip.coding.{
 import de.dnpm.dip.coding.atc.ATC
 import de.dnpm.dip.coding.UnregisteredMedication
 import de.dnpm.dip.coding.hgnc.HGNC
+import de.dnpm.dip.coding.icd.ICD10GM
 import de.dnpm.dip.coding.icd.ICDO3
 import de.dnpm.dip.model.{
   Id,
@@ -735,6 +736,33 @@ package object mappings
     )
 
 
+  def responseMethod(coding: Coding[ICD10GM]): model.Response.Method.Value =
+    coding.code.value.substring(0,3) match { 
+      case "C70" | "C71" | "C72" => model.Response.Method.RANO
+      case _                     => model.Response.Method.RECIST
+    }
+
+  implicit def responseMapping(
+    implicit
+    therapies: Seq[MTBMedicationTherapy],
+    diagnoses: Seq[MTBDiagnosis]
+  ): v1.Response => model.Response =
+    response =>
+      model.Response(
+        response.id,
+        response.patient,
+        response.therapy,
+        response.effectiveDate,
+        Coding(
+          response.therapy.resolveOn(therapies)
+            .flatMap(_.diagnosis.flatMap(_.resolveOn(diagnoses)))
+            .map(diag => responseMethod(diag.icd10))
+            .getOrElse(model.Response.Method.RECIST)
+        ),
+        response.value,
+      )
+
+/*
   implicit val responseMapping: v1.Response => model.Response =
     response =>
       model.Response(
@@ -745,7 +773,7 @@ package object mappings
         Coding(model.Response.Method.RECIST), //TODO: ICD-10 code mapping: RANO or else RECIST 
         response.value,
       )
-
+*/
 
   implicit def mtbPatientRecordMapping(
     implicit
@@ -765,6 +793,8 @@ package object mappings
     implicit val rebiopsyRequests = record.getRebiopsyRequests
 
     implicit val specimens = record.getSpecimens
+
+    implicit val therapies = record.getMolecularTherapies.map(_.history.head)
 
 
     model.MTBPatientRecord(
