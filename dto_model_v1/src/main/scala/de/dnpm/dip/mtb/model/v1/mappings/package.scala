@@ -28,7 +28,6 @@ import de.dnpm.dip.model.{
   Patient,
   Recommendation,
   Reference,
-  Site,
   Study,
   Therapy,
 }
@@ -120,7 +119,8 @@ package object mappings
         Coding(patient.gender),
         patient.birthDate, 
         patient.dateOfDeath,
-        Some(Site.local),
+        None,
+//        Some(Site.local),
         Patient.Insurance(
           Coding(HealthInsurance.Type.UNK),
           patient.insurance.map(Reference(_)),
