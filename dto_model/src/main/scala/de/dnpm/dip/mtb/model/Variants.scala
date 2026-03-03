@@ -19,6 +19,7 @@ import de.dnpm.dip.model.{
 }
 import de.dnpm.dip.util.{
   Displays,
+  DisplayLabel,
 }
 import de.dnpm.dip.coding.{
   Code,
@@ -76,7 +77,7 @@ object Variant
         s"SNV ${snv.gene.display} ${snv.proteinChange.map(_.value).getOrElse("")}"
 
       case cnv: CNV =>
-        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${cnv.`type`.display.getOrElse("")}"
+        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${DisplayLabel.of(cnv.`type`)}"
 
       case DNAFusion(_,_,_,_,partner5pr,partner3pr,_) =>
         s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
@@ -94,17 +95,21 @@ object Variant
     implicit res: Reference.Resolver[Variant]
   ): Displays[GeneAlterationReference[Variant]] =
     Displays[GeneAlterationReference[Variant]]{
-      case GeneAlterationReference(variant,gene,_) =>
-        s"${gene.flatMap(_.display).orElse(gene.map(_.code.value)).getOrElse("[Gene N/A]")} ${
-          variant.resolve.map { 
-            case snv: SNV => snv.proteinChange.map(_.value).getOrElse("SNV")
-            case cnv: CNV => cnv.`type`.display.getOrElse("CNV")
-            case _: DNAFusion => "Fusion"
-            case _: RNAFusion => "Fusion"
-            case _: RNASeq    => "RNASeq"
+      case GeneAlterationReference(variantRef,gene,_) =>
+        variantRef.resolve.map(
+          variant => variant match {
+
+            // CNV {specified gene symbol | N/A} {Amplification | Deletion}
+            case cnv: CNV => s"${gene.flatMap(_.display).getOrElse("[Gene N/A]")} ${DisplayLabel.of(cnv.`type`)}"
+
+            // SNV {gene symbol} {protein change}
+            // DNA-Fusion {5' Gene symbol} {3' gene symbol}
+            // RNA-Fusion {5' Gene symbol} {3' gene symbol}
+            // RNA-Seq {gene symbol}
+            case _ => DisplayLabel.of(variant).value
           }
-          .getOrElse("")
-        }"
+        )
+        .getOrElse("[Referenced variant not resolvable]") // Shouldn't occur, as referential integrity is checked on import, but kept for safety
     }
 
 
@@ -161,15 +166,6 @@ object Variant
   }
 
 }
-
-/*
-object Chromosome extends Enumeration with Chromosome
-{
-  implicit val format: Format[Value] =
-    Json.formatEnum(this)
-}
-*/
-
 
 sealed trait Exon
 

@@ -222,7 +222,7 @@ trait Generators
       id,
       gender,
       YearMonth.from(birthDate),
-      dateOfDeath.map(YearMonth.from),
+      dateOfDeath,
       None,
       healthInsurance,
       Some(Address(Address.MunicipalityCode("12345")))
@@ -235,17 +235,14 @@ trait Generators
     for {
       id <- Gen.of[Id[MTBDiagnosis]]
 
-      yearMonth <-
-        patient.dateOfDeath match {
-          case Some(dod) =>
-            for { os <- Gen.longsBetween(24,48) } yield dod minusMonths os
+      date <- patient.dateOfDeath match {
+        case Some(dod) =>
+          for { os <- Gen.longsBetween(24,48) } yield dod minusMonths os
 
-          case _ => 
-            val age = patient.ageIn(MONTHS).value.toLong
-            for { onsetAge <- Gen.longsBetween(age - 48L, age - 24L) } yield patient.birthDate plusMonths onsetAge
-        }
-
-      date = yearMonth atDay 1
+        case _ => 
+          val age = patient.ageIn(MONTHS).value.toLong
+          for { onsetAge <- Gen.longsBetween(age - 48L, age - 24L) } yield patient.birthDate.atDay(1) plusMonths onsetAge
+      }
 
       icd10 <- Gen.of[Coding[ICD10GM]]
 
@@ -1261,7 +1258,7 @@ trait Generators
         status match {
           case Therapy.Status(NotDone) => Gen.const(None)
           case _ =>
-            val refDate = patient.dateOfDeath.map(_ atDay 1).getOrElse(LocalDate.now)
+            val refDate = patient.dateOfDeath.getOrElse(LocalDate.now)
             for {
               duration <- Gen.longsBetween(8,36)
               start    =  refDate.minusWeeks(duration)
