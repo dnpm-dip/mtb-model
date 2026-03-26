@@ -282,7 +282,7 @@ trait Generators
         tnm <- for {
           t <- Gen.oneOf("TX","T0","T1","T2","T3","T4","Tis").map(Coding[UICC](_))
           n <- Gen.oneOf("NX","N0","N1","N2","N3").map(Coding[UICC](_))
-          m <- Gen.oneOf("MX","M0","M1").map(Coding[UICC](_))
+          m <- Gen.oneOf("M0","M1").map(Coding[UICC](_))
         } yield TumorStaging.TNM(t,n,m)
 
         spread <- Gen.of[Coding[TumorStaging.KDSSpread.Value]]
