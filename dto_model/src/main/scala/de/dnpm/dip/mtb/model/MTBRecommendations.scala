@@ -25,13 +25,33 @@ import play.api.libs.json.{
   Json,
   OFormat
 }
+import shapeless.{
+  Coproduct,
+  CNil,
+  :+:
+}
+import shapeless.ops.coproduct.Inject
 
+
+object MTBRecommendation
+{
+
+  type SupportingFinding = BRCAness :+: HRDScore :+: MSI :+: TMB :+: CNil
+
+  object SupportingFinding
+  {
+    def apply[T](t: T)(implicit inject: Inject[SupportingFinding,T]): SupportingFinding =
+      Coproduct[SupportingFinding](t)
+  }
+
+}
 
 trait MTBRecommendation
 {
   this: Recommendation =>
 
   val levelOfEvidence: Option[LevelOfEvidence]
+  val supportingFindings: Option[List[Reference[MTBRecommendation.SupportingFinding]]]
 }
 
 
@@ -46,7 +66,8 @@ final case class MTBMedicationRecommendation
   category: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
   medication: Set[Coding[Medications]],
   useType: Option[Coding[MTBMedicationRecommendation.UseType.Value]],
-  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
+  supportingFindings: Option[List[Reference[MTBRecommendation.SupportingFinding]]]
 )
 extends MTBRecommendation
 with MedicationRecommendation[Medications]
@@ -111,7 +132,8 @@ final case class MTBProcedureRecommendation
   priority: Coding[Recommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
   code: Coding[MTBProcedureRecommendation.Category.Value],
-  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
+  supportingFindings: Option[List[Reference[MTBRecommendation.SupportingFinding]]]
 )
 extends MTBRecommendation
 with TherapyRecommendation
@@ -190,7 +212,8 @@ final case class MTBStudyEnrollmentRecommendation
   priority: Coding[Recommendation.Priority.Value],
   study: NonEmptyList[ExternalReference[Study,Study.Registries]],
   medication: Option[Set[Coding[Medications]]],
-  supportingVariants: Option[List[GeneAlterationReference[Variant]]]
+  supportingVariants: Option[List[GeneAlterationReference[Variant]]],
+  supportingFindings: Option[List[Reference[MTBRecommendation.SupportingFinding]]]
 )
 extends StudyEnrollmentRecommendation
 with MTBRecommendation
