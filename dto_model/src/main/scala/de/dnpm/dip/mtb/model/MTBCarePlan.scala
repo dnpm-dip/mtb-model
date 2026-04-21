@@ -25,6 +25,7 @@ final case class MTBCarePlan
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
+  boardType: Option[Coding[CarePlan.BoardType.Value]], 
   noSequencingPerformedReason: Option[Coding[CarePlan.NoSequencingPerformedReason.Value]],
   recommendationsMissingReason: Option[Coding[MTBCarePlan.RecommendationsMissingReason.Value]],
   geneticCounselingRecommendation: Option[GeneticCounselingRecommendation],

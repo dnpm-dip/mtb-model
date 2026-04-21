@@ -36,6 +36,7 @@ import de.dnpm.dip.util.DisplayLabel
 import de.dnpm.dip.model.{
   Address,
   BaseVariant,
+  CarePlan,
   Chromosome,
   ClosedInterval,
   ExternalId,
@@ -59,6 +60,7 @@ import de.dnpm.dip.model.{
   Therapy
 }
 import de.dnpm.dip.mtb.model._
+import MTBRecommendation.SupportingFinding
 import MTBTherapy.StatusReason.{
   PaymentRefused,
   Progression
@@ -631,6 +633,8 @@ trait Generators
       "p.Gly2_Met46del",
     )
 
+  implicit val genChromosome: Gen[Chromosome.Value] =
+    Gen.oneOf((Chromosome.values - Chromosome.chrMT).toSeq)
 
   protected def genVariantId[
     T <: Variant,
@@ -940,10 +944,12 @@ trait Generators
 
   }
 
+
   def genSystemicTherapyRecommendation(
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
-    variants: Seq[Variant]
+    variants: Seq[Variant],
+    supportingFindingRefs: Seq[Reference[SupportingFinding]]
   ): Gen[MTBMedicationRecommendation] =
     for {
       id <- Gen.of[Id[MTBMedicationRecommendation]]
@@ -986,6 +992,8 @@ trait Generators
           )
       }
 
+      supportingFinding <- Gen.oneOf(supportingFindingRefs)
+
     } yield MTBMedicationRecommendation(
       id,
       patient,
@@ -996,7 +1004,8 @@ trait Generators
       Some(Set(category)),
       Set(medication),
       Some(useType),
-      Some(List(supportingVariant))
+      Some(List(supportingVariant)),
+      Some(List(supportingFinding))
     )
 
   def genOtherTherapyRecommendation(
@@ -1049,7 +1058,8 @@ trait Generators
       priority,
       Some(evidenceLevel),
       category,
-      Some(List(supportingVariant))
+      Some(List(supportingVariant)),
+      None
     )
 
 
@@ -1089,12 +1099,19 @@ trait Generators
     patient: Reference[Patient],
     diagnosis: MTBDiagnosis,
     specimen: TumorSpecimen,
-    variants: Seq[Variant]
+    msiFindings: List[MSI],
+    ngsReport: SomaticNGSReport
   ): Gen[MTBCarePlan] = 
     for { 
       id <- Gen.of[Id[MTBCarePlan]]
 
       protocol = "Protocol of the MTB conference..."
+
+      variants = ngsReport.variants
+      
+      supportingFindings =
+        msiFindings.map(Reference[SupportingFinding](_)) ++
+        ngsReport.results.tmb.map(Reference[SupportingFinding](_))
 
       medicationRecommendations <- 
         Gen.list(
@@ -1102,7 +1119,8 @@ trait Generators
           genSystemicTherapyRecommendation(
             patient,
             diagnosis,
-            variants
+            variants,
+            supportingFindings
           )
         )
 
@@ -1139,6 +1157,7 @@ trait Generators
           NonEmptyList.of(studyRef),
           None,
           medicationRecommendations.head.supportingVariants,
+          None
         )
 
       rebiopyRequest <-
@@ -1166,6 +1185,7 @@ trait Generators
       patient,
       Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
       LocalDate.now,
+      Some(Coding(CarePlan.BoardType.TherapyBoard)),
       None,
       None,
       Some(counselingRecommendation),
@@ -1420,6 +1440,7 @@ trait Generators
           patRef,
           Some(Reference to diagnosis),
           ngsReport.issuedOn minusWeeks 2,
+          Some(Coding(CarePlan.BoardType.IndicationBoard)),
           None, None, None, None, None, None, None, None, None
         )
 
@@ -1428,7 +1449,8 @@ trait Generators
           patRef,
           diagnosis,
           specimen,
-          ngsReport.variants
+          List(msi),
+          ngsReport
         )
 
       recommendations =
