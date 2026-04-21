@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.1.2...mtb-dto-generators-v1.2.0) (2026-04-21)
+
+
+### Features
+
+* Added MTBCarePlan.boardType ([9d14715](https://github.com/dnpm-dip/mtb-model/commit/9d1471509e11b210484f8f9f012ffcff1702a98b))
+* Added MTBRecommendations.supportingFindings ([9d14715](https://github.com/dnpm-dip/mtb-model/commit/9d1471509e11b210484f8f9f012ffcff1702a98b))
+* supporting findings on recommendation ([#17](https://github.com/dnpm-dip/mtb-model/issues/17)) ([9d14715](https://github.com/dnpm-dip/mtb-model/commit/9d1471509e11b210484f8f9f012ffcff1702a98b))
+
+
+### Bug Fixes
+
+* Adapted Generators to DTO changes and also to exclude chrMT from used chromosome value set ([9d14715](https://github.com/dnpm-dip/mtb-model/commit/9d1471509e11b210484f8f9f012ffcff1702a98b))
+* bump core 1.2.2, with adaptations to generators ([b726c7d](https://github.com/dnpm-dip/mtb-model/commit/b726c7d4744232343acbbd4c9a2c7ffb7f1795a2))
+* bump core to 1.3.0 ([9d14715](https://github.com/dnpm-dip/mtb-model/commit/9d1471509e11b210484f8f9f012ffcff1702a98b))
+* Removed outdated TNM value 'MX' from valueset in Generators ([b7a6adc](https://github.com/dnpm-dip/mtb-model/commit/b7a6adce903240e0969a71360886a82376b215ab))
+
 ## [1.1.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.1.1...mtb-dto-generators-v1.1.2) (2025-11-19)
 
 
