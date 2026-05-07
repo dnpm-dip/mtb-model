@@ -206,7 +206,7 @@ final case class MTBStudyEnrollmentRecommendation
 (
   id: Id[MTBStudyEnrollmentRecommendation],
   patient: Reference[Patient],
-  reason: Reference[MTBDiagnosis],
+  reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
   priority: Coding[Recommendation.Priority.Value],
