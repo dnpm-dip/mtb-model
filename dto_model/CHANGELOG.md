@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.2.0...mtb-dto-model-v1.2.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* Made MTBStudyEnrollmentRecommendation.reason optional, to be consistent with other MTBRecommendations ([#18](https://github.com/dnpm-dip/mtb-model/issues/18)) ([79b2f68](https://github.com/dnpm-dip/mtb-model/commit/79b2f689cdb262b07cf5b13739151b1fefac7e4a))
+
 ## [1.2.0](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.1.2...mtb-dto-model-v1.2.0) (2026-04-21)
 
 
