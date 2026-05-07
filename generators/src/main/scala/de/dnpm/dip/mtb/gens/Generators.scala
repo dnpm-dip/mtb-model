@@ -1150,7 +1150,7 @@ trait Generators
         } yield MTBStudyEnrollmentRecommendation(
           recId,
           patient,
-          medicationRecommendations.head.reason.get,
+          medicationRecommendations.head.reason,
           LocalDate.now,
           medicationRecommendations.head.levelOfEvidence,
           priority,
