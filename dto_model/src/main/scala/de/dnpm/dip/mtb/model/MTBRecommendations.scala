@@ -2,11 +2,14 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.Applicative
 import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
-  DefaultCodeSystem
+  DefaultCodeSystem,
+  CodeSystemProvider,
+  CodeSystemProviderSPI
 }
 import de.dnpm.dip.model.{
   Id,
@@ -36,6 +39,31 @@ import shapeless.ops.coproduct.Inject
 object MTBRecommendation
 {
 
+  object Priority
+  extends CodedEnum("dnpm-dip/mtb/recommendation/priority")
+  with DefaultCodeSystem
+  {
+    val One    = Value("1")
+    val Two    = Value("2")
+    val Three  = Value("3")
+    val Four   = Value("4")
+    val Five   = Value("5")
+    val Six    = Value("6")
+    val Seven  = Value("7")
+    val Eight  = Value("8")
+    val Nine   = Value("9")
+    val Ten    = Value("10")
+    val Eleven = Value("11")
+    val Twelve = Value("12")
+
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+  }
+
+
   type SupportingFinding = BRCAness :+: HRDScore :+: MSI :+: TMB :+: CNil
 
   object SupportingFinding
@@ -61,7 +89,7 @@ final case class MTBMedicationRecommendation
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  priority: Coding[Recommendation.Priority.Value],
+  priority: Coding[MTBRecommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
   category: Option[Set[Coding[MTBMedicationRecommendation.Category.Value]]],
   medication: Set[Coding[Medications]],
@@ -129,7 +157,7 @@ final case class MTBProcedureRecommendation
   patient: Reference[Patient],
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
-  priority: Coding[Recommendation.Priority.Value],
+  priority: Coding[MTBRecommendation.Priority.Value],
   levelOfEvidence: Option[LevelOfEvidence],
   code: Coding[MTBProcedureRecommendation.Category.Value],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]],
@@ -209,7 +237,7 @@ final case class MTBStudyEnrollmentRecommendation
   reason: Option[Reference[MTBDiagnosis]],
   issuedOn: LocalDate,
   levelOfEvidence: Option[LevelOfEvidence],
-  priority: Coding[Recommendation.Priority.Value],
+  priority: Coding[MTBRecommendation.Priority.Value],
   study: NonEmptyList[ExternalReference[Study,Study.Registries]],
   medication: Option[Set[Coding[Medications]]],
   supportingVariants: Option[List[GeneAlterationReference[Variant]]],
