@@ -55,7 +55,6 @@ import de.dnpm.dip.model.{
   Publication,
   PubMed,
   Reference,
-  Recommendation,
   Study,
   Therapy
 }
@@ -954,7 +953,7 @@ trait Generators
     for {
       id <- Gen.of[Id[MTBMedicationRecommendation]]
 
-      priority <- Gen.of[Coding[Recommendation.Priority.Value]]
+      priority <- Gen.of[Coding[MTBRecommendation.Priority.Value]]
 
       evidenceLevel <-
         for { 
@@ -1016,7 +1015,7 @@ trait Generators
     for {
       id <- Gen.of[Id[MTBProcedureRecommendation]]
 
-      priority <- Gen.of[Coding[Recommendation.Priority.Value]]
+      priority <- Gen.of[Coding[MTBRecommendation.Priority.Value]]
 
       evidenceLevel <-
         for { 
@@ -1145,7 +1144,7 @@ trait Generators
       studyEnrollmentRecommendation <-
         for { 
           recId  <- Gen.of[Id[MTBStudyEnrollmentRecommendation]]
-          priority <- Gen.of[Coding[Recommendation.Priority.Value]]
+          priority <- Gen.of[Coding[MTBRecommendation.Priority.Value]]
           studyRef <- Gen.of[ExternalReference[Study,Study.Registries]]
         } yield MTBStudyEnrollmentRecommendation(
           recId,

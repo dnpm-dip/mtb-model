@@ -87,7 +87,7 @@ lazy val dependencies =
   new {
     val scalatest             = "org.scalatest" %% "scalatest"             % "3.2.19" % Test
     val generators            = "de.ekut.tbi"   %% "generators"            % "1.0.0"
-    val core                  = "de.dnpm.dip"   %% "core"                  % "1.3.0"
+    val core                  = "de.dnpm.dip"   %% "core"                  % "1.3.2"
     val icd10gm               = "de.dnpm.dip"   %% "icd10gm-impl"          % "1.1.2" % Test
     val icdo3                 = "de.dnpm.dip"   %% "icdo3-impl"            % "1.1.2" % Test
     val icd_catalogs          = "de.dnpm.dip"   %% "icd-claml-packaged"    % "1.1.2" % Test
