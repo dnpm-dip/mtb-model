@@ -59,7 +59,7 @@ final case class Response
   patient: Reference[Patient],
   therapy: Reference[MTBSystemicTherapy],
   effectiveDate: LocalDate,
-  method: Coding[Response.Method.Value],
+  method: Option[Coding[Response.Method.Value]],
   value: Coding[RECIST.Value]
 )
 extends Observation[Coding[RECIST.Value]]

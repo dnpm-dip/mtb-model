@@ -1347,7 +1347,7 @@ trait Generators
       patient,
       Reference.to(therapy),
       date,
-      method,
+      Some(method),
       value
     )
 
