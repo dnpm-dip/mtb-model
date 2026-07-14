@@ -77,7 +77,7 @@ object Variant
         s"SNV ${snv.gene.display.getOrElse("[Gene N/A]")} ${snv.proteinChange.map(_.value).getOrElse("[Protein change N/A]")}"
 
       case cnv: CNV =>
-        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${DisplayLabel.of(cnv.`type`).value}"
+        s"CNV ${cnv.reportedAffectedGenes.map(_.flatMap(_.display).mkString(",")).getOrElse("[Genes N/A]")} ${DisplayLabel.of(cnv.`type`).value}"
 
       case DNAFusion(_,_,_,_,partner5pr,partner3pr,_) =>
         s"DNA-Fusion ${partner5pr.gene.display.getOrElse("[5' N/A]")}-${partner3pr.gene.display.getOrElse("[3' N/A]")}"
