@@ -39,7 +39,7 @@ with Schemas
   implicit val rnd: Random = new Random
 
  
-  "MTBPatientRecord" must "have have been successfully generated" in { 
+  "MTBPatientRecord" must "have been successfully generated" in { 
 
     val record = Gen.of[MTBPatientRecord].next
 
@@ -89,7 +89,7 @@ with Schemas
         .flatMap(_.medicationRecommendations.getOrElse(List.empty))
         .flatMap(_.supportingVariants.getOrElse(Nil))
     ){
-      ref => ref.display.value must not include None.toString
+      ref => ref.display.value must not (include("None") or include("Some("))
     }
 
   }
