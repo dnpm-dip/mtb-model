@@ -378,11 +378,13 @@ trait Completers extends BaseCompleters
 
       record => 
 
-        implicit val variants =
-          record.getNgsReports.flatMap(_.variants)
+        // Complete NGSReports ahead...
+        val completedNgsReports = record.ngsReports.complete
+
+        //... in order to use the completed variants in subsequent resolutions, e.g. on recommendations
+        implicit val completedVariants = completedNgsReports.getOrElse(Nil).flatMap(_.variants)
   
-        implicit val completedDiagnoses =
-          record.diagnoses.complete
+        implicit val completedDiagnoses = record.diagnoses.complete
 
         record.copy(
           patient = record.patient.complete,
@@ -394,7 +396,7 @@ trait Completers extends BaseCompleters
           priorDiagnosticReports = record.priorDiagnosticReports.complete,
           histologyReports = record.histologyReports.complete,
           ihcReports = record.ihcReports.complete,
-          ngsReports = record.ngsReports.complete,
+          ngsReports = completedNgsReports,
           carePlans = record.carePlans.complete,
           followUps = record.followUps.complete,
           claims = record.claims.complete,
