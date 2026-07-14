@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.1...mtb-dto-generators-v1.2.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* Expanded MTBRecommendation.Priority valueset to (1,2,..., 12) ([#21](https://github.com/dnpm-dip/mtb-model/issues/21)) ([cf21c29](https://github.com/dnpm-dip/mtb-model/commit/cf21c29ecd3e8c34b21b3b78859c89bb832c0be0))
+* Fixed Display[Variant], added test for it ([#25](https://github.com/dnpm-dip/mtb-model/issues/25)) ([a67cae8](https://github.com/dnpm-dip/mtb-model/commit/a67cae83af1b2a0f430690b3d515245eba1da586))
+* Made Response.method optional ([#24](https://github.com/dnpm-dip/mtb-model/issues/24)) ([babce4a](https://github.com/dnpm-dip/mtb-model/commit/babce4a7d62490eb670f1913c1d0e9d2ba27d4d6))
+
 ## [1.2.1](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.0...mtb-dto-generators-v1.2.1) (2026-05-07)
 
 
