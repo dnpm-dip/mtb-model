@@ -74,19 +74,19 @@ object Variant
     Displays[Variant] {
 
       case snv: SNV =>
-        s"SNV ${snv.gene.display} ${snv.proteinChange.map(_.value).getOrElse("")}"
+        s"SNV ${snv.gene.display.getOrElse("[Gene N/A]")} ${snv.proteinChange.map(_.value).getOrElse("[Protein change N/A]")}"
 
       case cnv: CNV =>
-        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${DisplayLabel.of(cnv.`type`)}"
+        s"CNV ${cnv.reportedAffectedGenes.getOrElse(Set.empty).flatMap(_.display).mkString(",")} ${DisplayLabel.of(cnv.`type`).value}"
 
       case DNAFusion(_,_,_,_,partner5pr,partner3pr,_) =>
-        s"DNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
+        s"DNA-Fusion ${partner5pr.gene.display.getOrElse("[5' N/A]")}-${partner3pr.gene.display.getOrElse("[3' N/A]")}"
       
       case RNAFusion(_,_,_,_,partner5pr,partner3pr,_,_) =>
-        s"RNA-Fusion ${partner5pr.gene.display.getOrElse("N/A")}-${partner3pr.gene.display.getOrElse("N/A")}"
+        s"RNA-Fusion ${partner5pr.gene.display.getOrElse("[5' N/A]")}-${partner3pr.gene.display.getOrElse("[3' N/A]")}"
       
       case rnaSeq: RNASeq =>
-        s"RNA-Seq ${rnaSeq.gene.flatMap(_.display).getOrElse("N/A")}"
+        s"RNA-Seq ${rnaSeq.gene.flatMap(_.display).getOrElse("[Gene N/A]")}"
 
     }
 
@@ -96,19 +96,18 @@ object Variant
   ): Displays[GeneAlterationReference[Variant]] =
     Displays[GeneAlterationReference[Variant]]{
       case GeneAlterationReference(variantRef,gene,_) =>
-        variantRef.resolve.map(
-          variant => variant match {
+        variantRef.resolve.map {
 
-            // CNV {specified gene symbol | N/A} {Amplification | Deletion}
-            case cnv: CNV => s"${gene.flatMap(_.display).getOrElse("[Gene N/A]")} ${DisplayLabel.of(cnv.`type`)}"
+          // CNV {specified gene symbol | N/A} {Amplification | Deletion}
+          case cnv: CNV => s"CNV ${gene.flatMap(_.display).getOrElse("[Gene N/A]")} ${DisplayLabel.of(cnv.`type`).value}"
 
-            // SNV {gene symbol} {protein change}
-            // DNA-Fusion {5' Gene symbol} {3' gene symbol}
-            // RNA-Fusion {5' Gene symbol} {3' gene symbol}
-            // RNA-Seq {gene symbol}
-            case _ => DisplayLabel.of(variant).value
-          }
-        )
+          // SNV {gene symbol} {protein change}
+          // DNA-Fusion {5' Gene symbol} {3' gene symbol}
+          // RNA-Fusion {5' Gene symbol} {3' gene symbol}
+          // RNA-Seq {gene symbol}
+          case other => DisplayLabel.of(other).value
+          
+        }
         .getOrElse("[Referenced variant not resolvable]") // Shouldn't occur, as referential integrity is checked on import, but kept for safety
     }
 

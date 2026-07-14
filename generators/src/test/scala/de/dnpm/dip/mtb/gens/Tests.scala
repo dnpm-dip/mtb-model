@@ -5,8 +5,12 @@ import scala.util.Random
 import scala.util.chaining._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers._
+import org.scalatest.OptionValues._
+import org.scalatest.Inspectors._
 import de.ekut.tbi.generators.Gen
+import de.dnpm.dip.util.Completer.syntax._
 import de.dnpm.dip.mtb.model.MTBPatientRecord
+import de.dnpm.dip.mtb.model.Completers._
 import de.dnpm.dip.mtb.model.json.Schemas
 import play.api.libs.json.Json.{
   toJson,
@@ -29,14 +33,15 @@ with Generators
 with Schemas
 {
 
-  implicit val rnd: Random =
-    new Random
+  // Required for use of Completers further down
+  System.setProperty("dnpm.dip.site","UKx:Musterhausen")
+
+  implicit val rnd: Random = new Random
 
  
-  "MTBPatientRecord" must "have have been successfully generated" in { 
+  "MTBPatientRecord" must "have been successfully generated" in { 
 
-    val record =
-      Gen.of[MTBPatientRecord].next
+    val record = Gen.of[MTBPatientRecord].next
 
     record.getNgsReports.flatMap(_.variants) must not be empty
 
@@ -71,6 +76,21 @@ with Schemas
         .tap(_.foreach(msg => println(msg.getMessage)))
 
     errors must be (empty)
+
+  }
+
+
+  it must "have been correctly completed" in {
+
+    val record = Gen.of[MTBPatientRecord].next.complete
+
+    forAll(
+      record.getCarePlans
+        .flatMap(_.medicationRecommendations.getOrElse(List.empty))
+        .flatMap(_.supportingVariants.getOrElse(Nil))
+    ){
+      ref => ref.display.value must not (include("None") or include("Some("))
+    }
 
   }
 
