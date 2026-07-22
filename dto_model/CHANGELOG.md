@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.3](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.2.2...mtb-dto-model-v1.2.3) (2026-07-22)
+
+
+### Bug Fixes
+
+* Added CarePlan.boardType in Completer[CarePlan] ([#27](https://github.com/dnpm-dip/mtb-model/issues/27)) ([9b40d10](https://github.com/dnpm-dip/mtb-model/commit/9b40d1042f184ae747774e9bb7b08340966c04b0))
+* Corrected reference range for HRD Score to interval [0,inf) as requested by MTB working group ([#29](https://github.com/dnpm-dip/mtb-model/issues/29)) ([dba6a93](https://github.com/dnpm-dip/mtb-model/commit/dba6a93badbbb45dea785494d20b85156d3797f5))
+
 ## [1.2.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.2.1...mtb-dto-model-v1.2.2) (2026-07-14)
 
 
