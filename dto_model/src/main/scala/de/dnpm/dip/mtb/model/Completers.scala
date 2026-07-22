@@ -335,6 +335,7 @@ trait Completers extends BaseCompleters
 
       carePlan => carePlan.copy(
         reason                          = carePlan.reason.complete,
+        boardType                       = carePlan.boardType.complete,
         recommendationsMissingReason    = carePlan.recommendationsMissingReason.complete,
         noSequencingPerformedReason     = carePlan.noSequencingPerformedReason.complete,
         geneticCounselingRecommendation = carePlan.geneticCounselingRecommendation.map(
