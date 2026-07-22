@@ -68,16 +68,14 @@ object TMB
   }
 
 
-  val mutPerMBase =
-    UnitOfMeasure("Mutations per megabase","mut/MBase")
+  val mutPerMBase = UnitOfMeasure("Mutations per megabase","mut/MBase")
 
   final case class Result(value: Double) extends Quantity 
   {
     override val unit = mutPerMBase
   }
 
-  val referenceRange =
-    ClosedInterval(Result(0.0) -> Result(1e6))
+  val referenceRange = ClosedInterval(Result(0.0) -> Result(1e6))
 
   implicit val readsResult: Reads[Result] =
     Json.reads[Result]
@@ -100,8 +98,7 @@ extends Observation[Double]
 object BRCAness
 {
 
-  val referenceRange =
-    ClosedInterval(0.0 -> 1.0)
+  val referenceRange = ClosedInterval(0.0 -> 1.0)
 
   implicit val format: OFormat[BRCAness] =
     Json.format[BRCAness]
@@ -123,8 +120,7 @@ extends Observation[Double]
 object HRDScore
 {
 
-  val referenceRange =
-    ClosedInterval(0.0,100)
+  val referenceRange = LeftClosedInterval(0.0)
 
 
   object Interpretation
