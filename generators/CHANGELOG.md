@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.2...mtb-dto-generators-v1.2.3) (2026-07-22)
+
+
+### Bug Fixes
+
+* Adapted HRDScore generation to correctly reflect that total score is sum of components scores ([#30](https://github.com/dnpm-dip/mtb-model/issues/30)) ([ae06b28](https://github.com/dnpm-dip/mtb-model/commit/ae06b282e8baa66bc56835f99dffd66ee3ca70a2))
+
 ## [1.2.2](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.1...mtb-dto-generators-v1.2.2) (2026-07-14)
 
 
