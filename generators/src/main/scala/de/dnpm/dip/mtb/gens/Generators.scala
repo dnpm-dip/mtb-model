@@ -879,20 +879,19 @@ trait Generators
       hrdScore <-
         for {
           id <- Gen.of[Id[HRDScore]]
-          value <- Gen.doubles
-          lst <- Gen.doubles.map(HRDScore.LST(_))
-          loh <- Gen.doubles.map(HRDScore.LoH(_))
-          tai <- Gen.doubles.map(HRDScore.TAI(_))
+          lst <- Gen.doubles
+          loh <- Gen.doubles
+          tai <- Gen.doubles
           interpretation <- Gen.of[Coding[HRDScore.Interpretation.Value]]
         } yield HRDScore(
           id,
           patient,
           specimen,
-          value,
+          lst + loh + tai,
           HRDScore.Components(
-            lst,
-            loh,
-            tai
+            HRDScore.LST(lst),
+            HRDScore.LoH(loh),
+            HRDScore.TAI(tai)
           ),
           Some(interpretation)
         )
