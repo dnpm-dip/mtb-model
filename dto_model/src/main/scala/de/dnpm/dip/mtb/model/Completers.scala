@@ -23,8 +23,9 @@ import de.dnpm.dip.coding.icd.{
 import de.dnpm.dip.coding.hgnc.HGNC
 import de.dnpm.dip.model.{
   BaseCompleters,
+  GeneAlterationReference,
   History,
-  Reference,
+  Reference
 }
 
 
@@ -285,6 +286,12 @@ trait Completers extends BaseCompleters
       variants: List[Variant]
     ): Completer[MTBCarePlan] = {
 
+      implicit val genAlterationReferenceCompleter: Completer[GeneAlterationReference[Variant]] =
+        ref => ref.copy(
+          gene = ref.gene.complete,
+        )
+        .withDisplay(DisplayLabel.of(ref).value)
+
       implicit val loeCompleter: Completer[LevelOfEvidence] =
         loe => loe.copy(
           grading   = loe.grading.complete,
@@ -293,43 +300,31 @@ trait Completers extends BaseCompleters
 
       implicit val medicationRecommendationCompleter: Completer[MTBMedicationRecommendation] =
         recommendation => recommendation.copy(
-          reason          = recommendation.reason.complete,
-          priority        = recommendation.priority.complete,
-          levelOfEvidence = recommendation.levelOfEvidence.complete,
-          category        = recommendation.category.complete,
-          medication      = recommendation.medication.complete,
-          useType         = recommendation.useType.complete,
-          supportingVariants =
-            recommendation.supportingVariants
-              .map(
-                _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
-              )
+          reason             = recommendation.reason.complete,
+          priority           = recommendation.priority.complete,
+          levelOfEvidence    = recommendation.levelOfEvidence.complete,
+          category           = recommendation.category.complete,
+          medication         = recommendation.medication.complete,
+          useType            = recommendation.useType.complete,
+          supportingVariants = recommendation.supportingVariants.complete
         )
 
       implicit val procedureRecommendationCompleter: Completer[MTBProcedureRecommendation] =
         recommendation => recommendation.copy(
-          reason          = recommendation.reason.complete,
-          priority        = recommendation.priority.complete,
-          levelOfEvidence = recommendation.levelOfEvidence.complete,
-          code            = recommendation.code.complete,
-            supportingVariants =
-              recommendation.supportingVariants
-                .map(
-                  _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
-                )
+          reason             = recommendation.reason.complete,
+          priority           = recommendation.priority.complete,
+          levelOfEvidence    = recommendation.levelOfEvidence.complete,
+          code               = recommendation.code.complete,
+          supportingVariants = recommendation.supportingVariants.complete
         )
 
       implicit val studyRecommendationCompleter: Completer[MTBStudyEnrollmentRecommendation] =
         recommendation => recommendation.copy(
-          reason          = recommendation.reason.complete,
-          priority        = recommendation.priority.complete,
-          levelOfEvidence = recommendation.levelOfEvidence.complete,
-          medication      = recommendation.medication.complete,
-            supportingVariants =
-              recommendation.supportingVariants
-                .map(
-                  _.map(ref => ref.withDisplay(DisplayLabel.of(ref).value))
-                )
+          reason             = recommendation.reason.complete,
+          priority           = recommendation.priority.complete,
+          levelOfEvidence    = recommendation.levelOfEvidence.complete,
+          medication         = recommendation.medication.complete,
+          supportingVariants = recommendation.supportingVariants.complete
         )
 
 
@@ -338,9 +333,7 @@ trait Completers extends BaseCompleters
         boardType                       = carePlan.boardType.complete,
         recommendationsMissingReason    = carePlan.recommendationsMissingReason.complete,
         noSequencingPerformedReason     = carePlan.noSequencingPerformedReason.complete,
-        geneticCounselingRecommendation = carePlan.geneticCounselingRecommendation.map(
-          rec => rec.copy(reason = rec.reason.complete)
-        ),
+        geneticCounselingRecommendation = carePlan.geneticCounselingRecommendation.map(rec => rec.copy(reason = rec.reason.complete)),
         medicationRecommendations       = carePlan.medicationRecommendations.complete,
         procedureRecommendations        = carePlan.procedureRecommendations.complete,
         studyEnrollmentRecommendations  = carePlan.studyEnrollmentRecommendations.complete,
