@@ -286,11 +286,9 @@ trait Completers extends BaseCompleters
       variants: List[Variant]
     ): Completer[MTBCarePlan] = {
 
-      implicit val genAlterationReferenceCompleter: Completer[GeneAlterationReference[Variant]] =
-        ref => ref.copy(
-          gene = ref.gene.complete,
-        )
-        .withDisplay(DisplayLabel.of(ref).value)
+      implicit val genAlterationReferenceCompleter: Completer[GeneAlterationReference[Variant]] = 
+        ref => ref.copy(gene = ref.gene.complete)
+                  .pipe(r => r.withDisplay(DisplayLabel.of(r).value))
 
       implicit val loeCompleter: Completer[LevelOfEvidence] =
         loe => loe.copy(
