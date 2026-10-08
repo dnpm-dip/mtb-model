@@ -34,6 +34,7 @@ final case class MTBPatientRecord
   claims: Option[List[Claim]],
   claimResponses: Option[List[ClaimResponse]],
   systemicTherapies: Option[List[History[MTBSystemicTherapy]]],
+  studyInclusions: Option[List[History[StudyInclusion]]],
   responses: Option[List[Response]]
 )
 extends PatientRecord

@@ -2,6 +2,7 @@ package de.dnpm.dip.mtb.model
 
 
 import java.time.LocalDate
+import cats.data.NonEmptyList
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
@@ -9,14 +10,15 @@ import de.dnpm.dip.coding.{
 }
 import de.dnpm.dip.model.{
   Id,
+  ExternalReference,
   Medications,
-  Period,
-  Reference,
   Patient,
-  Therapy,
-//  TherapyRecommendation,
+  Period,
   Procedure,
-  SystemicTherapy
+  Reference,
+  Study,
+  SystemicTherapy,
+  Therapy
 }
 import play.api.libs.json.{
   Json,
@@ -211,4 +213,26 @@ object OncoProcedure
   implicit val format: OFormat[OncoProcedure] =
     Json.format[OncoProcedure]
 
+}
+
+final case class StudyInclusion
+(
+  id: Id[StudyInclusion],
+  patient: Reference[Patient],
+  reason: Option[Reference[MTBDiagnosis]],
+  basedOn: Option[Reference[MTBStudyEnrollmentRecommendation]],
+  recordedOn: LocalDate,
+  study: NonEmptyList[ExternalReference[Study,Study.Registries]],
+  status: Coding[Therapy.Status.Value],
+  statusReason: Option[Coding[MTBTherapy.StatusReason.Value]],
+  period: Option[Period[LocalDate]],
+  medication: Option[Set[Coding[Medications]]]
+)
+
+object StudyInclusion
+{
+  import de.dnpm.dip.util.json.{readsNel,writesNel}
+
+  implicit val format: OFormat[StudyInclusion] =
+    Json.format[StudyInclusion]
 }
