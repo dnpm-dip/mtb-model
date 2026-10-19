@@ -1,7 +1,6 @@
 package de.dnpm.dip.mtb.gens
 
 
-
 import java.net.URI
 import java.time.{
   LocalDate,
@@ -1315,6 +1314,35 @@ trait Generators
     )
 
 
+  def genStudyInclusion(
+    patient: Patient,
+    diagnosis: MTBDiagnosis,
+    recommendation: MTBStudyEnrollmentRecommendation
+  ): Gen[StudyInclusion] =
+    for {
+
+      id <- Gen.of[Id[StudyInclusion]]
+
+      status = Coding(Therapy.Status.Ongoing)
+
+      period = Period(LocalDate.now)
+
+      medication = recommendation.medication
+
+    } yield StudyInclusion(
+      id,
+      Reference.to(patient),
+      Some(Reference.to(diagnosis,Some(DisplayLabel.of(diagnosis.code).value))),
+      Some(Reference.to(recommendation)),
+      LocalDate.now,
+      recommendation.study,
+      status,
+      None,
+      Some(period),
+      medication
+    )
+
+
   import RECIST._
 
   private implicit val genRECIST: Gen[Coding[RECIST.Value]] =
@@ -1373,128 +1401,70 @@ trait Generators
 
       famMemHistory <- familyMemberHistory(patient)
 
-      episode <-
-         genEpisode(
-           patRef,
-           List(Reference.to(rawDiagnosis))
-         )
+      episode <- genEpisode(patRef,List(Reference.to(rawDiagnosis)))
 
       performanceStatus <- genPerformanceStatus(patRef) 
 
 
-      guidelineTherapies <-
-        Gen.list(
-          Gen.intsBetween(1,3),
-          genGuidelineTherapy(
-            patRef,
-            rawDiagnosis
-          )
-        )
+      guidelineTherapies <- Gen.list(Gen.intsBetween(1,3),genGuidelineTherapy(patRef,rawDiagnosis))
 
-      guidelineProcedures <-
-        Gen.list(
-          Gen.intsBetween(1,3),
-          genProcedure(
-            patRef,
-            rawDiagnosis
-          )
-        )
+      guidelineProcedures <- Gen.list(Gen.intsBetween(1,3),genProcedure(patRef,rawDiagnosis))
 
       specimen <- genTumorSpecimen(patRef,rawDiagnosis)
 
       priorDiagnostics <- genMolecularDiagnosticReport(patRef,specimen)
         
-      histologyReport <-
-        genHistologyReport(
-          patRef,
-          Reference.to(specimen)
-        )
+      histologyReport <- genHistologyReport(patRef,Reference.to(specimen))
 
-      diagnosis = rawDiagnosis.copy(
-        histology = Some(List(Reference.to(histologyReport)))
-      )  
+      diagnosis = rawDiagnosis.copy(histology = Some(List(Reference.to(histologyReport))))  
 
-      msi <-
-        genMSI(
-          patRef,
-          Reference.to(specimen)
-        )
+      msi <- genMSI(patRef,Reference.to(specimen))
 
-      ihcReport <-
-        genIHCReport(
-          patRef,
-          Reference.to(specimen)
-        )
+      ihcReport <- genIHCReport(patRef,Reference.to(specimen))
 
-      ngsReport <-
-        genNGSReport(
-          patRef,
-          Reference.to(specimen)
-        )
+      ngsReport <- genNGSReport(patRef,Reference.to(specimen))
 
-      mvhCarePlan <- 
-        for { id <- Gen.of[Id[MTBCarePlan]] } yield MTBCarePlan(
-          id,
-          patRef,
-          Some(Reference to diagnosis),
-          ngsReport.issuedOn minusWeeks 2,
-          Some(Coding(CarePlan.BoardType.IndicationBoard)),
-          None, None, None, None, None, None, None, None, None
-        )
+      mvhCarePlan <- for { id <- Gen.of[Id[MTBCarePlan]] } yield MTBCarePlan(
+        id,
+        patRef,
+        Some(Reference.to(diagnosis)),
+        ngsReport.issuedOn minusWeeks 2,
+        Some(Coding(CarePlan.BoardType.IndicationBoard)),
+        None, None, None, None, None, None, None, None, None
+      )
 
-      carePlan <- 
-        genCarePlan(
-          patRef,
-          diagnosis,
-          specimen,
-          List(msi),
-          ngsReport
-        )
+      carePlan <- genCarePlan(patRef,diagnosis,specimen,List(msi),ngsReport)
 
-      recommendations =
-        carePlan.medicationRecommendations
-          .getOrElse(List.empty)
+      recommendations = carePlan.medicationRecommendations.getOrElse(List.empty)
 
-      claims <-
-        Gen.oneOfEach(
-          recommendations
-            .map(genClaim(patRef,_))
-        )
+      claims <- Gen.oneOfEach(recommendations.map(genClaim(patRef,_)))
 
-      claimResponses <-
-        Gen.oneOfEach(
-          claims
-            .map(Reference.to(_))
-            .map(genClaimResponse(patRef,_))
-        )
+      claimResponses <- Gen.oneOfEach(claims.map(Reference.to(_)).map(genClaimResponse(patRef,_)))
 
-      therapies <-
-        Gen.oneOfEach(
-          recommendations
-            .map(
-              genTherapy(
-                patient,
-                diagnosis,
-                _
-              )
+      therapies <- Gen.oneOfEach(
+        recommendations
+          .map(
+            genTherapy(
+              patient,
+              diagnosis,
+              _
             )
-        )
+          )
+      )
 
-      responses <-
-        Gen.oneOfEach(
-          therapies
-            .map(
-              genResponse(patRef,_)
-            )
-        )
+      studyInclusions <- Gen.oneOfEach(
+        carePlan.studyEnrollmentRecommendations.getOrElse(List.empty)
+          .map(genStudyInclusion(patient,diagnosis,_))
+      )
 
-      followUp = 
-        FollowUp(
-          responses.head.effectiveDate,
-          patRef,
-          Some(responses.head.effectiveDate),
-          None
-        )
+      responses <- Gen.oneOfEach(therapies.map(genResponse(patRef,_)))
+
+      followUp = FollowUp(
+        responses.head.effectiveDate,
+        patRef,
+        Some(responses.head.effectiveDate),
+        None
+      )
         
 
     } yield MTBPatientRecord(
@@ -1516,6 +1486,7 @@ trait Generators
       Some(claims),
       Some(claimResponses),
       Some(therapies.map(History(_))),
+      Some(studyInclusions.map(History(_))),
       Some(responses)
     )
 

@@ -171,6 +171,10 @@ trait Schemas extends BaseSchemas
     Json.schema[ClaimResponse]
       .toSimpleNameDefinition
 
+  implicit val studyInclusionSchema: Schema[StudyInclusion] =
+    Json.schema[StudyInclusion]
+      .toSimpleNameDefinition
+
 
   implicit val responseSchema: Schema[Response] =
     Json.schema[Response]
