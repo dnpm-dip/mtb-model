@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.3...mtb-dto-generators-v1.2.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* Add study inclusion ([#32](https://github.com/dnpm-dip/mtb-model/issues/32)) ([f7b40a8](https://github.com/dnpm-dip/mtb-model/commit/f7b40a818049603fa8827bff33081da5c96e47ca))
+
 ## [1.2.3](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-generators-v1.2.2...mtb-dto-generators-v1.2.3) (2026-08-11)
 
 
