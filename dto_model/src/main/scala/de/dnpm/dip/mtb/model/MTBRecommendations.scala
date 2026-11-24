@@ -64,7 +64,7 @@ object MTBRecommendation
   }
 
 
-  type SupportingFinding = BRCAness :+: HRDScore :+: MSI :+: TMB :+: CNil
+  type SupportingFinding = BRCAness :+: HRDScore :+: MSI :+: ProteinExpression :+: TMB :+: CNil
 
   object SupportingFinding
   {
