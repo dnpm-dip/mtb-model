@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.2.4...mtb-dto-model-v1.2.5) (2026-11-24)
+
+
+### Bug Fixes
+
+* Added IHC ProteinExpression as possible supporting finding for recommendations ([#34](https://github.com/dnpm-dip/mtb-model/issues/34)) ([ed281e5](https://github.com/dnpm-dip/mtb-model/commit/ed281e5931817d5edbec5838c11e12c8664312e8))
+
 ## [1.2.4](https://github.com/dnpm-dip/mtb-model/compare/mtb-dto-model-v1.2.3...mtb-dto-model-v1.2.4) (2026-10-21)
 
 
