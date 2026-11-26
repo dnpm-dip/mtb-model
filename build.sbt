@@ -31,7 +31,7 @@ lazy val global = project
 lazy val dto_model = project
   .settings(
     name := "mtb-dto-model",
-    version := envOrElse("DTO_MODEL_VERSION","1.2.5-SNAPSHOT"),
+    version := envOrElse("DTO_MODEL_VERSION","1.2.6-SNAPSHOT"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.scalatest,
@@ -43,7 +43,7 @@ lazy val dto_model = project
 lazy val generators = project
   .settings(
     name := "mtb-dto-generators",
-    version := envOrElse("GENERATORS_VERSION","1.2.5-SNAPSHOT"),
+    version := envOrElse("GENERATORS_VERSION","1.2.6-SNAPSHOT"),
     settings,
     libraryDependencies ++= Seq(
       dependencies.generators,

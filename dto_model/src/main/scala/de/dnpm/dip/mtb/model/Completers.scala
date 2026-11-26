@@ -200,6 +200,9 @@ trait Completers extends BaseCompleters
 
     implicit val ihcReportCompleter: Completer[IHCReport] = {
 
+      implicit val proteinCodingCompleter: Completer[Coding[IHCReport.Protein]] =
+        Coding.completeDisplayWithCode
+
       implicit val proteinExpressionCompleter: Completer[ProteinExpression] =
         obs => obs.copy(
           protein = obs.protein.complete,
