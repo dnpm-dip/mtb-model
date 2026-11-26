@@ -150,7 +150,7 @@ object IHCReport
     override implicit val codingSystem: Coding.System[Protein] = Coding.System("dnpm-dip/mtb/ihc/protein")
 
     val baseProteins = List(
-      "ALK", "BRAF V600E", "EGFR", "HER2/neu ",
+      "ALK", "BRAF V600E", "EGFR", "HER2/neu",
       "AR", "ER", "PR", "Ki-67/MIB-1", "Nectin-4",
       "PanTRK", "PD-L1", "ROS1", "Trop-2",
       "ATRX", "CDK4", "CDK6", "CyclinD1", "CyclinD2",
