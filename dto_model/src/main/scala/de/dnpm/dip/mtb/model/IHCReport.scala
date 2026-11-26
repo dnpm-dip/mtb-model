@@ -14,20 +14,21 @@ import de.dnpm.dip.model.{
 import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
+  CodeSystem,
   DefaultCodeSystem
 }
-import de.dnpm.dip.coding.hgnc.HGNC
 import play.api.libs.json.{
   Json,
   Format,
   OFormat,
 }
 
+
 final case class ProteinExpression
 (
   id: Id[ProteinExpression],
   patient: Reference[Patient],
-  protein: Coding[HGNC],
+  protein: Coding[IHCReport.Protein],
   value: Coding[ProteinExpression.Result.Value],
   tpsScore: Option[Int],
   cpsScore: Option[Int],
@@ -131,17 +132,57 @@ extends DiagnosticReport
 {
   override val `type` = 
     Coding(
-      "ihc",
-      "Immun-Histo-Chemie",
-      URI.create("dnpm-dip/mtb/ihc")
+      code = "ihc",
+      display = "Immun-Histo-Chemie",
+      system = URI.create("dnpm-dip/mtb/ihc")
     )
 
-  override val notes =
-    None
+  override val notes = None
 }
 
 object IHCReport
 {
+
+  sealed trait Protein
+  object Protein extends CodeSystem.Publisher[Protein]
+  {
+
+    override implicit val codingSystem: Coding.System[Protein] = Coding.System("dnpm-dip/mtb/ihc/protein")
+
+    val baseProteins = List(
+      "ALK", "BRAF V600E", "EGFR", "HER2/neu ",
+      "AR", "ER", "PR", "Ki-67/MIB-1", "Nectin-4",
+      "PanTRK", "PD-L1", "ROS1", "Trop-2",
+      "ATRX", "CDK4", "CDK6", "CyclinD1", "CyclinD2",
+      "CyclinD3", "MDM2", "MET", "p16", "p53",
+      "p-AKT", "p-mTOR", "p-p38 MAPK", "p-p44/42 MAPK", "p-RB",
+      "p-S6", "p-STAT3", "p-STAT5", "PTEN", "RB1"
+    )
+
+    val msiMmrProteins =
+      Set("MLH1","MSH2","MSH6","PMS2")
+
+    val msiMmrProteinFilter =
+      CodeSystem.Filter[Protein](
+        name = "MSI/MMR-Protein",
+        description = Some("Filters MSI/MMR-Proteins"),              
+        concept => msiMmrProteins.contains(concept.code.value)
+      )
+
+    override val filters = List(msiMmrProteinFilter)
+
+    override val properties = Nil
+
+    val codeSystem: CodeSystem[Protein] =
+      CodeSystem[Protein](
+        name = "IHC-Proteins",
+        title = Some("IHC-Proteins"),
+        version = None,
+        concepts = (baseProteins ++ msiMmrProteins).map(code => (code,code)): _*  // Use code as display value
+      )
+  }
+
+
 
   final case class Results
   (

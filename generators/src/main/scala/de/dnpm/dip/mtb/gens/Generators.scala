@@ -559,12 +559,18 @@ trait Generators
     )
 
 
+  private val ihcBaseProteinCodings: Gen[Coding[IHCReport.Protein]] =
+    Gen.oneOf(IHCReport.Protein.baseProteins.map(Coding[IHCReport.Protein](_)))
+
+  private val msiMmrProteinCodings =
+    IHCReport.Protein.msiMmrProteins.map(Coding[IHCReport.Protein](_)).toList
+
   def genProteinExpression(
-    patient: Reference[Patient],
+    patient: Reference[Patient]
   ): Gen[ProteinExpression] =
     for {
       id      <- Gen.of[Id[ProteinExpression]]
-      protein <- Gen.of[Coding[HGNC]]
+      protein <- ihcBaseProteinCodings
       value   <- Gen.of[Coding[ProteinExpression.Result.Value]]
       tpsScore <- Gen.intsBetween(0,100)
       cpsScore <- Gen.intsBetween(0,100)
@@ -588,11 +594,12 @@ trait Generators
     for {
       id <- Gen.of[Id[IHCReport]]
 
-      proteinExpression <-
-        Gen.list(
-          Gen.intsBetween(3,10),
-          genProteinExpression(patient)
-        )
+      proteinExpression <- Gen.list(Gen.intsBetween(3,10), genProteinExpression(patient))
+
+      msiMmrProteinsExpressions <- 
+        Gen.listOf(msiMmrProteinCodings.size,genProteinExpression(patient))
+          .map(_ zip msiMmrProteinCodings)
+          .map(_ map { case (pe, coding) => pe.copy(protein = coding) })
 
     } yield IHCReport(
       id,
@@ -600,16 +607,14 @@ trait Generators
       specimen,
       LocalDate.now,
       IHCReport.Results(
-        NonEmptyList.fromListUnsafe(proteinExpression),
-        List.empty,
+        proteinExpression = NonEmptyList.fromListUnsafe(proteinExpression),
+        msiMmr = msiMmrProteinsExpressions
       )
     )
 
 
-
   private val bases = 
     Seq("A","C","G","T")
-
 
   // Source: https://hgvs-nomenclature.org
   private val proteinChanges =
