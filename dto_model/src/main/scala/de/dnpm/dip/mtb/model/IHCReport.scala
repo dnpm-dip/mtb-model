@@ -3,6 +3,7 @@ package de.dnpm.dip.mtb.model
 
 import java.net.URI
 import java.time.LocalDate
+import cats.Applicative
 import cats.data.NonEmptyList
 import de.dnpm.dip.model.{
   Id,
@@ -15,7 +16,10 @@ import de.dnpm.dip.coding.{
   Coding,
   CodedEnum,
   CodeSystem,
-  DefaultCodeSystem
+  CodeSystemProvider,
+  CodeSystemProviderSPI,
+  DefaultCodeSystem,
+  SingleCodeSystemProvider
 }
 import play.api.libs.json.{
   Json,
@@ -164,7 +168,7 @@ object IHCReport
 
     val msiMmrProteinFilter =
       CodeSystem.Filter[Protein](
-        name = "MSI/MMR-Protein",
+        name        = "MSI/MMR-Protein",
         description = Some("Filters MSI/MMR-Proteins"),              
         concept => msiMmrProteins.contains(concept.code.value)
       )
@@ -180,6 +184,17 @@ object IHCReport
         version = None,
         concepts = (baseProteins ++ msiMmrProteins).map(code => (code,code)): _*  // Use code as display value
       )
+
+    // Private implicit CodeSystem required for resolution in SingleCodeSystemProvider contructor
+    private implicit val implCodeSystem: CodeSystem[Protein] = codeSystem
+    object Provider extends SingleCodeSystemProvider[Protein]
+
+    final class ProviderSPI extends CodeSystemProviderSPI
+    {
+      override def getInstance[F[_]]: CodeSystemProvider[Any,F,Applicative[F]] =
+        new Provider.Facade[F]
+    }
+
   }
 
 
